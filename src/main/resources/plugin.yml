@@ -1,0 +1,16 @@
+name: ${project.artifactId}
+main: com.meggawatts.jobs.Jobs
+version: ${project.version}
+website: ${project.url}
+authors: [meggawatts]
+description: Job API for MCME.
+author: meggawatts
+permissions:
+  jobs.run:
+    description: Ability to start and stop own jobs.
+    default: op
+commands:
+  job:
+    usage: |
+            /job <jobName> <Status>
+            /job check
