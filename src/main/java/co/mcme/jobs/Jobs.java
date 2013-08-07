@@ -258,7 +258,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 oldjob.setStatus(true);
                 runningJobs.put(oldjob.getName(), oldjob);
                 notRunningJobs.remove(jobname);
-                opened_worlds.add(oldjob.getWarp().getWorld().getName());
+                opened_worlds.add(oldjob.getWorld().getName());
                 try {
                     oldjob.writeToFile();
                 } catch (IOException ex) {
@@ -272,7 +272,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 oldjob.setStatus(false);
                 notRunningJobs.put(oldjob.getName(), oldjob);
                 runningJobs.remove(jobname);
-                opened_worlds.remove(oldjob.getWarp().getWorld().getName());
+                opened_worlds.remove(oldjob.getWorld().getName());
                 try {
                     oldjob.writeToFile();
                 } catch (IOException ex) {

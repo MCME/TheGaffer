@@ -38,6 +38,9 @@ public class Job implements Listener {
         this.warpto = loc;
         started = System.currentTimeMillis();
         this.world = Bukkit.getWorld(w);
+        if (status) {
+            Jobs.protected_worlds.add(world.getName());
+        }
     }
 
     public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w) {
@@ -53,6 +56,9 @@ public class Job implements Listener {
         this.started = started;
         this.workers = parti;
         this.world = Bukkit.getWorld(w);
+        if (status) {
+            Jobs.protected_worlds.add(world.getName());
+        }
     }
 
     public String getName() {
