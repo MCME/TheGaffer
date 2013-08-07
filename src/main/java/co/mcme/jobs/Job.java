@@ -181,28 +181,6 @@ public class Job implements Listener {
     }
 
     @EventHandler
-    public void onPlace(BlockPlaceEvent event) {
-        if (event.getBlock().getWorld().equals(world)) {
-            if (status || event.getPlayer().hasPermission("jobs.ignorestatus")) {
-                event.setCancelled(false);
-            } else {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler
-    public void onBreak(BlockBreakEvent event) {
-        if (event.getBlock().getWorld().equals(world)) {
-            if (status || event.getPlayer().hasPermission("jobs.ignorestatus")) {
-                event.setCancelled(false);
-            } else {
-                event.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler
     public void onLeave(PlayerQuitEvent event) {
         if (event.getPlayer().getName().equals(admin.getName())) {
             Jobs.scheduleAdminTimeout(this);
