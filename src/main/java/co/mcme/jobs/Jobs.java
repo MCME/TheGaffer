@@ -31,11 +31,13 @@ public final class Jobs extends JavaPlugin implements Listener {
     public static ArrayList<String> protected_worlds = new ArrayList();
     public static ArrayList<String> opened_worlds = new ArrayList();
     public static HashMap<Job, Long> timedout_waiting = new HashMap();
+    public static boolean debug = false;
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         setupConfig();
+        debug = getConfig().getBoolean("general.debug");
         getCommand("jobadmin").setExecutor(new JobAdminCommand());
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {

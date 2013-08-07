@@ -1,2 +1,4 @@
 protect_worlds:
   - bvz
+general:
+  debug: true

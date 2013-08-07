@@ -1,5 +1,6 @@
 package co.mcme.jobs.util;
 
+import co.mcme.jobs.Jobs;
 import java.util.logging.Logger;
 
 public class Util {
@@ -20,7 +21,7 @@ public class Util {
     }
 
     public static void debug(String msg) {
-        if (true) {
+        if (Jobs.debug) {
             Util.info("DEBUG: " + msg);
         }
     }

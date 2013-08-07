@@ -13,7 +13,7 @@ public class Cleanup {
             if (!job.getAdmin().isOnline()) {
                 Long waitingSince = Jobs.timedout_waiting.get(job);
                 Long waitingFor = System.currentTimeMillis() - waitingSince;
-                Long max_wait = Long.valueOf(300000);
+                Long max_wait = Long.valueOf(250000);
                 if (waitingFor >= max_wait) {
                     Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin now.");
                     selectNewAdmin(job);
@@ -21,6 +21,7 @@ public class Cleanup {
                     Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin in " + (max_wait - waitingFor) / 1000 + " seconds.");
                 }
             } else {
+                Util.debug(job.getName() + "'s admin was online, removed from cleanup queue");
                 Jobs.timedout_waiting.remove(job);
             }
         }
