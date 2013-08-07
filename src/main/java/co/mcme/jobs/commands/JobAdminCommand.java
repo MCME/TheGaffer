@@ -120,6 +120,7 @@ public class JobAdminCommand implements CommandExecutor {
                             for (String name : job.getWorkers()) {
                                 out.append("\n").append(ChatColor.AQUA).append(name);
                             }
+                            player.sendMessage(out.toString());
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
