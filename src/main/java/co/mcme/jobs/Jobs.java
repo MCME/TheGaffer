@@ -102,7 +102,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                 player.sendMessage(ChatColor.RED + "You must provide a job name.");
                             }
                         }
-                        if (args[0].equalsIgnoreCase("stop")){
+                        if (args[0].equalsIgnoreCase("stop")) {
                             if (args[1] != null) {
                                 String jobname = args[1];
                                 if (runningJobs.containsKey(jobname)) {
@@ -235,7 +235,7 @@ public final class Jobs extends JavaPlugin implements Listener {
             }
             opened_worlds.add(adminloc.getWorld().getName());
         }
-        if (status.equalsIgnoreCase("reopen")){
+        if (status.equalsIgnoreCase("reopen")) {
             if (runningJobs.containsKey(jobname)) {
                 Job oldjob = notRunningJobs.get(jobname);
                 oldjob.setAdmin(Bukkit.getOfflinePlayer(admin));

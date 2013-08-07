@@ -68,7 +68,7 @@ public class Job implements Listener {
     public OfflinePlayer getAdmin() {
         return admin;
     }
-    
+
     public void setAdmin(OfflinePlayer newadmin) {
         this.admin = newadmin;
     }
@@ -134,7 +134,7 @@ public class Job implements Listener {
     public Long getRunningSince() {
         return started;
     }
-    
+
     public World getWorld() {
         return world;
     }
@@ -189,18 +189,18 @@ public class Job implements Listener {
             writer.close();
         }
     }
-    
-    public void sendToRunners(String msg){
-        for (String Pname : runners){
+
+    public void sendToRunners(String msg) {
+        for (String Pname : runners) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(Pname);
             if (target.isOnline()) {
                 target.getPlayer().sendMessage(msg);
             }
         }
     }
-    
-    public void sendToWorkers(String msg){
-        for (String Pname : workers){
+
+    public void sendToWorkers(String msg) {
+        for (String Pname : workers) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(Pname);
             if (target.isOnline()) {
                 target.getPlayer().sendMessage(msg);

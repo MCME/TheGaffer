@@ -34,7 +34,7 @@ public class JobAdminCommand implements CommandExecutor {
                                 }
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "NO running job found by that name.");
+                            player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
                     }
                     if (args[0].equalsIgnoreCase("removehelper") && player.hasPermission("jobs.run")) {
@@ -49,7 +49,7 @@ public class JobAdminCommand implements CommandExecutor {
                                 }
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "NO running job found by that name.");
+                            player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
                     }
                 }
@@ -62,7 +62,7 @@ public class JobAdminCommand implements CommandExecutor {
                                 player.sendMessage(ChatColor.GRAY + "Set the warp of " + ChatColor.AQUA + targetJob.getName() + ChatColor.GRAY + " to your location.");
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "NO running job found by that name.");
+                            player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
                     }
                 }
