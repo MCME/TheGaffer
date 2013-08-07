@@ -13,17 +13,18 @@ public class Cleanup {
             if (!job.getAdmin().isOnline()) {
                 Long waitingSince = Jobs.timedout_waiting.get(job);
                 Long waitingFor = System.currentTimeMillis() - waitingSince;
-                Long max_wait = Long.valueOf(420000);
+                Long max_wait = Long.valueOf(300000);
                 if (waitingFor >= max_wait) {
                     Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin now.");
                     selectNewAdmin(job);
                 } else {
-                    Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin in " + (max_wait - waitingFor) / 1000 + "seconds.");
+                    Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin in " + (max_wait - waitingFor) / 1000 + " seconds.");
                 }
             } else {
                 Jobs.timedout_waiting.remove(job);
             }
         }
+        Util.debug("Cleanup complete");
     }
 
     private static void selectNewAdmin(Job job) {

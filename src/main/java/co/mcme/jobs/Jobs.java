@@ -38,12 +38,13 @@ public final class Jobs extends JavaPlugin implements Listener {
         setupConfig();
         getCommand("jobadmin").setExecutor(new JobAdminCommand());
         getServer().getPluginManager().registerEvents(this, this);
-        getServer().getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
+                Util.debug("Starting cleanup");
                 Cleanup.scheduledCleanup();
             }
-        }, 0, 8400);
+        }, 0, (5 * 60) * 20);
     }
 
     @Override
@@ -330,6 +331,7 @@ public final class Jobs extends JavaPlugin implements Listener {
 
     static void scheduleAdminTimeout(Job job) {
         Long time = System.currentTimeMillis();
+        timedout_waiting.put(job, time);
     }
 
     public static void disableJob(Job job) {
