@@ -166,7 +166,7 @@ public class Job implements Listener {
 
     public void writeToFile() throws IOException {
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath() + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + name + ".job"))) {
+        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + name + ".job"))) {
             writer.beginArray().beginObject();
             writer.name("name").value(name);
             writer.name("runby").value(admin.getName());

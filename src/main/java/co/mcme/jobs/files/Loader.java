@@ -21,7 +21,7 @@ import org.bukkit.Location;
 public class Loader {
 
     public static int loadJobs() {
-        String baseloc = Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath();
+        String baseloc = Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath();
         File metadataDir = new File(baseloc + System.getProperty("file.separator") + "Jobs");
         int count = 0;
         String[] fileJobs = metadataDir.list(new FilenameFilter() {
