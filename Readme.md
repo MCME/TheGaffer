@@ -24,10 +24,12 @@ The first argument is the action you would like to perform. The current actions 
 * addhelper
 * removehelper
 * setwarp
+* listworkers
+* removeworker
 
 The second argument is the Job you would like to perform the action on. This can be any Job that is currently running. The name of the job is __case-sensitive__.
 
-The third argument is currently only used in the helper actions, and is the name of the player that you would like to add or remove.
+The third argument is the name of the player that you would like to add or remove.
 
 Below is a description of each action and what they do.
 
@@ -41,6 +43,18 @@ This action allows you to add an additional Staff member to the job. This Staff 
 This action allows you to remove a Staff member from the job. This Staff member will no longer be able to modify the job. The name is __case-sensitive__.
 
 ###### Example
-/jobadmin removehelper GreenHills ryanturambar *This will remove ryanturambar to the Staff list for the job __GreenHills__, but __not__ RyanTurambar*
+/jobadmin removehelper GreenHills ryanturambar *This will remove ryanturambar from the Staff list for the job __GreenHills__, but __not__ RyanTurambar*
+
+### removeworker
+This action allows you to remove a worker from the job. This worker will no longer be able to modify the world. The name is __case-sensitive__.
+
+###### Example
+/jobadmin removeworker GreenHills ryanturambar *This will remove ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
+
+### listworkers
+This action allows you to list the workers of a job.
+
+###### Example
+/jobadmin listworkers GreenHills *This will list all of the workers in the job __GreenHIlls__.*
 
 ## User
