@@ -9,7 +9,7 @@ permissions:
   jobs.run:
     description: Ability to start and stop own jobs.
     default: op
-  jobs.ignorestats:
+  jobs.ignorestatus:
     description: Ignore job build permissions
     default: op
   jobs.write:
