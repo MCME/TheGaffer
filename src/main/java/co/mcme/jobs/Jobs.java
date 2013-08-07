@@ -30,6 +30,7 @@ public final class Jobs extends JavaPlugin implements Listener {
     public static HashMap<String, Job> notRunningJobs = new HashMap();
     public static ArrayList<String> protected_worlds = new ArrayList();
     public static ArrayList<String> opened_worlds = new ArrayList();
+    public static HashMap<Job, Long> timedout_waiting = new HashMap();
 
     @Override
     public void onEnable() {
@@ -37,6 +38,12 @@ public final class Jobs extends JavaPlugin implements Listener {
         setupConfig();
         getCommand("jobadmin").setExecutor(new JobAdminCommand());
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                Cleanup.scheduledCleanup();
+            }
+        }, 0, 8400);
     }
 
     @Override
@@ -319,5 +326,37 @@ public final class Jobs extends JavaPlugin implements Listener {
             out = "never";
         }
         return out;
+    }
+
+    static void scheduleAdminTimeout(Job job) {
+        Long time = System.currentTimeMillis();
+    }
+
+    public static void disableJob(Job job) {
+        if (runningJobs.containsValue(job)) {
+            job.setStatus(false);
+            notRunningJobs.put(job.getName(), job);
+            runningJobs.remove(job.getName());
+            opened_worlds.remove(job.getWarp().getWorld().getName());
+            try {
+                job.writeToFile();
+            } catch (IOException ex) {
+                Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public static void enableJob(Job job) {
+        if (notRunningJobs.containsValue(job)) {
+            job.setStatus(true);
+            runningJobs.put(job.getName(), job);
+            notRunningJobs.remove(job.getName());
+            opened_worlds.add(job.getWarp().getWorld().getName());
+            try {
+                job.writeToFile();
+            } catch (IOException ex) {
+                Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }

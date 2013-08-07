@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class Job implements Listener {
 
@@ -153,6 +154,13 @@ public class Job implements Listener {
             } else {
                 event.setCancelled(true);
             }
+        }
+    }
+    
+    @EventHandler
+    public void onLeave(PlayerQuitEvent event){
+        if (event.getPlayer().getName().equals(admin.getName())){
+            Jobs.scheduleAdminTimeout(this);
         }
     }
 
