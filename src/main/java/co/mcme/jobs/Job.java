@@ -39,7 +39,7 @@ public class Job implements Listener {
         started = System.currentTimeMillis();
         this.world = Bukkit.getWorld(w);
         if (status) {
-            Jobs.protected_worlds.add(world.getName());
+            Jobs.protected_worlds.add(world);
         }
     }
 
@@ -57,7 +57,7 @@ public class Job implements Listener {
         this.workers = parti;
         this.world = Bukkit.getWorld(w);
         if (status) {
-            Jobs.protected_worlds.add(world.getName());
+            Jobs.protected_worlds.add(world);
         }
     }
 
@@ -111,6 +111,10 @@ public class Job implements Listener {
         }
     }
 
+    public boolean isWorking(OfflinePlayer p) {
+        return workers.contains(p.getName());
+    }
+
     public Location getWarp() {
         return warpto;
     }
@@ -120,6 +124,8 @@ public class Job implements Listener {
         newloc.setY((int) newloc.getY());
         newloc.setZ((int) newloc.getZ());
         warpto = newloc;
+        world = newloc.getWorld();
+        Jobs.opened_worlds.put(this, world);
     }
 
     public void setStatus(boolean news) {

@@ -11,7 +11,9 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
@@ -26,12 +28,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Jobs extends JavaPlugin implements Listener {
 
     private final Logger log = Logger.getLogger("Minecraft");
-    private static int jobCount;
     static Configuration conf;
     public static HashMap<String, Job> runningJobs = new HashMap();
     public static HashMap<String, Job> notRunningJobs = new HashMap();
-    public static ArrayList<String> protected_worlds = new ArrayList();
-    public static ArrayList<String> opened_worlds = new ArrayList();
+    public static ArrayList<World> protected_worlds = new ArrayList();
+    public static HashMap<Job, World> opened_worlds = new HashMap();
     public static HashMap<Job, Long> timedout_waiting = new HashMap();
     public static boolean debug = false;
 
@@ -245,8 +246,8 @@ public final class Jobs extends JavaPlugin implements Listener {
             } catch (IOException ex) {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
-            opened_worlds.add(adminloc.getWorld().getName());
-            for (Player targetP : Bukkit.getOnlinePlayers()){
+            opened_worlds.put(newjob, adminloc.getWorld());
+            for (Player targetP : Bukkit.getOnlinePlayers()) {
                 targetP.sendMessage(ChatColor.GRAY + "" + ChatColor.BOLD + admin + " has started a new job called '" + jobname + "'");
                 targetP.playSound(targetP.getLocation(), Sound.ENDERDRAGON_DEATH, 100, 100);
             }
@@ -258,7 +259,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 oldjob.setStatus(true);
                 runningJobs.put(oldjob.getName(), oldjob);
                 notRunningJobs.remove(jobname);
-                opened_worlds.add(oldjob.getWorld().getName());
+                opened_worlds.put(oldjob, oldjob.getWorld());
                 try {
                     oldjob.writeToFile();
                 } catch (IOException ex) {
@@ -272,7 +273,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 oldjob.setStatus(false);
                 notRunningJobs.put(oldjob.getName(), oldjob);
                 runningJobs.remove(jobname);
-                opened_worlds.remove(oldjob.getWorld().getName());
+                opened_worlds.remove(oldjob);
                 try {
                     oldjob.writeToFile();
                 } catch (IOException ex) {
@@ -292,12 +293,14 @@ public final class Jobs extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
-        if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
-            for (Job job : runningJobs.values()) {
-                if (job.getWorld().equals(event.getBlock().getWorld()) && !job.getWorkers().contains(event.getPlayer().getName())) {
-                    event.setCancelled(true);
-                } else {
-                    event.setCancelled(false);
+        World happenedin = event.getBlock().getWorld();
+        if (protected_worlds.contains(happenedin) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
+            if (opened_worlds.containsValue(happenedin)) {
+                OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
+                for (Job job : opened_worlds.keySet()) {
+                    if (job.getWorld().equals(happenedin)) {
+                        event.setCancelled(!job.isWorking(toCheck));
+                    }
                 }
             }
         }
@@ -305,20 +308,22 @@ public final class Jobs extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
-        if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
-            for (Job job : runningJobs.values()) {
-                if (job.getWorld().equals(event.getBlock().getWorld()) && !job.getWorkers().contains(event.getPlayer().getName())) {
-                    event.setCancelled(true);
-                } else {
-                    event.setCancelled(false);
+        World happenedin = event.getBlock().getWorld();
+        if (protected_worlds.contains(happenedin) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
+            if (opened_worlds.containsValue(happenedin)) {
+                OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
+                for (Job job : opened_worlds.keySet()) {
+                    if (job.getWorld().equals(happenedin)) {
+                        event.setCancelled(!job.isWorking(toCheck));
+                    }
                 }
             }
         }
     }
-    
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (runningJobs.size() > 0){
+        if (runningJobs.size() > 0) {
             event.getPlayer().sendMessage(ChatColor.GRAY + "" + ChatColor.BOLD + "The is a job running! Use /job check to find out what it is!");
         }
     }
@@ -358,7 +363,7 @@ public final class Jobs extends JavaPlugin implements Listener {
             job.setStatus(false);
             notRunningJobs.put(job.getName(), job);
             runningJobs.remove(job.getName());
-            opened_worlds.remove(job.getWarp().getWorld().getName());
+            opened_worlds.remove(job);
             try {
                 job.writeToFile();
             } catch (IOException ex) {
@@ -372,7 +377,7 @@ public final class Jobs extends JavaPlugin implements Listener {
             job.setStatus(true);
             runningJobs.put(job.getName(), job);
             notRunningJobs.remove(job.getName());
-            opened_worlds.add(job.getWarp().getWorld().getName());
+            opened_worlds.put(job, job.getWorld());
             try {
                 job.writeToFile();
             } catch (IOException ex) {
