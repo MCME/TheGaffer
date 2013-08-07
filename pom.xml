@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>co.mcme</groupId>
-    <artifactId>MCMEJobs</artifactId>
+    <artifactId>TheGaffer</artifactId>
     <version>1.0.9</version>
     <packaging>jar</packaging>
 
@@ -11,7 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <name>MCMEJobs</name>
+    <name>TheGaffer</name>
     <url>http://mcme.co/</url>
     <build>
         <finalName>${project.artifactId}</finalName>
