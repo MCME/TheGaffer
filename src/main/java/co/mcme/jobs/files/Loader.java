@@ -22,26 +22,23 @@ public class Loader {
 
     public static int loadJobs() {
         String baseloc = Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath();
-        File metadataDir = new File(baseloc + "\\Jobs");
-        if (metadataDir.exists()) {
-            int count = 0;
-            String[] fileJobs = metadataDir.list(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.toLowerCase().endsWith(".job");
-                }
-            });
+        File metadataDir = new File(baseloc + System.getProperty("file.separator") + "Jobs");
+        int count = 0;
+        String[] fileJobs = metadataDir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".job");
+            }
+        });
+        if (fileJobs.length > 0) {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
-                JsonArray meta = loadJobMeta(baseloc + "\\Jobs\\" + gob);
+                JsonArray meta = loadJobMeta(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + gob);
                 getJobDat(meta);
                 count++;
             }
-            return count;
-        } else {
-            metadataDir.mkdir();
-            return 0;
         }
+        return count;
     }
 
     public static JsonArray loadJobMeta(String file) {
@@ -97,10 +94,5 @@ public class Loader {
             Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world));
         }
 
-    }
-
-    public boolean checkFileExists(String jobname) {
-        File check = new File(Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath() + "\\Jobs\\" + jobname + ".job");
-        return check.exists();
     }
 }

@@ -88,13 +88,32 @@ public final class Jobs extends JavaPlugin implements Listener {
                     }
 
                     if (args.length == 2 && player.hasPermission("jobs.run")) {
-                        if (args[1].equals("on")) {
-                            storeJob(args[0], player.getName(), true);
-                            player.sendMessage(ChatColor.GREEN + "Created job called " + args[0] + ".");
+                        if (args[0].equalsIgnoreCase("start")) {
+                            if (args[1] != null) {
+                                String jobname = args[1];
+                                if (notRunningJobs.containsKey(jobname)) {
+                                    storeJob(jobname, player.getName(), "reopen");
+                                    player.sendMessage(ChatColor.GRAY + "Successfully reopend the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
+                                } else {
+                                    storeJob(jobname, player.getName(), "new");
+                                    player.sendMessage(ChatColor.GRAY + "Successfully created the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
+                                }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                            }
                         }
-                        if (args[1].equals("off")) {
-                            storeJob(args[0], player.getName(), false);
-                            player.sendMessage(ChatColor.RED + "Removed job called " + args[0] + ".");
+                        if (args[0].equalsIgnoreCase("stop")){
+                            if (args[1] != null) {
+                                String jobname = args[1];
+                                if (runningJobs.containsKey(jobname)) {
+                                    storeJob(jobname, player.getName(), "remove");
+                                    player.sendMessage(ChatColor.GRAY + "Successfully closed the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "No job found by that name.");
+                                }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                            }
                         }
                     }
                     if (args[0].equalsIgnoreCase("check")) {
@@ -197,9 +216,9 @@ public final class Jobs extends JavaPlugin implements Listener {
         return true;
     }
 
-    public void storeJob(String jobname, String admin, boolean status) {
+    public void storeJob(String jobname, String admin, String status) {
         Player p = Bukkit.getPlayer(admin);
-        if (status) {
+        if (status.equalsIgnoreCase("new")) {
             Location adminloc = Bukkit.getPlayer(admin).getLocation();
             int newx = (int) adminloc.getX();
             int newy = (int) adminloc.getY();
@@ -214,14 +233,35 @@ public final class Jobs extends JavaPlugin implements Listener {
             } catch (IOException ex) {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (status) {
-                opened_worlds.add(adminloc.getWorld().getName());
+            opened_worlds.add(adminloc.getWorld().getName());
+        }
+        if (status.equalsIgnoreCase("reopen")){
+            if (runningJobs.containsKey(jobname)) {
+                Job oldjob = notRunningJobs.get(jobname);
+                oldjob.setAdmin(Bukkit.getOfflinePlayer(admin));
+                oldjob.setStatus(true);
+                runningJobs.put(oldjob.getName(), oldjob);
+                notRunningJobs.remove(jobname);
+                opened_worlds.add(oldjob.getWarp().getWorld().getName());
+                try {
+                    oldjob.writeToFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
-        } else {
+        }
+        if (status.equalsIgnoreCase("remove")) {
             if (runningJobs.containsKey(jobname)) {
                 Job oldjob = runningJobs.get(jobname);
                 oldjob.setStatus(false);
+                notRunningJobs.put(oldjob.getName(), oldjob);
+                runningJobs.remove(jobname);
                 opened_worlds.remove(oldjob.getWarp().getWorld().getName());
+                try {
+                    oldjob.writeToFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -238,7 +278,7 @@ public final class Jobs extends JavaPlugin implements Listener {
     public void onPlace(BlockPlaceEvent event) {
         if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
             for (Job job : runningJobs.values()) {
-                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld())) {
+                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld()) && !job.getWorkers().contains(event.getPlayer().getName())) {
                     event.setCancelled(true);
                 }
             }
@@ -249,7 +289,7 @@ public final class Jobs extends JavaPlugin implements Listener {
     public void onBreak(BlockBreakEvent event) {
         if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
             for (Job job : runningJobs.values()) {
-                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld())) {
+                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld()) && !job.getWorkers().contains(event.getPlayer().getName())) {
                     event.setCancelled(true);
                 }
             }
@@ -265,5 +305,19 @@ public final class Jobs extends JavaPlugin implements Listener {
         String status = (job.getStatus()) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
         out.append("Status: ").append(status);
         return out.toString();
+    }
+
+    public String jobExists(String name) {
+        String out = "never";
+        if (runningJobs.containsKey(name)) {
+            out = "active";
+        }
+        if (notRunningJobs.containsKey(name)) {
+            out = "dormant";
+        }
+        if (!(notRunningJobs.containsKey(name) || runningJobs.containsKey(name))) {
+            out = "never";
+        }
+        return out;
     }
 }

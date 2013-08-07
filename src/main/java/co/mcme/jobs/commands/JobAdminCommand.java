@@ -53,6 +53,19 @@ public class JobAdminCommand implements CommandExecutor {
                         }
                     }
                 }
+                if (args.length >= 2) {
+                    if (args[0].equalsIgnoreCase("setwarp") && player.hasPermission("jobs.run")) {
+                        if (Jobs.runningJobs.containsKey(args[1])) {
+                            Job targetJob = Jobs.runningJobs.get(args[1]);
+                            if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
+                                targetJob.setWarp(player.getLocation());
+                                player.sendMessage(ChatColor.GRAY + "Set the warp of " + ChatColor.AQUA + targetJob.getName() + ChatColor.GRAY + " to your location.");
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "NO running job found by that name.");
+                        }
+                    }
+                }
             }
         }
         return true;

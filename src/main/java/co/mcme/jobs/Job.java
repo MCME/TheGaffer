@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -67,6 +68,10 @@ public class Job implements Listener {
     public OfflinePlayer getAdmin() {
         return admin;
     }
+    
+    public void setAdmin(OfflinePlayer newadmin) {
+        this.admin = newadmin;
+    }
 
     public ArrayList<String> getHelpers() {
         return runners;
@@ -79,6 +84,8 @@ public class Job implements Listener {
     public boolean addWorker(Player p) {
         if (!workers.contains(p.getName()) && status) {
             workers.add(p.getName());
+            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
+            sendToWorkers(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
             return true;
         } else {
             return false;
@@ -90,6 +97,9 @@ public class Job implements Listener {
     }
 
     public void setWarp(Location newloc) {
+        newloc.setX((int) newloc.getX());
+        newloc.setY((int) newloc.getY());
+        newloc.setZ((int) newloc.getZ());
         warpto = newloc;
     }
 
@@ -106,6 +116,7 @@ public class Job implements Listener {
             return false;
         } else {
             runners.add(p.getName());
+            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been added to the job staff.");
             return true;
         }
     }
@@ -113,6 +124,7 @@ public class Job implements Listener {
     public boolean removeHelper(OfflinePlayer p) {
         if (runners.contains(p.getName())) {
             runners.remove(p.getName());
+            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been removed from the job staff.");
             return true;
         } else {
             return false;
@@ -146,7 +158,7 @@ public class Job implements Listener {
 
     public void writeToFile() throws IOException {
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath() + "\\Jobs\\" + name + ".job"))) {
+        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath() + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + name + ".job"))) {
             writer.beginArray().beginObject();
             writer.name("name").value(name);
             writer.name("runby").value(admin.getName());
@@ -175,6 +187,24 @@ public class Job implements Listener {
 
             writer.endObject().endArray();
             writer.close();
+        }
+    }
+    
+    public void sendToRunners(String msg){
+        for (String Pname : runners){
+            OfflinePlayer target = Bukkit.getOfflinePlayer(Pname);
+            if (target.isOnline()) {
+                target.getPlayer().sendMessage(msg);
+            }
+        }
+    }
+    
+    public void sendToWorkers(String msg){
+        for (String Pname : workers){
+            OfflinePlayer target = Bukkit.getOfflinePlayer(Pname);
+            if (target.isOnline()) {
+                target.getPlayer().sendMessage(msg);
+            }
         }
     }
 }
