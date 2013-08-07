@@ -16,7 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-public class Job implements Listener{
+public class Job implements Listener {
 
     private OfflinePlayer admin;
     private String name;
@@ -40,7 +40,11 @@ public class Job implements Listener{
         this.admin = Bukkit.getOfflinePlayer(a);
         this.name = n;
         this.status = s;
-        this.runners = helpers;
+        if (!helpers.isEmpty()) {
+            this.runners = helpers;
+        } else {
+            this.runners = new ArrayList();
+        }
         this.warpto = loc;
         this.started = started;
         this.workers = parti;
@@ -88,26 +92,51 @@ public class Job implements Listener{
     public void setWarp(Location newloc) {
         warpto = newloc;
     }
-    
+
     public void setStatus(boolean news) {
         status = news;
     }
-    
+
     public boolean getStatus() {
         return status;
     }
-    
-    @EventHandler
-    public void onPlace(BlockPlaceEvent event) {
-        if (event.getBlock().getWorld().equals(world)){
-            
+
+    public boolean addHelper(OfflinePlayer p) {
+        if (runners.contains(p.getName())) {
+            return false;
+        } else {
+            runners.add(p.getName());
+            return true;
         }
     }
+
+    public boolean removeHelper(OfflinePlayer p) {
+        if (runners.contains(p.getName())) {
+            runners.remove(p.getName());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Long getRunningSince() {
+        return started;
+    }
     
+    public World getWorld() {
+        return world;
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent event) {
+        if (event.getBlock().getWorld().equals(world)) {
+        }
+    }
+
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
-        if (event.getBlock().getWorld().equals(world)){
-            if (status || event.getPlayer().hasPermission("jobs.ignorestatus")){
+        if (event.getBlock().getWorld().equals(world)) {
+            if (status || event.getPlayer().hasPermission("jobs.ignorestatus")) {
                 event.setCancelled(false);
             } else {
                 event.setCancelled(true);

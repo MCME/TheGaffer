@@ -1,7 +1,10 @@
 package co.mcme.jobs;
 
+import co.mcme.jobs.commands.JobAdminCommand;
 import co.mcme.jobs.util.Util;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,7 +15,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Jobs extends JavaPlugin implements Listener {
@@ -21,11 +27,16 @@ public final class Jobs extends JavaPlugin implements Listener {
     private static int jobCount;
     static Configuration conf;
     public static HashMap<String, Job> runningJobs = new HashMap();
+    public static HashMap<String, Job> notRunningJobs = new HashMap();
+    public static ArrayList<String> protected_worlds = new ArrayList();
+    public static ArrayList<String> opened_worlds = new ArrayList();
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         setupConfig();
+        getCommand("jobadmin").setExecutor(new JobAdminCommand());
+        getServer().getPluginManager().registerEvents(this, this);
     }
 
     @Override
@@ -43,6 +54,7 @@ public final class Jobs extends JavaPlugin implements Listener {
         conf = getConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
+        protected_worlds = (ArrayList) getConfig().getStringList("protect_worlds");
         loadJobs();
     }
 
@@ -86,37 +98,44 @@ public final class Jobs extends JavaPlugin implements Listener {
                         }
                     }
                     if (args[0].equalsIgnoreCase("check")) {
-                        if (runningJobs.size() > 0) {
-                            StringBuilder out = new StringBuilder();
-                            out.append(ChatColor.GRAY).append("Running Jobs:");
-                            for (String jobName : runningJobs.keySet()) {
-                                Job job = runningJobs.get(jobName);
-                                out.append("\n").append(ChatColor.AQUA).append(jobName).append(ChatColor.GRAY).append(" with ").append(job.getAdmin().getName()).append(" (").append(job.getWorkers().size()).append(")");
+                        if (player.hasPermission("jobs.check")) {
+                            if (runningJobs.size() > 0) {
+                                StringBuilder out = new StringBuilder();
+                                out.append(ChatColor.GRAY).append("Running Jobs:");
+                                for (String jobName : runningJobs.keySet()) {
+                                    Job job = runningJobs.get(jobName);
+                                    out.append("\n").append(ChatColor.AQUA).append(jobName).append(ChatColor.GRAY).append(" with ").append(job.getAdmin().getName()).append(" (").append(job.getWorkers().size()).append(")");
+                                }
+                                player.sendMessage(out.toString());
+                            } else {
+                                player.sendMessage(ChatColor.GRAY + "No jobs currently running.");
                             }
-                            player.sendMessage(out.toString());
-                            System.out.println(runningJobs.toString());
                         } else {
-                            player.sendMessage(ChatColor.GRAY + "No jobs currently running.");
+                            player.sendMessage(ChatColor.RED + "You don't have permission.");
                         }
                     }
                     if (args[0].equalsIgnoreCase("join")) {
-                        if (runningJobs.size() > 0) {
-                            if (args.length > 1) {
-                                if (runningJobs.containsKey(args[1])) {
-                                    Job jobToJoin = runningJobs.get(args[1]);
-                                    if (jobToJoin.addWorker(player)) {
-                                        player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
+                        if (player.hasPermission("jobs.join")) {
+                            if (runningJobs.size() > 0) {
+                                if (args.length > 1) {
+                                    if (runningJobs.containsKey(args[1])) {
+                                        Job jobToJoin = runningJobs.get(args[1]);
+                                        if (jobToJoin.addWorker(player)) {
+                                            player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
+                                        } else {
+                                            player.sendMessage(ChatColor.RED + "You cannot be added to that job.");
+                                        }
                                     } else {
-                                        player.sendMessage(ChatColor.RED + "You cannot be added to that job.");
+                                        player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
                                     }
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                    player.sendMessage(ChatColor.RED + "What job would you like to join?");
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "What job would you like to join?");
+                                player.sendMessage(ChatColor.RED + "No jobs currently running.");
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                            player.sendMessage(ChatColor.RED + "You do not have permission.");
                         }
                     }
                     if (args[0].equalsIgnoreCase("warpto")) {
@@ -125,6 +144,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                 if (runningJobs.containsKey(args[1])) {
                                     Job jobToJoin = runningJobs.get(args[1]);
                                     player.teleport(jobToJoin.getWarp());
+                                    player.sendMessage(ChatColor.GRAY + "Warped to " + ChatColor.AQUA + jobToJoin.getName());
                                 } else {
                                     player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
                                 }
@@ -133,6 +153,42 @@ public final class Jobs extends JavaPlugin implements Listener {
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                        }
+                    }
+                    if (args[0].equalsIgnoreCase("info")) {
+                        if (runningJobs.size() > 0) {
+                            if (args.length > 1) {
+                                if (runningJobs.containsKey(args[1])) {
+                                    Job jobToJoin = runningJobs.get(args[1]);
+                                    player.sendMessage(getJobInfo(jobToJoin));
+                                } else if (notRunningJobs.containsKey(args[1])) {
+                                    Job jobToJoin = notRunningJobs.get(args[1]);
+                                    player.sendMessage(getJobInfo(jobToJoin));
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                        }
+                    }
+                    if (args[0].equalsIgnoreCase("archive")) {
+                        if (player.hasPermission("jobs.check")) {
+                            if (notRunningJobs.size() > 0) {
+                                StringBuilder out = new StringBuilder();
+                                out.append(ChatColor.GRAY).append("Running Jobs:");
+                                for (String jobName : notRunningJobs.keySet()) {
+                                    Job job = notRunningJobs.get(jobName);
+                                    out.append("\n").append(ChatColor.AQUA).append(jobName).append(ChatColor.GRAY).append(" with ").append(job.getAdmin().getName()).append(" (").append(job.getWorkers().size()).append(")");
+                                }
+                                player.sendMessage(out.toString());
+                            } else {
+                                player.sendMessage(ChatColor.GRAY + "No jobs currently running.");
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "You don't have permission.");
                         }
                     }
                 }
@@ -145,6 +201,12 @@ public final class Jobs extends JavaPlugin implements Listener {
         Player p = Bukkit.getPlayer(admin);
         if (status) {
             Location adminloc = Bukkit.getPlayer(admin).getLocation();
+            int newx = (int) adminloc.getX();
+            int newy = (int) adminloc.getY();
+            int newz = (int) adminloc.getZ();
+            adminloc.setX(newx);
+            adminloc.setY(newy);
+            adminloc.setZ(newz);
             Job newjob = new Job(jobname, admin, true, adminloc, adminloc.getWorld().getName());
             runningJobs.put(jobname, newjob);
             try {
@@ -152,19 +214,56 @@ public final class Jobs extends JavaPlugin implements Listener {
             } catch (IOException ex) {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
+            if (status) {
+                opened_worlds.add(adminloc.getWorld().getName());
+            }
         } else {
-            if (runningJobs.containsKey(jobname)){
+            if (runningJobs.containsKey(jobname)) {
                 Job oldjob = runningJobs.get(jobname);
                 oldjob.setStatus(false);
+                opened_worlds.remove(oldjob.getWarp().getWorld().getName());
             }
         }
     }
 
     private void loadJobs() {
         Util.info("Loaded " + co.mcme.jobs.files.Loader.loadJobs() + " old job(s) from file.");
-        for (Job job : runningJobs.values()){
+        for (Job job : runningJobs.values()) {
             getServer().getPluginManager().registerEvents(job, this);
         }
         Util.info(runningJobs.size() + " of which are active.");
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent event) {
+        if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
+            for (Job job : runningJobs.values()) {
+                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld())) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBreak(BlockBreakEvent event) {
+        if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
+            for (Job job : runningJobs.values()) {
+                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld())) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    private String getJobInfo(Job job) {
+        StringBuilder out = new StringBuilder();
+        out.append(ChatColor.GRAY).append(job.getName()).append("\n");
+        out.append("Started by: ").append(ChatColor.AQUA).append(job.getAdmin().getName()).append("\n").append(ChatColor.GRAY);
+        out.append("Started on: ").append(ChatColor.AQUA).append(new Date(job.getRunningSince()).toGMTString()).append("\n").append(ChatColor.GRAY);
+        out.append("Location: ").append(ChatColor.AQUA).append(job.getWorld().getName()).append(" (x: ").append(job.getWarp().getX()).append(", y: ").append(job.getWarp().getY()).append(", z: ").append(job.getWarp().getZ()).append(")").append("\n").append(ChatColor.GRAY);
+        String status = (job.getStatus()) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
+        out.append("Status: ").append(status);
+        return out.toString();
     }
 }

@@ -92,8 +92,15 @@ public class Loader {
                 jobLocObj.get("z").getAsInt(), jobLocObj.get("yaw").getAsFloat(),
                 jobLocObj.get("pitch").getAsFloat());
         if (running) {
-            Jobs.runningJobs.put(name, new Job(name, runby, true, helpers, jobLoc, started, partis, world));
+            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world));
+        } else {
+            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world));
         }
 
+    }
+
+    public boolean checkFileExists(String jobname) {
+        File check = new File(Bukkit.getPluginManager().getPlugin("MCMEJobs").getDataFolder().getPath() + "\\Jobs\\" + jobname + ".job");
+        return check.exists();
     }
 }

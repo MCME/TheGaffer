@@ -9,8 +9,38 @@ permissions:
   jobs.run:
     description: Ability to start and stop own jobs.
     default: op
+  jobs.ignorestats:
+    description: Ignore job build permissions
+    default: op
+  jobs.write:
+    description: Forces a job to write it's file
+    default: op
+  jobs.reload:
+    description: Reloads job list from file
+    default: op
+  jobs.ignoreownjob:
+    descripton: allows user to bypass the owner restriction on jobs.
+    default: op
+  jobs.join:
+    description: allows joining a running job.
+  jobs.check:
+    description: allows checking the running jobs.
+  jobs.user:
+    children:
+      jobs.join: true
+      jobs.check: true
+  jobs.admin:
+    default: op
+    children:
+      jobs.user: true
+      jobs.run: true
+      jobs.write: true
+      jobs.reload: true
 commands:
   job:
     usage: |
             /job <jobName> <Status>
             /job check
+  jobadmin:
+    usage: |
+           /jobadmin <jobName> <action> <variables>
