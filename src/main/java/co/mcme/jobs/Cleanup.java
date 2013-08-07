@@ -42,6 +42,7 @@ public class Cleanup {
             int index = Min + (int) (Math.random() * ((Max - Min) + 1));
             Collections.shuffle(possibles);
             OfflinePlayer choice = possibles.get(index);
+            job.addHelper(job.getAdmin());
             job.setAdmin(choice);
             Util.debug("Selecting " + choice.getName() + " as " + job.getName() + "'s new admin.");
         } else {
