@@ -56,7 +56,7 @@ public class JobAdminCommand implements CommandExecutor {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
                     }
-                    if (args[0].equalsIgnoreCase("removeworker") && player.hasPermission("jobs.run")) {
+                    if (args[0].equalsIgnoreCase("kickworker") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
                             Job targetJob = Jobs.runningJobs.get(args[1]);
                             if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
@@ -65,6 +65,34 @@ public class JobAdminCommand implements CommandExecutor {
                                     player.sendMessage(ChatColor.GRAY + "Removed " + ChatColor.AQUA + target.getName() + ChatColor.GRAY + " from the job.");
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is not on the job.");
+                                }
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "No running job found by that name.");
+                        }
+                    }
+                    if (args[0].equalsIgnoreCase("banworker") && player.hasPermission("jobs.run")) {
+                        if (Jobs.runningJobs.containsKey(args[1])) {
+                            Job targetJob = Jobs.runningJobs.get(args[1]);
+                            if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
+                                OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
+                                if (targetJob.banWorker(target)) {
+                                } else {
+                                    player.sendMessage(ChatColor.RED + target.getName() + " is already banned from this job.");
+                                }
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "No running job found by that name.");
+                        }
+                    }
+                    if (args[0].equalsIgnoreCase("unbanworker") && player.hasPermission("jobs.run")) {
+                        if (Jobs.runningJobs.containsKey(args[1])) {
+                            Job targetJob = Jobs.runningJobs.get(args[1]);
+                            if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
+                                OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
+                                if (targetJob.unBanWorker(target)) {
+                                } else {
+                                    player.sendMessage(ChatColor.RED + target.getName() + " is not banned from this job.");
                                 }
                             }
                         } else {

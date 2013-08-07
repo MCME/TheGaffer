@@ -29,6 +29,7 @@ public class Job implements Listener {
     private ArrayList<String> workers = new ArrayList();
     private Long started;
     private World world;
+    private ArrayList<String> bannedworkers = new ArrayList();
 
     public Job(String n, String a, boolean s, Location loc, String w) {
         this.admin = Bukkit.getOfflinePlayer(a);
@@ -124,7 +125,7 @@ public class Job implements Listener {
     }
 
     public boolean addHelper(OfflinePlayer p) {
-        if (runners.contains(p.getName())) {
+        if (runners.contains(p.getName()) && !(bannedworkers.contains(p.getName()))) {
             return false;
         } else {
             runners.add(p.getName());
@@ -149,6 +150,38 @@ public class Job implements Listener {
 
     public World getWorld() {
         return world;
+    }
+    
+    public boolean banWorker(OfflinePlayer p){
+        if (!bannedworkers.contains(p.getName())){
+            bannedworkers.add(p.getName());
+            if (workers.contains(p.getName())){
+                workers.remove(p.getName());
+            }
+            if (p.isOnline()){
+                sendToRunners(ChatColor.RED + p.getName() + "Has been banned from the " + name + " job.");
+                sendToWorkers(ChatColor.RED + p.getName() + "Has been banned from the " + name + " job.");
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean unBanWorker(OfflinePlayer p){
+        if (bannedworkers.contains(p.getName())){
+            bannedworkers.remove(p.getName());
+            if (!workers.contains(p.getName())){
+                workers.add(p.getName());
+            }
+            if (p.isOnline()){
+                sendToRunners(ChatColor.GRAY + p.getName() + "Has been unbanned from the " + name + " job.");
+                sendToWorkers(ChatColor.GRAY + p.getName() + "Has been unbanned from the " + name + " job.");
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @EventHandler
