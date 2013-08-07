@@ -23,11 +23,15 @@ public class JobAdminCommand implements CommandExecutor {
                             Job targetJob = Jobs.runningJobs.get(args[1]);
                             if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
                                 OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
-                                if (target.isOnline() || (args.length == 4 && args[3].equalsIgnoreCase("force"))) {
-                                    if (targetJob.addHelper(target)) {
-                                        player.sendMessage(ChatColor.GRAY + "Added " + ChatColor.AQUA + target.getName() + ChatColor.GRAY + " to the job");
+                                if (target.isOnline()) {
+                                    if (target.getPlayer().hasPermission("jobs.run")) {
+                                        if (targetJob.addHelper(target)) {
+                                            player.sendMessage(ChatColor.GRAY + "Added " + ChatColor.AQUA + target.getName() + ChatColor.GRAY + " to the job");
+                                        } else {
+                                            player.sendMessage(ChatColor.RED + target.getName() + " is already added to the job");
+                                        }
                                     } else {
-                                        player.sendMessage(ChatColor.RED + target.getName() + " is already added to the job");
+                                        player.sendMessage(ChatColor.RED + target.getName() + " does not have the permissions to run a job.");
                                     }
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is offline.");
@@ -85,7 +89,7 @@ public class JobAdminCommand implements CommandExecutor {
                             Job job = Jobs.runningJobs.get(args[1]);
                             StringBuilder out = new StringBuilder();
                             out.append(ChatColor.GRAY).append("Workers");
-                            for (String name : job.getWorkers()){
+                            for (String name : job.getWorkers()) {
                                 out.append("\n").append(ChatColor.AQUA).append(name);
                             }
                         } else {
