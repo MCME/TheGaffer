@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
@@ -19,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Jobs extends JavaPlugin implements Listener {
@@ -244,6 +246,10 @@ public final class Jobs extends JavaPlugin implements Listener {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
             opened_worlds.add(adminloc.getWorld().getName());
+            for (Player targetP : Bukkit.getOnlinePlayers()){
+                targetP.sendMessage(ChatColor.GRAY + "" + ChatColor.BOLD + admin + " has started a new job called '" + jobname + "'");
+                targetP.playSound(targetP.getLocation(), Sound.ENDERDRAGON_DEATH, 100, 100);
+            }
         }
         if (status.equalsIgnoreCase("reopen")) {
             if (runningJobs.containsKey(jobname)) {
@@ -303,6 +309,13 @@ public final class Jobs extends JavaPlugin implements Listener {
                     event.setCancelled(true);
                 }
             }
+        }
+    }
+    
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        if (runningJobs.size() > 0){
+            event.getPlayer().sendMessage(ChatColor.GRAY + "" + ChatColor.BOLD + "The is a job running! Use /job check to find out what it is!");
         }
     }
 
