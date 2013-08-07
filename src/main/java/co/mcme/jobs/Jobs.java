@@ -294,8 +294,10 @@ public final class Jobs extends JavaPlugin implements Listener {
     public void onPlace(BlockPlaceEvent event) {
         if (protected_worlds.contains(event.getBlock().getWorld().getName()) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
             for (Job job : runningJobs.values()) {
-                if (!job.getStatus() && job.getWorld().equals(event.getBlock().getWorld()) && !job.getWorkers().contains(event.getPlayer().getName())) {
+                if (job.getWorld().equals(event.getBlock().getWorld()) && !job.getWorkers().contains(event.getPlayer().getName())) {
                     event.setCancelled(true);
+                } else {
+                    event.setCancelled(false);
                 }
             }
         }
