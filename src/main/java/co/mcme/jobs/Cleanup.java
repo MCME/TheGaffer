@@ -10,14 +10,18 @@ public class Cleanup {
 
     public static void scheduledCleanup() {
         for (Job job : Jobs.timedout_waiting.keySet()) {
-            Long waitingSince = Jobs.timedout_waiting.get(job);
-            Long waitingFor = System.currentTimeMillis() - waitingSince;
-            Long max_wait = Long.valueOf(420000);
-            if (waitingFor >= max_wait) {
-                Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin now.");
-                selectNewAdmin(job);
+            if (!job.getAdmin().isOnline()) {
+                Long waitingSince = Jobs.timedout_waiting.get(job);
+                Long waitingFor = System.currentTimeMillis() - waitingSince;
+                Long max_wait = Long.valueOf(420000);
+                if (waitingFor >= max_wait) {
+                    Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin now.");
+                    selectNewAdmin(job);
+                } else {
+                    Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin in " + (max_wait - waitingFor) / 1000 + "seconds.");
+                }
             } else {
-                Util.debug("Job: " + job.getName() + " awaiting new admin for " + waitingFor / 1000 + " seconds. Selecting new admin in " + (max_wait - waitingFor) / 1000 + "seconds.");
+                Jobs.timedout_waiting.remove(job);
             }
         }
     }
