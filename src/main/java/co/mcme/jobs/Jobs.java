@@ -252,7 +252,7 @@ public final class Jobs extends JavaPlugin implements Listener {
             }
         }
         if (status.equalsIgnoreCase("reopen")) {
-            if (runningJobs.containsKey(jobname)) {
+            if (notRunningJobs.containsKey(jobname)) {
                 Job oldjob = notRunningJobs.get(jobname);
                 oldjob.setAdmin(Bukkit.getOfflinePlayer(admin));
                 oldjob.setStatus(true);
