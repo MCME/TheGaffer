@@ -46,7 +46,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.google.gson</pattern>
-                                    <shadedPattern>co.mcme.pvp.libs.com.google.gson</shadedPattern>
+                                    <shadedPattern>co.mcme.jobs.libs.com.google.gson</shadedPattern>
                                 </relocation>
                             </relocations>
                             <artifactSet>

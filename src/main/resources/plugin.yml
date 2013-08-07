@@ -1,5 +1,5 @@
 name: ${project.artifactId}
-main: com.meggawatts.jobs.Jobs
+main: co.mcme.jobs.Jobs
 version: ${project.version}
 website: ${project.url}
 authors: [meggawatts]

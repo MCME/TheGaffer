@@ -1,0 +1,31 @@
+[
+    {
+        "name": "jobname",
+        "runby": "derpington",
+        "status": true,
+        "world": "world",
+        "started": 0,
+        "helpers": [
+            "someone",
+            "someoneelse"
+        ],
+        "workers": [
+            "droog1",
+            "droog2",
+            "droog3",
+            "droog4",
+            "droog5",
+            "droog6",
+            "droog7"
+        ],
+        "location": [
+            {
+                "x": 0,
+                "y": 7,
+                "z": 0,
+                "pitch": 1.2,
+                "yaw": 260.15
+            }
+        ]
+    }
+]

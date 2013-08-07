@@ -8,15 +8,15 @@ public class Util {
     private static int maxLength = 105;
 
     public static void info(String msg) {
-        log.info("[MCMEPVP] " + msg);
+        log.info("[MCMEJobs] " + msg);
     }
 
     public static void warning(String msg) {
-        log.warning("[MCMEPVP] " + msg);
+        log.warning("[MCMEJobs] " + msg);
     }
 
     public static void severe(String msg) {
-        log.severe("[MCMEPVP] " + msg);
+        log.severe("[MCMEJobs] " + msg);
     }
 
     public static void debug(String msg) {
