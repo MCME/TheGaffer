@@ -25,7 +25,9 @@ The first argument is the action you would like to perform. The current actions 
 * removehelper
 * setwarp
 * listworkers
-* removeworker
+* kickworker
+* banworker
+* unbanworker
 
 The second argument is the Job you would like to perform the action on. This can be any Job that is currently running. The name of the job is __case-sensitive__.
 
@@ -45,11 +47,23 @@ This action allows you to remove a Staff member from the job. This Staff member 
 ###### Example
 /jobadmin removehelper GreenHills ryanturambar *This will remove ryanturambar from the Staff list for the job __GreenHills__, but __not__ RyanTurambar*
 
-### removeworker
-This action allows you to remove a worker from the job. This worker will no longer be able to modify the world. The name is __case-sensitive__.
+### kickworker
+This action allows you to kick a worker from the job. This worker will no longer be able to modify the world, but can rejoin. The name is __case-sensitive__.
 
 ###### Example
-/jobadmin removeworker GreenHills ryanturambar *This will remove ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
+/jobadmin kickworker GreenHills ryanturambar *This will kick ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
+
+### banworker
+This action allows you to ban a worker from the job. This worker will no longer be able to rejoin the job. The name is __case-sensitive__.
+
+###### Example
+/jobadmin banworker GreenHills ryanturambar *This will ban ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
+
+### unbanworker
+This action allows you to unban a worker from the job. This worker will now be able to rejoin the job. The name is __case-sensitive__.
+
+###### Example
+/jobadmin unbanworker GreenHills ryanturambar *This will unban ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
 
 ### listworkers
 This action allows you to list the workers of a job.
