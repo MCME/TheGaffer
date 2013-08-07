@@ -93,6 +93,16 @@ public class Job implements Listener {
             return false;
         }
     }
+    
+    public boolean removeWorker(OfflinePlayer p) {
+        if (workers.contains(p.getName())) {
+            workers.remove(p.getName());
+            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been removed from the workers list.");
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public Location getWarp() {
         return warpto;
