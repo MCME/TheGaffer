@@ -1,5 +1,6 @@
 package co.mcme.jobs;
 
+import co.mcme.jobs.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
@@ -143,6 +144,11 @@ public class Job implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
         if (event.getBlock().getWorld().equals(world)) {
+            if (status || event.getPlayer().hasPermission("jobs.ignorestatus")) {
+                event.setCancelled(false);
+            } else {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -156,11 +162,12 @@ public class Job implements Listener {
             }
         }
     }
-    
+
     @EventHandler
-    public void onLeave(PlayerQuitEvent event){
-        if (event.getPlayer().getName().equals(admin.getName())){
+    public void onLeave(PlayerQuitEvent event) {
+        if (event.getPlayer().getName().equals(admin.getName())) {
             Jobs.scheduleAdminTimeout(this);
+            Util.debug("Queued " + name + " for timeout");
         }
     }
 
