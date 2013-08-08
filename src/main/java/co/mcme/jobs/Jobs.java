@@ -317,7 +317,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 }
             } else {
                 Util.debug("Protected world is not open!");
-                event.setCancelled(true);
+                event.setCancelled(!event.getPlayer().hasPermission("jobs.ignorestatus"));
             }
         }
     }
@@ -345,7 +345,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 }
             } else {
                 Util.debug("Protected world is not open!");
-                event.setCancelled(true);
+                event.setCancelled(!event.getPlayer().hasPermission("jobs.ignorestatus"));
             }
         }
     }
