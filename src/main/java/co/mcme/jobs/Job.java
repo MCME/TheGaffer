@@ -91,7 +91,7 @@ public class Job implements Listener {
     }
 
     public boolean addWorker(Player p) {
-        if (!workers.contains(p.getName()) && status) {
+        if (!workers.contains(p.getName()) && status && !bannedworkers.contains(p.getName())) {
             workers.add(p.getName());
             sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
             sendToWorkers(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");

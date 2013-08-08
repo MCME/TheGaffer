@@ -26,12 +26,14 @@ permissions:
   jobs.check:
     description: allows checking the running jobs.
   jobs.user:
+    default: true
     children:
       jobs.join: true
       jobs.check: true
   jobs.admin:
     default: op
     children:
+      jobs.ignorestatus: true
       jobs.user: true
       jobs.run: true
       jobs.write: true
