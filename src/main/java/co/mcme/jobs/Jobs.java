@@ -308,7 +308,11 @@ public final class Jobs extends JavaPlugin implements Listener {
                 OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
                 for (Job job : opened_worlds.keySet()) {
                     if (job.getWorld().equals(happenedin)) {
-                        event.setCancelled(!job.isWorking(toCheck) || toCheck.getPlayer().hasPermission("jobs.ignorestatus"));
+                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")){
+                            event.setCancelled(false);
+                        } else {
+                            event.setCancelled(!job.isWorking(toCheck));
+                        }
                     }
                 }
             } else {
@@ -332,7 +336,11 @@ public final class Jobs extends JavaPlugin implements Listener {
                 OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
                 for (Job job : opened_worlds.keySet()) {
                     if (job.getWorld().equals(happenedin)) {
-                        event.setCancelled(!job.isWorking(toCheck) || toCheck.getPlayer().hasPermission("jobs.ignorestatus"));
+                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")){
+                            event.setCancelled(false);
+                        } else {
+                            event.setCancelled(!job.isWorking(toCheck));
+                        }
                     }
                 }
             } else {
