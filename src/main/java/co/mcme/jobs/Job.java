@@ -15,8 +15,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class Job implements Listener {
@@ -170,8 +168,8 @@ public class Job implements Listener {
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
             }
-            sendToRunners(ChatColor.RED + p.getName() + "Has been banned from the " + name + " job.");
-            sendToWorkers(ChatColor.RED + p.getName() + "Has been banned from the " + name + " job.");
+            sendToRunners(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
+            sendToWorkers(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
             return true;
         } else {
             return false;
@@ -181,11 +179,8 @@ public class Job implements Listener {
     public boolean unBanWorker(OfflinePlayer p) {
         if (bannedworkers.contains(p.getName())) {
             bannedworkers.remove(p.getName());
-            if (!workers.contains(p.getName())) {
-                workers.add(p.getName());
-            }
-            sendToRunners(ChatColor.GRAY + p.getName() + "Has been unbanned from the " + name + " job.");
-            sendToWorkers(ChatColor.GRAY + p.getName() + "Has been unbanned from the " + name + " job.");
+            sendToRunners(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
+            sendToWorkers(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
             return true;
         } else {
             return false;
@@ -240,6 +235,9 @@ public class Job implements Listener {
             if (target.isOnline()) {
                 target.getPlayer().sendMessage(msg);
             }
+        }
+        if (admin.isOnline()){
+            admin.getPlayer().sendMessage(msg);
         }
     }
 

@@ -252,7 +252,7 @@ public final class Jobs extends JavaPlugin implements Listener {
             opened_worlds.put(newjob, adminloc.getWorld());
             for (Player targetP : Bukkit.getOnlinePlayers()) {
                 targetP.sendMessage(ChatColor.GRAY + admin + " has started a new job called '" + jobname + "'");
-                targetP.playSound(targetP.getLocation(), Sound.ENDERDRAGON_DEATH, 1, 100);
+                targetP.playSound(targetP.getLocation(), Sound.WITHER_DEATH, 1, 100);
             }
         }
         if (status.equalsIgnoreCase("reopen")) {
@@ -260,14 +260,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 Job oldjob = notRunningJobs.get(jobname);
                 oldjob.setAdmin(Bukkit.getOfflinePlayer(admin));
                 oldjob.setStatus(true);
-                runningJobs.put(oldjob.getName(), oldjob);
-                notRunningJobs.remove(jobname);
-                opened_worlds.put(oldjob, oldjob.getWorld());
-                try {
-                    oldjob.writeToFile();
-                } catch (IOException ex) {
-                    Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                enableJob(oldjob);
             }
         }
         if (status.equalsIgnoreCase("remove")) {
@@ -353,7 +346,7 @@ public final class Jobs extends JavaPlugin implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         if (runningJobs.size() > 0) {
-            event.getPlayer().sendMessage(ChatColor.GRAY + "The is a job running! Use /job check to find out what it is!");
+            event.getPlayer().sendMessage(ChatColor.GRAY + "There is a job running! Use /job check to find out what it is!");
         }
     }
 

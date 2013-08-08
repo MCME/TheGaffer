@@ -63,6 +63,9 @@ public class JobAdminCommand implements CommandExecutor {
                                 OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
                                 if (targetJob.removeWorker(target)) {
                                     player.sendMessage(ChatColor.GRAY + "Removed " + ChatColor.AQUA + target.getName() + ChatColor.GRAY + " from the job.");
+                                    if (target.isOnline()) {
+                                        target.getPlayer().sendMessage(ChatColor.RED + "You have been kicked from the " + targetJob.getName() + " job.");
+                                    }
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is not on the job.");
                                 }
@@ -77,6 +80,9 @@ public class JobAdminCommand implements CommandExecutor {
                             if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
                                 OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
                                 if (targetJob.banWorker(target)) {
+                                    if (target.isOnline()) {
+                                        target.getPlayer().sendMessage(ChatColor.RED + "You have been banned from the " + targetJob.getName() + " job.");
+                                    }
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is already banned from this job.");
                                 }
@@ -91,6 +97,9 @@ public class JobAdminCommand implements CommandExecutor {
                             if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
                                 OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
                                 if (targetJob.unBanWorker(target)) {
+                                    if (target.isOnline()) {
+                                        target.getPlayer().sendMessage(ChatColor.RED + "You have been unbanned from the " + targetJob.getName() + " job.");
+                                    }
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is not banned from this job.");
                                 }
