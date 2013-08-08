@@ -67,7 +67,10 @@ public final class Jobs extends JavaPlugin implements Listener {
         conf = getConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
-        protected_worlds = (ArrayList) getConfig().getStringList("protect_worlds");
+        ArrayList<String> worlds_config = (ArrayList) getConfig().getStringList("protect_worlds");
+        for (String name : worlds_config){
+            protected_worlds.add(Bukkit.getWorld(name));
+        }
         loadJobs();
     }
 
@@ -294,14 +297,23 @@ public final class Jobs extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
         World happenedin = event.getBlock().getWorld();
-        if (protected_worlds.contains(happenedin) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
+        Util.debug("Place event fired in " + happenedin.getName());
+        for (World w : protected_worlds){
+            Util.debug(w.getName() + " is protected!");
+        }
+        if (protected_worlds.contains(happenedin)) {
+            Util.debug("Place event is in protected world!");
             if (opened_worlds.containsValue(happenedin)) {
+                Util.debug("Place event is is in opened world");
                 OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
                 for (Job job : opened_worlds.keySet()) {
                     if (job.getWorld().equals(happenedin)) {
-                        event.setCancelled(!job.isWorking(toCheck));
+                        event.setCancelled(!job.isWorking(toCheck) || toCheck.getPlayer().hasPermission("jobs.ignorestatus"));
                     }
                 }
+            } else {
+                Util.debug("Protected world is not open!");
+                event.setCancelled(true);
             }
         }
     }
@@ -309,14 +321,23 @@ public final class Jobs extends JavaPlugin implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
         World happenedin = event.getBlock().getWorld();
-        if (protected_worlds.contains(happenedin) && !event.getPlayer().hasPermission("jobs.ignorestatus")) {
+        Util.debug("Break event fired in " + happenedin.getName());
+        for (World w : protected_worlds){
+            Util.debug(w.getName() + " is protected!");
+        }
+        if (protected_worlds.contains(happenedin)) {
+            Util.debug("Break event is in protected world!");
             if (opened_worlds.containsValue(happenedin)) {
+                Util.debug("Break event is in opened world");
                 OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
                 for (Job job : opened_worlds.keySet()) {
                     if (job.getWorld().equals(happenedin)) {
-                        event.setCancelled(!job.isWorking(toCheck));
+                        event.setCancelled(!job.isWorking(toCheck) || toCheck.getPlayer().hasPermission("jobs.ignorestatus"));
                     }
                 }
+            } else {
+                Util.debug("Protected world is not open!");
+                event.setCancelled(true);
             }
         }
     }
