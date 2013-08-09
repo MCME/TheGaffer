@@ -8,14 +8,70 @@ A job is basically a glorified list. This list contains who is working on the jo
 The list of helpers on a job is crucial. A few minutes after the main runner of the job goes offline, *The Gaffer* will select another person from the list of helpers to continue the job. If *The Gaffer* cannot find another online helper to continue the job, the job is put on hold and held in the archive.
 
 # Usage
-## Staff
 Staff have access to 2 commands, /job, and /jobadmin.
 
 /job is used to create a new job, check running jobs and some plugin maintenance things.
 
 /jobadmin is used to modify a currently running job.
 
-#### The jobadmin Command
+#### The Job Command
+
+The job command is used to list, manage, and get info on jobs.
+
+The job command takes 2 arguments.
+
+The first argument is the action you would like to perform. The current actions are:
+
+* __start__
+* __stop__
+* check
+* join
+* warpto
+* info
+* archive
+
+*Those in bold are only available to Staff*
+
+### Start
+This is the action used to create a new job. If an old job is found with the same name, it will be restarted with you as the admin. The name of the job is __case-sensitive__.
+
+###### Example
+/job start river *This will start a job called **river**.
+
+### Stop
+This is the action that will stop a job. When a job is stopped, the world becomes locked again, and the job is moved to the archive.
+
+###### Example
+/job stop river *This will stop the job called river, but __not__ River*
+
+### Check
+This is the action that allows any player to see the list of currently running jobs.
+
+### Join
+This is the action that allows someone to join a job. Once a user joins a job, they can build in the world. The name of the job is __case-sensitive__.
+
+###### Example
+/job join river *This will join the job river but __not__ River or rIVer*
+
+### Warpto
+This is the action that will warp you to the jobs location.
+
+###### Example
+/job warpto river *This will warp you to the location of river but __not__ River*
+
+### Info
+This action allows you to see the info of any past or present job.
+
+###### Example
+/job info river
+
+### Archive
+This action will list all of the past jobs that are no longer running.
+
+###### Example
+/job archive
+
+#### The Jobadmin Command
 
 The jobadmin commad takes 2 -3 additional arguments.
 
@@ -70,5 +126,3 @@ This action allows you to list the workers of a job.
 
 ###### Example
 /jobadmin listworkers GreenHills *This will list all of the workers in the job __GreenHIlls__.*
-
-## User
