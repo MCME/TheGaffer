@@ -28,6 +28,7 @@ public class Job implements Listener {
     private Long started;
     private World world;
     private ArrayList<String> bannedworkers = new ArrayList();
+    private boolean dirty = false;
 
     public Job(String n, String a, boolean s, Location loc, String w) {
         this.admin = Bukkit.getOfflinePlayer(a);
@@ -66,6 +67,7 @@ public class Job implements Listener {
     public boolean setName(String newname) {
         if (!name.equals(newname)) {
             name = newname;
+            dirty = true;
             return true;
         } else {
             return false;
@@ -78,6 +80,7 @@ public class Job implements Listener {
 
     public void setAdmin(OfflinePlayer newadmin) {
         this.admin = newadmin;
+        dirty = true;
     }
 
     public ArrayList<String> getHelpers() {
@@ -93,6 +96,7 @@ public class Job implements Listener {
             workers.add(p.getName());
             sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
             sendToWorkers(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
+            dirty = true;
             return true;
         } else {
             return false;
@@ -103,6 +107,7 @@ public class Job implements Listener {
         if (workers.contains(p.getName())) {
             workers.remove(p.getName());
             sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been removed from the workers list.");
+            dirty = true;
             return true;
         } else {
             return false;
@@ -124,10 +129,12 @@ public class Job implements Listener {
         warpto = newloc;
         world = newloc.getWorld();
         Jobs.opened_worlds.put(this, world);
+        dirty = true;
     }
 
     public void setStatus(boolean news) {
         status = news;
+        dirty = true;
     }
 
     public boolean getStatus() {
@@ -140,6 +147,7 @@ public class Job implements Listener {
         } else {
             runners.add(p.getName());
             sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been added to the job staff.");
+            dirty = true;
             return true;
         }
     }
@@ -148,6 +156,7 @@ public class Job implements Listener {
         if (runners.contains(p.getName())) {
             runners.remove(p.getName());
             sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been removed from the job staff.");
+            dirty = true;
             return true;
         } else {
             return false;
@@ -170,6 +179,7 @@ public class Job implements Listener {
             }
             sendToRunners(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
             sendToWorkers(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
+            dirty = true;
             return true;
         } else {
             return false;
@@ -181,10 +191,15 @@ public class Job implements Listener {
             bannedworkers.remove(p.getName());
             sendToRunners(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
             sendToWorkers(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
+            dirty = true;
             return true;
         } else {
             return false;
         }
+    }
+    
+    public boolean isDirty() {
+        return dirty;
     }
 
     @EventHandler

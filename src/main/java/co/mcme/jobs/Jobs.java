@@ -55,10 +55,12 @@ public final class Jobs extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         for (Job job : runningJobs.values()) {
-            try {
-                job.writeToFile();
-            } catch (IOException ex) {
-                Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
+            if (job.isDirty()) {
+                try {
+                    job.writeToFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -68,7 +70,7 @@ public final class Jobs extends JavaPlugin implements Listener {
         getConfig().options().copyDefaults(true);
         saveConfig();
         ArrayList<String> worlds_config = (ArrayList) getConfig().getStringList("protect_worlds");
-        for (String name : worlds_config){
+        for (String name : worlds_config) {
             protected_worlds.add(Bukkit.getWorld(name));
         }
         loadJobs();
@@ -291,7 +293,7 @@ public final class Jobs extends JavaPlugin implements Listener {
     public void onPlace(BlockPlaceEvent event) {
         World happenedin = event.getBlock().getWorld();
         Util.debug("Place event fired in " + happenedin.getName());
-        for (World w : protected_worlds){
+        for (World w : protected_worlds) {
             Util.debug(w.getName() + " is protected!");
         }
         if (protected_worlds.contains(happenedin)) {
@@ -301,7 +303,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
                 for (Job job : opened_worlds.keySet()) {
                     if (job.getWorld().equals(happenedin)) {
-                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")){
+                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
                             event.setCancelled(false);
                         } else {
                             event.setCancelled(!job.isWorking(toCheck));
@@ -319,7 +321,7 @@ public final class Jobs extends JavaPlugin implements Listener {
     public void onBreak(BlockBreakEvent event) {
         World happenedin = event.getBlock().getWorld();
         Util.debug("Break event fired in " + happenedin.getName());
-        for (World w : protected_worlds){
+        for (World w : protected_worlds) {
             Util.debug(w.getName() + " is protected!");
         }
         if (protected_worlds.contains(happenedin)) {
@@ -329,7 +331,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                 OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
                 for (Job job : opened_worlds.keySet()) {
                     if (job.getWorld().equals(happenedin)) {
-                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")){
+                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
                             event.setCancelled(false);
                         } else {
                             event.setCancelled(!job.isWorking(toCheck));
