@@ -125,4 +125,4 @@ This action allows you to unban a worker from the job. This worker will now be a
 This action allows you to list the workers of a job.
 
 ###### Example
-/jobadmin listworkers GreenHills *This will list all of the workers in the job __GreenHIlls__.*
+/jobadmin listworkers GreenHills *This will list all of the workers in the job __GreenHills__.*
