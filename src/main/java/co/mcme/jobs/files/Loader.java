@@ -31,7 +31,7 @@ public class Loader {
         if (fileJobs.length > 0) {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
-                JsonArray meta = loadJobMeta(Jobs.getActiveDir().getPath() + gob);
+                JsonArray meta = loadJobMeta(Jobs.getActiveDir().getPath() + System.getProperty("file.separator") + gob);
                 getJobDat(meta);
                 count++;
             }
@@ -50,7 +50,7 @@ public class Loader {
         if (fileJobs.length > 0) {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
-                JsonArray meta = loadJobMeta(Jobs.getInactiveDir().getPath() + gob);
+                JsonArray meta = loadJobMeta(Jobs.getInactiveDir().getPath() + System.getProperty("file.separator") + gob);
                 getJobDat(meta);
                 count++;
             }

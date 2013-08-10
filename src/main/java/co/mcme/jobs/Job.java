@@ -4,6 +4,7 @@ import co.mcme.jobs.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -212,11 +213,13 @@ public class Job implements Listener {
 
     public void writeToFile() throws IOException {
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        String file_location = Jobs.getActiveDir().getPath() + name + ".job";
+        String file_location = Jobs.getActiveDir().getPath() + System.getProperty("file.separator") + name + ".job";
         if (!status){
-            file_location = Jobs.getInactiveDir().getPath() + name + "." +System.currentTimeMillis() + ".job";
+            new File(file_location).delete();
+            file_location = Jobs.getInactiveDir().getPath() + System.getProperty("file.separator") + name + "." +System.currentTimeMillis() + ".job";
         }
-        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + file_location))) {
+        File file = new File(file_location);
+        try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
             writer.beginArray().beginObject();
             writer.name("name").value(name);
             writer.name("runby").value(admin.getName());
