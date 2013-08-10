@@ -212,7 +212,11 @@ public class Job implements Listener {
 
     public void writeToFile() throws IOException {
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + name + ".job"))) {
+        String file_location = "Jobs" + System.getProperty("file.separator") + "active" + System.getProperty("file.seperator") + name + ".job";
+        if (!status){
+            file_location = "Jobs" + System.getProperty("file.seperator") + "inactive" + System.getProperty("file.seperator") + name + "." +System.currentTimeMillis() + ".job";
+        }
+        try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + file_location))) {
             writer.beginArray().beginObject();
             writer.name("name").value(name);
             writer.name("runby").value(admin.getName());
@@ -228,6 +232,12 @@ public class Job implements Listener {
             writer.name("workers").beginArray();
             for (String worker : workers) {
                 writer.value(worker);
+            }
+            writer.endArray();
+            
+            writer.name("banned").beginArray();
+            for (String banned : bannedworkers) {
+                writer.value(banned);
             }
             writer.endArray();
 

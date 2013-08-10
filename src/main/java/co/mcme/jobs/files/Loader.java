@@ -22,9 +22,18 @@ public class Loader {
 
     public static int loadJobs() {
         String baseloc = Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath();
-        File metadataDir = new File(baseloc + System.getProperty("file.separator") + "Jobs");
+        File activeDir = new File(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.seperator") + "active");
+        File inActiveDir = new File(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.seperator") + "inactive");
+        if (!activeDir.exists()){
+            activeDir.mkdir();
+            Util.info("Did not find the active jobs directory");
+        }
+        if (!inActiveDir.exists()){
+            inActiveDir.mkdir();
+            Util.info("Did not find the inactive jobs directory");
+        }
         int count = 0;
-        String[] fileJobs = metadataDir.list(new FilenameFilter() {
+        String[] fileJobs = activeDir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith(".job");
