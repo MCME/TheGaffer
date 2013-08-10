@@ -20,20 +20,9 @@ import org.bukkit.Location;
 
 public class Loader {
 
-    public static int loadJobs() {
-        String baseloc = Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath();
-        File activeDir = new File(baseloc + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "active");
-        File inActiveDir = new File(baseloc + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "inactive");
-        if (!activeDir.exists()){
-            activeDir.mkdirs();
-            Util.info("Did not find the active jobs directory");
-        }
-        if (!inActiveDir.exists()){
-            inActiveDir.mkdirs();
-            Util.info("Did not find the inactive jobs directory");
-        }
+    public static int loadActiveJobs() {
         int count = 0;
-        String[] fileJobs = activeDir.list(new FilenameFilter() {
+        String[] fileJobs = Jobs.getActiveDir().list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.toLowerCase().endsWith(".job");
@@ -42,7 +31,26 @@ public class Loader {
         if (fileJobs.length > 0) {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
-                JsonArray meta = loadJobMeta(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + "active" + gob);
+                JsonArray meta = loadJobMeta(Jobs.getActiveDir().getPath() + gob);
+                getJobDat(meta);
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    public static int loadInactiveJobs() {
+        int count = 0;
+        String[] fileJobs = Jobs.getInactiveDir().list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".job");
+            }
+        });
+        if (fileJobs.length > 0) {
+            for (String gob : fileJobs) {
+                Util.debug("Getting info for " + gob);
+                JsonArray meta = loadJobMeta(Jobs.getInactiveDir().getPath() + gob);
                 getJobDat(meta);
                 count++;
             }
@@ -92,15 +100,21 @@ public class Loader {
         while (pit.hasNext()) {
             partis.add(((JsonElement) pit.next()).getAsString());
         }
+        JsonArray bannedObj = jobObj.get("banned").getAsJsonArray();
+        ArrayList<String> banned = new ArrayList();
+        Iterator bit = bannedObj.iterator();
+        while (bit.hasNext()) {
+            banned.add(((JsonElement) bit.next()).getAsString());
+        }
         JsonObject jobLocObj = jobObj.get("location").getAsJsonArray().get(0).getAsJsonObject();
         Location jobLoc = new Location(Bukkit.getWorld(world),
                 jobLocObj.get("x").getAsInt(), jobLocObj.get("y").getAsInt(),
                 jobLocObj.get("z").getAsInt(), jobLocObj.get("yaw").getAsFloat(),
                 jobLocObj.get("pitch").getAsFloat());
         if (running) {
-            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world));
+            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned));
         } else {
-            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world));
+            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned));
         }
 
     }

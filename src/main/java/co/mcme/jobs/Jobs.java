@@ -2,6 +2,7 @@ package co.mcme.jobs;
 
 import co.mcme.jobs.commands.JobAdminCommand;
 import co.mcme.jobs.util.Util;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,9 +36,21 @@ public final class Jobs extends JavaPlugin implements Listener {
     public static HashMap<Job, World> opened_worlds = new HashMap();
     public static HashMap<Job, Long> timedout_waiting = new HashMap();
     public static boolean debug = false;
+    static File inactiveDir;
+    static File activeDir;
 
     @Override
     public void onEnable() {
+        inactiveDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "inactive");
+        activeDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "active");
+        if (!activeDir.exists()) {
+            activeDir.mkdirs();
+            Util.info("Did not find the active jobs directory");
+        }
+        if (!inactiveDir.exists()) {
+            inactiveDir.mkdirs();
+            Util.info("Did not find the inactive jobs directory");
+        }
         getServer().getPluginManager().registerEvents(this, this);
         setupConfig();
         debug = getConfig().getBoolean("general.debug");
@@ -91,7 +104,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                             }
                         }
                         runningJobs = new HashMap();
-                        player.sendMessage(ChatColor.GRAY + "Loaded " + co.mcme.jobs.files.Loader.loadJobs() + " old job(s) from file.");
+                        player.sendMessage(ChatColor.GRAY + "Loaded " + co.mcme.jobs.files.Loader.loadActiveJobs() + " old job(s) from file.");
                         Util.info(runningJobs.size() + " of which are active.");
                     }
                     if (args[0].equalsIgnoreCase("write") && player.hasPermission("jobs.write")) {
@@ -282,11 +295,11 @@ public final class Jobs extends JavaPlugin implements Listener {
     }
 
     private void loadJobs() {
-        Util.info("Loaded " + co.mcme.jobs.files.Loader.loadJobs() + " old job(s) from file.");
+        Util.debug("Loaded " + co.mcme.jobs.files.Loader.loadActiveJobs() + " active jobs from file.");
         for (Job job : runningJobs.values()) {
             getServer().getPluginManager().registerEvents(job, this);
         }
-        Util.info(runningJobs.size() + " of which are active.");
+        Util.debug("Loaded " + co.mcme.jobs.files.Loader.loadInactiveJobs() + " inactive jobs from file.");
     }
 
     @EventHandler
@@ -408,5 +421,13 @@ public final class Jobs extends JavaPlugin implements Listener {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    public static File getInactiveDir() {
+        return inactiveDir;
+    }
+
+    public static File getActiveDir() {
+        return activeDir;
     }
 }

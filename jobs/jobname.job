@@ -10,13 +10,12 @@
             "someoneelse"
         ],
         "workers": [
-            "droog1",
-            "droog2",
-            "droog3",
-            "droog4",
-            "droog5",
-            "droog6",
-            "droog7"
+            "gooddroog1",
+            "gooddroog2"
+        ],
+        "banned": [
+            "baddroog1",
+            "baddroog2"
         ],
         "location": [
             {

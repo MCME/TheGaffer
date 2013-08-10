@@ -42,7 +42,7 @@ public class Job implements Listener {
         }
     }
 
-    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w) {
+    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned) {
         this.admin = Bukkit.getOfflinePlayer(a);
         this.name = n;
         this.status = s;
@@ -212,9 +212,9 @@ public class Job implements Listener {
 
     public void writeToFile() throws IOException {
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        String file_location = "Jobs" + System.getProperty("file.separator") + "active" + System.getProperty("file.seperator") + name + ".job";
+        String file_location = Jobs.getActiveDir().getPath() + name + ".job";
         if (!status){
-            file_location = "Jobs" + System.getProperty("file.seperator") + "inactive" + System.getProperty("file.seperator") + name + "." +System.currentTimeMillis() + ".job";
+            file_location = Jobs.getInactiveDir().getPath() + name + "." +System.currentTimeMillis() + ".job";
         }
         try (JsonWriter writer = new JsonWriter(new FileWriter(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + file_location))) {
             writer.beginArray().beginObject();
