@@ -206,7 +206,6 @@ public final class Jobs extends JavaPlugin implements Listener {
                         }
                     }
                     if (args[0].equalsIgnoreCase("info")) {
-                        if (runningJobs.size() > 0) {
                             if (args.length > 1) {
                                 if (runningJobs.containsKey(args[1])) {
                                     Job jobToJoin = runningJobs.get(args[1]);
@@ -215,14 +214,11 @@ public final class Jobs extends JavaPlugin implements Listener {
                                     Job jobToJoin = notRunningJobs.get(args[1]);
                                     player.sendMessage(getJobInfo(jobToJoin));
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                    player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
                                 }
                             } else {
                                 player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
                             }
-                        } else {
-                            player.sendMessage(ChatColor.RED + "No jobs currently running.");
-                        }
                     }
                     if (args[0].equalsIgnoreCase("archive")) {
                         if (player.hasPermission("jobs.check")) {
