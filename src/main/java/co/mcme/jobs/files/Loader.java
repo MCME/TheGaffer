@@ -22,14 +22,14 @@ public class Loader {
 
     public static int loadJobs() {
         String baseloc = Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath();
-        File activeDir = new File(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.seperator") + "active");
-        File inActiveDir = new File(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.seperator") + "inactive");
+        File activeDir = new File(baseloc + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "active");
+        File inActiveDir = new File(baseloc + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "inactive");
         if (!activeDir.exists()){
-            activeDir.mkdir();
+            activeDir.mkdirs();
             Util.info("Did not find the active jobs directory");
         }
         if (!inActiveDir.exists()){
-            inActiveDir.mkdir();
+            inActiveDir.mkdirs();
             Util.info("Did not find the inactive jobs directory");
         }
         int count = 0;
@@ -42,7 +42,7 @@ public class Loader {
         if (fileJobs.length > 0) {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
-                JsonArray meta = loadJobMeta(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + gob);
+                JsonArray meta = loadJobMeta(baseloc + System.getProperty("file.separator") + "Jobs" + System.getProperty("file.separator") + "active" + gob);
                 getJobDat(meta);
                 count++;
             }
