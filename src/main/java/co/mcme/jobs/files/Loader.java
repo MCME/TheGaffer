@@ -32,7 +32,7 @@ public class Loader {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
                 JsonArray meta = loadJobMeta(Jobs.getActiveDir().getPath() + System.getProperty("file.separator") + gob);
-                getJobDat(meta);
+                getJobDat(meta, gob);
                 count++;
             }
         }
@@ -51,7 +51,7 @@ public class Loader {
             for (String gob : fileJobs) {
                 Util.debug("Getting info for " + gob);
                 JsonArray meta = loadJobMeta(Jobs.getInactiveDir().getPath() + System.getProperty("file.separator") + gob);
-                getJobDat(meta);
+                getJobDat(meta, gob);
                 count++;
             }
         }
@@ -81,7 +81,7 @@ public class Loader {
         return stringBuilder.toString();
     }
 
-    public static void getJobDat(JsonArray dat) {
+    public static void getJobDat(JsonArray dat, String gob) {
         JsonObject jobObj = dat.get(0).getAsJsonObject();
         String name = jobObj.get("name").getAsString();
         String runby = jobObj.get("runby").getAsString();
@@ -112,9 +112,9 @@ public class Loader {
                 jobLocObj.get("z").getAsInt(), jobLocObj.get("yaw").getAsFloat(),
                 jobLocObj.get("pitch").getAsFloat());
         if (running) {
-            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned));
+            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned, gob));
         } else {
-            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned));
+            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned, gob));
         }
 
     }

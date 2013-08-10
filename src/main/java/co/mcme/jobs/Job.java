@@ -30,6 +30,7 @@ public class Job implements Listener {
     private World world;
     private ArrayList<String> bannedworkers = new ArrayList();
     private boolean dirty = false;
+    private String filename;
 
     public Job(String n, String a, boolean s, Location loc, String w) {
         this.admin = Bukkit.getOfflinePlayer(a);
@@ -43,7 +44,7 @@ public class Job implements Listener {
         }
     }
 
-    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned) {
+    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname) {
         this.admin = Bukkit.getOfflinePlayer(a);
         this.name = n;
         this.status = s;
@@ -59,6 +60,7 @@ public class Job implements Listener {
         if (status) {
             Jobs.protected_worlds.add(world);
         }
+        this.filename = fname;
     }
 
     public String getName() {
@@ -198,9 +200,13 @@ public class Job implements Listener {
             return false;
         }
     }
-    
+
     public boolean isDirty() {
         return dirty;
+    }
+
+    public String getFileName() {
+        return filename;
     }
 
     @EventHandler
@@ -214,9 +220,9 @@ public class Job implements Listener {
     public void writeToFile() throws IOException {
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
         String file_location = Jobs.getActiveDir().getPath() + System.getProperty("file.separator") + name + ".job";
-        if (!status){
+        if (!status) {
             new File(file_location).delete();
-            file_location = Jobs.getInactiveDir().getPath() + System.getProperty("file.separator") + name + "." +System.currentTimeMillis() + ".job";
+            file_location = Jobs.getInactiveDir().getPath() + System.getProperty("file.separator") + name + "." + System.currentTimeMillis() + ".job";
         }
         File file = new File(file_location);
         try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
@@ -237,7 +243,7 @@ public class Job implements Listener {
                 writer.value(worker);
             }
             writer.endArray();
-            
+
             writer.name("banned").beginArray();
             for (String banned : bannedworkers) {
                 writer.value(banned);
@@ -264,7 +270,7 @@ public class Job implements Listener {
                 target.getPlayer().sendMessage(msg);
             }
         }
-        if (admin.isOnline()){
+        if (admin.isOnline()) {
             admin.getPlayer().sendMessage(msg);
         }
     }
