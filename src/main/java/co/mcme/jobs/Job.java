@@ -100,6 +100,7 @@ public class Job implements Listener {
             sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
             sendToWorkers(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
             dirty = true;
+            p.teleport(warpto);
             return true;
         } else {
             return false;
