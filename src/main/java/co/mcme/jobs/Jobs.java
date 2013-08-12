@@ -206,19 +206,19 @@ public final class Jobs extends JavaPlugin implements Listener {
                         }
                     }
                     if (args[0].equalsIgnoreCase("info")) {
-                            if (args.length > 1) {
-                                if (runningJobs.containsKey(args[1])) {
-                                    Job jobToJoin = runningJobs.get(args[1]);
-                                    player.sendMessage(getJobInfo(jobToJoin));
-                                } else if (notRunningJobs.containsKey(args[1])) {
-                                    Job jobToJoin = notRunningJobs.get(args[1]);
-                                    player.sendMessage(getJobInfo(jobToJoin));
-                                } else {
-                                    player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
-                                }
+                        if (args.length > 1) {
+                            if (runningJobs.containsKey(args[1])) {
+                                Job jobToJoin = runningJobs.get(args[1]);
+                                player.sendMessage(getJobInfo(jobToJoin));
+                            } else if (notRunningJobs.containsKey(args[1])) {
+                                Job jobToJoin = notRunningJobs.get(args[1]);
+                                player.sendMessage(getJobInfo(jobToJoin));
                             } else {
-                                player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
+                                player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
                             }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
+                        }
                     }
                     if (args[0].equalsIgnoreCase("archive")) {
                         if (player.hasPermission("jobs.check")) {
