@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -25,13 +26,15 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.ChatPaginator;
+import org.bukkit.util.ChatPaginator.ChatPage;
 
 public final class Jobs extends JavaPlugin implements Listener {
 
     private final Logger log = Logger.getLogger("Minecraft");
     static Configuration conf;
     public static HashMap<String, Job> runningJobs = new HashMap();
-    public static HashMap<String, Job> notRunningJobs = new HashMap();
+    public static TreeMap<String, Job> notRunningJobs = new TreeMap();
     public static ArrayList<World> protected_worlds = new ArrayList();
     public static HashMap<Job, World> opened_worlds = new HashMap();
     public static HashMap<Job, Long> timedout_waiting = new HashMap();
@@ -224,12 +227,24 @@ public final class Jobs extends JavaPlugin implements Listener {
                         if (player.hasPermission("jobs.check")) {
                             if (notRunningJobs.size() > 0) {
                                 StringBuilder out = new StringBuilder();
-                                out.append(ChatColor.GRAY).append("Running Jobs:");
+                                int pageNum = 1;
+                                boolean first = true;
                                 for (String jobName : notRunningJobs.keySet()) {
                                     Job job = notRunningJobs.get(jobName);
-                                    out.append("\n").append(ChatColor.AQUA).append(jobName).append(ChatColor.GRAY).append(" with ").append(job.getAdmin().getName()).append(" (").append(job.getWorkers().size()).append(")");
+                                    if (!first) {
+                                        out.append("\n");
+                                    }
+                                    out.append(ChatColor.AQUA).append(jobName).append(ChatColor.GRAY).append(" with ").append(job.getAdmin().getName()).append(" (").append(job.getWorkers().size()).append(")");
+                                    if (first) {
+                                        first = false;
+                                    }
                                 }
-                                player.sendMessage(out.toString());
+                                if (args.length > 1) {
+                                    pageNum = Integer.valueOf(args[1]);
+                                }
+                                ChatPage page = ChatPaginator.paginate(out.toString(), pageNum);
+                                player.sendMessage(ChatColor.AQUA + "Job Archive Page: " + page.getPageNumber() + " of " + page.getTotalPages());
+                                player.sendMessage(page.getLines());
                             } else {
                                 player.sendMessage(ChatColor.GRAY + "No jobs currently running.");
                             }
