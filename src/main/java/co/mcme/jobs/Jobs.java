@@ -182,7 +182,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                         player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
                                     }
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "What job would you like to join?");
+                                    player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to join.");
                                 }
                             } else {
                                 player.sendMessage(ChatColor.RED + "No jobs currently running.");
@@ -202,7 +202,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                     player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "What job would you like to warp to?");
+                                player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to warp to.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No jobs currently running.");
@@ -242,7 +242,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                 if (args.length > 1) {
                                     pageNum = Integer.valueOf(args[1]);
                                 }
-                                ChatPage page = ChatPaginator.paginate(out.toString(), pageNum);
+                                ChatPage page = ChatPaginator.paginate(out.toString(), pageNum, ChatPaginator.AVERAGE_CHAT_PAGE_WIDTH, 8);
                                 player.sendMessage(ChatColor.AQUA + "Job Archive Page: " + page.getPageNumber() + " of " + page.getTotalPages());
                                 player.sendMessage(page.getLines());
                             } else {
@@ -252,6 +252,8 @@ public final class Jobs extends JavaPlugin implements Listener {
                             player.sendMessage(ChatColor.RED + "You don't have permission.");
                         }
                     }
+                } else {
+                    return false;
                 }
             }
         }
