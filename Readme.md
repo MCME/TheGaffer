@@ -84,6 +84,7 @@ The first argument is the action you would like to perform. The current actions 
 * kickworker
 * banworker
 * unbanworker
+* bringall
 
 The second argument is the Job you would like to perform the action on. This can be any Job that is currently running. The name of the job is __case-sensitive__.
 
@@ -126,3 +127,9 @@ This action allows you to list the workers of a job.
 
 ###### Example
 /jobadmin listworkers GreenHills *This will list all of the workers in the job __GreenHills__.*
+
+### bringall
+This action allows you to bring all workers on the job to your location.
+
+###### Example
+/jobadmin bringall GreenHills ryanturambar *This will bring all workers on the __GreenHille__ job to your location.*
