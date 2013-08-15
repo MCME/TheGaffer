@@ -224,6 +224,7 @@ public class Job implements Listener {
         if (!status) {
             new File(file_location).delete();
             file_location = Jobs.getInactiveDir().getPath() + System.getProperty("file.separator") + name + "." + System.currentTimeMillis() + ".job";
+            filename = file_location;
         }
         File file = new File(file_location);
         try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
