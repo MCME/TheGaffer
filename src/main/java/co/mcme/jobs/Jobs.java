@@ -246,7 +246,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                 player.sendMessage(ChatColor.AQUA + "Job Archive Page: " + page.getPageNumber() + " of " + page.getTotalPages());
                                 player.sendMessage(page.getLines());
                             } else {
-                                player.sendMessage(ChatColor.GRAY + "No jobs currently running.");
+                                player.sendMessage(ChatColor.GRAY + "No jobs found in archive.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "You don't have permission.");
