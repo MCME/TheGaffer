@@ -147,7 +147,6 @@ public class Job implements Listener {
 
     public boolean addHelper(OfflinePlayer p) {
         if (runners.contains(p.getName()) && !(bannedworkers.contains(p.getName()))) {
-            sendToRunners(ChatColor.GREY + "Proper command usage is: /jobadmin [command] [jobname] [helpername]");
             return false;
         } else {
             runners.add(p.getName());
