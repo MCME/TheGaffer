@@ -112,9 +112,9 @@ public class Loader {
                 jobLocObj.get("z").getAsInt(), jobLocObj.get("yaw").getAsFloat(),
                 jobLocObj.get("pitch").getAsFloat());
         if (running) {
-            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned, gob, null));
+            Jobs.runningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned, gob));
         } else {
-            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned, gob, null));
+            Jobs.notRunningJobs.put(name, new Job(name, runby, running, helpers, jobLoc, started, partis, world, banned, gob));
         }
 
     }
