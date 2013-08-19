@@ -11,17 +11,15 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 public class ItemUtil {
 
     static String quote = "\"";
+    static Gson gson = new Gson();
 
-    public static void getJsonItems(PlayerInventory inv) {
+    public static String getJsonItems(PlayerInventory inv) {
         StringBuilder out = new StringBuilder();
-        int sizeofInv = inv.getContents().length;
-        int i = 0;
         out.append("[{");
         for (ItemStack is : inv.getContents()) {
             for (int slot : inv.all(is).keySet()) {
                 ItemStack is2 = inv.getItem(slot);
                 Map<String, Object> inf = is2.serialize();
-
                 out.append(quote).append(slot).append(quote).append(": [{");
                 out.append(quote).append("itemid").append(quote).append(": ").append(quote).append(is2.getTypeId()).append(quote).append(",");
                 out.append(quote).append("amount").append(quote).append(": ").append(quote).append(is2.getAmount()).append(quote).append(",");
@@ -33,18 +31,20 @@ public class ItemUtil {
                 out.append(",");
             }
         }
-        String without = out.substring(0, out.toString().length() -1);
+        String without = out.substring(0, out.toString().length() - 1);
         out = new StringBuilder();
         out.append(without);
         out.append("}]");
-        Util.debug(out.toString());
+        return out.toString();
     }
 
     private static String getMetaForItem(ItemStack is) {
         StringBuilder out = new StringBuilder();
         ItemMeta meta = is.getItemMeta();
+        boolean other = false;
         out.append("{");
         if (meta instanceof BookMeta) {
+            other = true;
             BookMeta bmeta = (BookMeta) meta;
             out.append(quote).append("type").append(quote).append(": ").append(quote).append("book").append(quote).append(",");
             if (bmeta.hasTitle()) {
@@ -54,7 +54,6 @@ public class ItemUtil {
                 out.append(quote).append("author").append(quote).append(": ").append(quote).append(bmeta.getAuthor()).append(quote).append(",");
             }
             if (bmeta.hasPages()) {
-                Gson gson = new Gson();
                 out.append(quote).append("pages").append(quote).append(": ").append("{");
                 int i = 1;
                 for (String page : bmeta.getPages()) {
@@ -68,12 +67,34 @@ public class ItemUtil {
             }
         }
         if (meta instanceof LeatherArmorMeta) {
+            other = true;
             LeatherArmorMeta lmeta = (LeatherArmorMeta) meta;
             out.append(quote).append("type").append(quote).append(": ").append(quote).append("armor").append(quote).append(",");
             out.append(quote).append("color").append(quote).append(": ").append("{");
             out.append(quote).append("red").append(quote).append(": ").append(lmeta.getColor().getRed()).append(",");
             out.append(quote).append("green").append(quote).append(": ").append(lmeta.getColor().getGreen()).append(",");
             out.append(quote).append("blue").append(quote).append(": ").append(lmeta.getColor().getBlue()).append("}");
+        }
+        if (meta.hasDisplayName()) {
+            if (other) {
+                out.append(",");
+            }
+            out.append(quote).append("displayname").append(quote).append(": ").append(quote).append(meta.getDisplayName()).append(quote);
+        }
+        if (meta.hasLore()) {
+            if (other) {
+                out.append(",");
+            }
+            out.append(quote).append("lore").append(quote).append(": ").append("{");
+            int i = 1;
+            for (String lore : meta.getLore()) {
+                out.append(quote).append(meta.getLore().indexOf(lore)).append(quote).append(": ").append(gson.toJson(lore));
+                if (i < meta.getLore().size()) {
+                    out.append(",");
+                }
+                i++;
+            }
+            out.append("}");
         }
         out.append("}");
         return out.toString();

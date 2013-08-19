@@ -1,5 +1,6 @@
 package co.mcme.jobs;
 
+import co.mcme.jobs.util.ItemUtil;
 import co.mcme.jobs.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.PlayerInventory;
 
 public class Job implements Listener {
 
@@ -31,6 +33,7 @@ public class Job implements Listener {
     private ArrayList<String> bannedworkers = new ArrayList();
     private boolean dirty = false;
     private String filename;
+    private PlayerInventory kit;
 
     public Job(String n, String a, boolean s, Location loc, String w) {
         this.admin = Bukkit.getOfflinePlayer(a);
@@ -44,7 +47,7 @@ public class Job implements Listener {
         }
     }
 
-    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname) {
+    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname, PlayerInventory k) {
         this.admin = Bukkit.getOfflinePlayer(a);
         this.name = n;
         this.status = s;
@@ -61,6 +64,7 @@ public class Job implements Listener {
             Jobs.protected_worlds.add(world);
         }
         this.filename = fname;
+        this.kit = k;
     }
 
     public String getName() {
@@ -251,7 +255,11 @@ public class Job implements Listener {
                 writer.value(banned);
             }
             writer.endArray();
-
+            
+            writer.name("kit").beginArray();
+            writer.value(ItemUtil.getJsonItems(kit));
+            writer.endArray();
+            
             writer.name("location").beginArray().beginObject();
             writer.name("x").value(warpto.getX());
             writer.name("y").value(warpto.getY());
