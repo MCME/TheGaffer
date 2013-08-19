@@ -97,8 +97,7 @@ public class Job implements Listener {
     public boolean addWorker(Player p) {
         if (!workers.contains(p.getName()) && status && !bannedworkers.contains(p.getName())) {
             workers.add(p.getName());
-            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
-            sendToWorkers(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
+            sendToAll(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
             dirty = true;
             p.teleport(warpto);
             return true;
@@ -181,8 +180,7 @@ public class Job implements Listener {
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
             }
-            sendToRunners(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
-            sendToWorkers(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
+            sendToAll(ChatColor.RED + p.getName() + " has been banned from the " + name + " job.");
             dirty = true;
             return true;
         } else {
@@ -193,8 +191,7 @@ public class Job implements Listener {
     public boolean unBanWorker(OfflinePlayer p) {
         if (bannedworkers.contains(p.getName())) {
             bannedworkers.remove(p.getName());
-            sendToRunners(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
-            sendToWorkers(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
+            sendToAll(ChatColor.GRAY + p.getName() + " has been unbanned from the " + name + " job.");
             dirty = true;
             return true;
         } else {

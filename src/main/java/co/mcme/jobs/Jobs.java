@@ -307,8 +307,7 @@ public final class Jobs extends JavaPlugin implements Listener {
             if (runningJobs.containsKey(jobname)) {
                 Job oldjob = runningJobs.get(jobname);
                 oldjob.setStatus(false);
-                oldjob.sendToWorkers(ChatColor.GRAY + "The " + ChatColor.AQUA + oldjob.getName() + ChatColor.GRAY + " job has ended.");
-                oldjob.sendToRunners(ChatColor.GRAY + "The " + ChatColor.AQUA + oldjob.getName() + ChatColor.GRAY + " job has ended.");
+                oldjob.sendToAll(ChatColor.GRAY + "The " + ChatColor.AQUA + oldjob.getName() + ChatColor.GRAY + " job has ended.");
                 notRunningJobs.put(oldjob.getName(), oldjob);
                 runningJobs.remove(jobname);
                 opened_worlds.remove(oldjob);
