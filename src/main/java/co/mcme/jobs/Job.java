@@ -285,4 +285,22 @@ public class Job implements Listener {
             }
         }
     }
+
+    public void sendToAll(String msg) {
+        for (String Pname : workers) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(Pname);
+            if (target.isOnline()) {
+                target.getPlayer().sendMessage(msg);
+            }
+        }
+        for (String Pname : runners) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(Pname);
+            if (target.isOnline()) {
+                target.getPlayer().sendMessage(msg);
+            }
+        }
+        if (admin.isOnline()) {
+            admin.getPlayer().sendMessage(msg);
+        }
+    }
 }
