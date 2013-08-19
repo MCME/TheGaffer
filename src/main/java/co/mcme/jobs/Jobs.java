@@ -199,20 +199,24 @@ public final class Jobs extends JavaPlugin implements Listener {
                         return true;
                     }
                     if (args[0].equalsIgnoreCase("warpto")) {
-                        if (runningJobs.size() > 0) {
-                            if (args.length > 1) {
-                                if (runningJobs.containsKey(args[1])) {
-                                    Job jobToJoin = runningJobs.get(args[1]);
-                                    player.teleport(jobToJoin.getWarp());
-                                    player.sendMessage(ChatColor.GRAY + "Warped to " + ChatColor.AQUA + jobToJoin.getName());
+                        if (player.hasPermission("jobs.join")) {
+                            if (runningJobs.size() > 0) {
+                                if (args.length > 1) {
+                                    if (runningJobs.containsKey(args[1])) {
+                                        Job jobToJoin = runningJobs.get(args[1]);
+                                        player.teleport(jobToJoin.getWarp());
+                                        player.sendMessage(ChatColor.GRAY + "Warped to " + ChatColor.AQUA + jobToJoin.getName());
+                                    } else {
+                                        player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                    }
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                    player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to warp to.");
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to warp to.");
+                                player.sendMessage(ChatColor.RED + "No jobs currently running.");
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                            player.sendMessage(ChatColor.RED + "You do not have permission.");
                         }
                         return true;
                     }
