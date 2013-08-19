@@ -110,6 +110,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                         runningJobs = new HashMap();
                         player.sendMessage(ChatColor.GRAY + "Loaded " + co.mcme.jobs.files.Loader.loadActiveJobs() + " old job(s) from file.");
                         Util.info(runningJobs.size() + " of which are active.");
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("write") && player.hasPermission("jobs.write")) {
                         if (runningJobs.containsKey(args[1])) {
@@ -120,6 +121,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
+                        return true;
                     }
 
                     if (args.length == 2 && player.hasPermission("jobs.run")) {
@@ -136,6 +138,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                             } else {
                                 player.sendMessage(ChatColor.RED + "You must provide a job name.");
                             }
+                            return true;
                         }
                         if (args[0].equalsIgnoreCase("stop")) {
                             if (args[1] != null) {
@@ -149,6 +152,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                             } else {
                                 player.sendMessage(ChatColor.RED + "You must provide a job name.");
                             }
+                            return true;
                         }
                     }
                     if (args[0].equalsIgnoreCase("check")) {
@@ -167,6 +171,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                         } else {
                             player.sendMessage(ChatColor.RED + "You don't have permission.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("join")) {
                         if (player.hasPermission("jobs.join")) {
@@ -191,6 +196,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                         } else {
                             player.sendMessage(ChatColor.RED + "You do not have permission.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("warpto")) {
                         if (runningJobs.size() > 0) {
@@ -208,6 +214,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                         } else {
                             player.sendMessage(ChatColor.RED + "No jobs currently running.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("info")) {
                         if (args.length > 1) {
@@ -223,6 +230,7 @@ public final class Jobs extends JavaPlugin implements Listener {
                         } else {
                             player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("archive")) {
                         if (player.hasPermission("jobs.check")) {
@@ -252,13 +260,12 @@ public final class Jobs extends JavaPlugin implements Listener {
                         } else {
                             player.sendMessage(ChatColor.RED + "You don't have permission.");
                         }
+                        return true;
                     }
-                } else {
-                    return false;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     public void storeJob(String jobname, String admin, String status) {

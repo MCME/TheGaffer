@@ -42,6 +42,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("removehelper") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
@@ -59,6 +60,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("kickworker") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
@@ -79,6 +81,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("banworker") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
@@ -98,6 +101,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("unbanworker") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
@@ -117,6 +121,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                 }
                 if (args.length >= 2) {
@@ -132,6 +137,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("bringall") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
@@ -147,6 +153,7 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                     if (args[0].equalsIgnoreCase("listworkers") && player.hasPermission("jobs.run")) {
                         if (Jobs.runningJobs.containsKey(args[1])) {
@@ -160,10 +167,11 @@ public class JobAdminCommand implements CommandExecutor {
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
                         }
+                        return true;
                     }
                 }
             }
         }
-        return true;
+        return false;
     }
 }

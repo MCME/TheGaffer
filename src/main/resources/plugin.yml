@@ -41,8 +41,12 @@ permissions:
 commands:
   job:
     usage: |
-            /job <jobName> <Status>
+            /job <start|stop> <jobname>
             /job check
+            /job archive
+            /job join <jobname>
+            /job warpto <jobname>
+            /job info <jobname>
   jobadmin:
     usage: |
-           /jobadmin <jobName> <action> <variables>
+           /jobadmin <jobName> <action> <variable>
