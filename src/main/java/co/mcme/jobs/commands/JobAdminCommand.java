@@ -144,7 +144,9 @@ public class JobAdminCommand implements CommandExecutor {
                             Job targetJob = Jobs.runningJobs.get(args[1]);
                             if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
                                 for (String name : targetJob.getWorkers()) {
-                                    Bukkit.getPlayer(name).teleport(player.getLocation());
+                                    if (Bukkit.getOfflinePlayer(name).isOnline()) {
+                                        Bukkit.getPlayer(name).teleport(player.getLocation());
+                                    }
                                 }
                                 player.sendMessage(ChatColor.GRAY + "Brought all workers to your location.");
                             } else {
