@@ -36,6 +36,8 @@ public class JobAdminCommand implements CommandExecutor {
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is offline.");
                                 }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
@@ -51,6 +53,8 @@ public class JobAdminCommand implements CommandExecutor {
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is not on the job.");
                                 }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
@@ -69,6 +73,8 @@ public class JobAdminCommand implements CommandExecutor {
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is not on the job.");
                                 }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
@@ -86,6 +92,8 @@ public class JobAdminCommand implements CommandExecutor {
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is already banned from this job.");
                                 }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
@@ -103,6 +111,8 @@ public class JobAdminCommand implements CommandExecutor {
                                 } else {
                                     player.sendMessage(ChatColor.RED + target.getName() + " is not banned from this job.");
                                 }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
@@ -116,6 +126,8 @@ public class JobAdminCommand implements CommandExecutor {
                             if (targetJob.getAdmin().getName().equals(player.getName()) || targetJob.getHelpers().contains(player.getName()) || player.hasPermission("jobs.ignoreownjob")) {
                                 targetJob.setWarp(player.getLocation());
                                 player.sendMessage(ChatColor.GRAY + "Set the warp of " + ChatColor.AQUA + targetJob.getName() + ChatColor.GRAY + " to your location.");
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
@@ -129,6 +141,8 @@ public class JobAdminCommand implements CommandExecutor {
                                     Bukkit.getPlayer(name).teleport(player.getLocation());
                                 }
                                 player.sendMessage(ChatColor.GRAY + "Brought all workers to your location.");
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
                             }
                         } else {
                             player.sendMessage(ChatColor.RED + "No running job found by that name.");
