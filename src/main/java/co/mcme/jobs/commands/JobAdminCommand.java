@@ -14,7 +14,7 @@ public class JobAdminCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (label.equalsIgnoreCase("jobadmin")) {
+        if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length > 0) {
                 if (args.length >= 3) {
