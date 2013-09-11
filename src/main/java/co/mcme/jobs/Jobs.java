@@ -24,7 +24,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Jobs extends JavaPlugin {
 
-    private final Logger log = Logger.getLogger("Minecraft");
     static Configuration conf;
     public static HashMap<String, Job> runningJobs = new HashMap();
     public static TreeMap<String, Job> notRunningJobs = new TreeMap();
