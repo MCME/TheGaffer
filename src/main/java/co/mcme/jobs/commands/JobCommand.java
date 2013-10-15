@@ -6,17 +6,19 @@ import static co.mcme.jobs.Jobs.notRunningJobs;
 import static co.mcme.jobs.Jobs.runningJobs;
 import co.mcme.jobs.util.Util;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
 
-public class JobCommand implements CommandExecutor {
+public class JobCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -192,5 +194,30 @@ public class JobCommand implements CommandExecutor {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args[0].equalsIgnoreCase("archive")) {
+            return new ArrayList();
+        }
+        if (args[0].equalsIgnoreCase("check")) {
+            return new ArrayList();
+        }
+        if (args[0].equalsIgnoreCase("start")) {
+            List<String> jobs = new ArrayList();
+            jobs.addAll(Jobs.notRunningJobs.keySet());
+            return jobs;
+        }
+        if (args[0].equalsIgnoreCase("info")) {
+            List<String> jobs = new ArrayList();
+            jobs.addAll(Jobs.runningJobs.keySet());
+            jobs.addAll(Jobs.notRunningJobs.keySet());
+            return jobs;
+        } else {
+            List<String> jobs = new ArrayList();
+            jobs.addAll(Jobs.runningJobs.keySet());
+            return jobs;
+        }
     }
 }
