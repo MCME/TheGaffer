@@ -50,12 +50,18 @@ public class JobCommand implements TabExecutor {
                     return true;
                 }
 
-                if (args.length == 2 && player.hasPermission("jobs.run")) {
+                if (args.length >= 2 && player.hasPermission("jobs.run")) {
                     if (args[0].equalsIgnoreCase("start")) {
                         if (args[1] != null) {
                             String jobname = args[1];
+                            boolean inviteOnly = false;
+                            if (args.length == 3) {
+                                if (args[2].equalsIgnoreCase("private")) {
+                                    inviteOnly = true;
+                                }
+                            }
                             if (!runningJobs.containsKey(jobname)) {
-                                Jobs.storeJob(jobname, player.getName(), "new");
+                                Jobs.storeJob(jobname, player.getName(), "new", inviteOnly);
                                 player.sendMessage(ChatColor.GRAY + "Successfully created the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
                             } else {
                                 player.sendMessage(ChatColor.RED + "A job by that name is already running.");
@@ -69,7 +75,7 @@ public class JobCommand implements TabExecutor {
                         if (args[1] != null) {
                             String jobname = args[1];
                             if (runningJobs.containsKey(jobname)) {
-                                Jobs.storeJob(jobname, player.getName(), "remove");
+                                Jobs.storeJob(jobname, player.getName(), "remove", runningJobs.get(jobname).isInviteOnly());
                                 player.sendMessage(ChatColor.GRAY + "Successfully closed the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
                             } else {
                                 player.sendMessage(ChatColor.RED + "No job found by that name.");

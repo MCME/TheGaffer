@@ -17,6 +17,7 @@ permissions:
       jobs.run.actions.setwarp: true
       jobs.run.actions.bringall: true
       jobs.run.actions.listworkers: true
+      jobs.run.actions.inviteworker: true
   jobs.ignorestatus:
     description: Ignore job build permissions
     default: op
@@ -57,6 +58,9 @@ permissions:
   jobs.run.actions.listworkers:
     default: op
     description: Allows user to list workers on any job
+  jobs.run.actions.inviteworker:
+    default: op
+    description: Allows user to invite a worker to a job they have permissions for
   jobs.run.actions.*:
     default: op
     description: Allows user to execute every job action

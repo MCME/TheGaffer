@@ -31,8 +31,10 @@ public class Job implements Listener {
     private ArrayList<String> bannedworkers = new ArrayList();
     private boolean dirty = false;
     private String filename;
+    private boolean inviteOnly;
+    private ArrayList<String> invitedworkers = new ArrayList();
 
-    public Job(String n, String a, boolean s, Location loc, String w) {
+    public Job(String n, String a, boolean s, Location loc, String w, boolean i) {
         this.admin = Bukkit.getOfflinePlayer(a);
         this.name = n;
         this.status = s;
@@ -42,9 +44,10 @@ public class Job implements Listener {
         if (status) {
             Jobs.protected_worlds.add(world);
         }
+        this.inviteOnly = i;
     }
 
-    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname) {
+    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname, boolean i) {
         this.admin = Bukkit.getOfflinePlayer(a);
         this.name = n;
         this.status = s;
@@ -61,6 +64,28 @@ public class Job implements Listener {
             Jobs.protected_worlds.add(world);
         }
         this.filename = fname;
+        this.inviteOnly = i;
+    }
+
+    public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname, boolean i, ArrayList<String> ip) {
+        this.admin = Bukkit.getOfflinePlayer(a);
+        this.name = n;
+        this.status = s;
+        if (!helpers.isEmpty()) {
+            this.runners = helpers;
+        } else {
+            this.runners = new ArrayList();
+        }
+        this.warpto = loc;
+        this.started = started;
+        this.workers = parti;
+        this.world = Bukkit.getWorld(w);
+        if (status) {
+            Jobs.protected_worlds.add(world);
+        }
+        this.filename = fname;
+        this.inviteOnly = i;
+        this.invitedworkers = ip;
     }
 
     public String getName() {
@@ -95,14 +120,26 @@ public class Job implements Listener {
     }
 
     public boolean addWorker(Player p) {
-        if (!workers.contains(p.getName()) && status && !bannedworkers.contains(p.getName())) {
-            workers.add(p.getName());
-            sendToAll(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
-            dirty = true;
-            p.teleport(warpto);
-            return true;
+        if (!isInviteOnly()) {
+            if (!workers.contains(p.getName()) && status && !bannedworkers.contains(p.getName())) {
+                workers.add(p.getName());
+                sendToAll(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
+                dirty = true;
+                p.teleport(warpto);
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return false;
+            if (!workers.contains(p.getName()) && status && !bannedworkers.contains(p.getName()) && invitedworkers.contains(p.getName())) {
+                workers.add(p.getName());
+                sendToAll(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has joined the job.");
+                dirty = true;
+                p.teleport(warpto);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -115,6 +152,26 @@ public class Job implements Listener {
         } else {
             return false;
         }
+    }
+
+    public boolean inviteWorker(OfflinePlayer p) {
+        if (!invitedworkers.contains(p.getName())) {
+            invitedworkers.add(p.getName());
+            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been invited to the job.");
+            dirty = true;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean unInviteWorker(OfflinePlayer p) {
+        if (invitedworkers.contains(p.getName())) {
+            invitedworkers.remove(p.getName());
+            sendToRunners(ChatColor.AQUA + p.getName() + ChatColor.GRAY + " has been uninvited from the job.");
+            dirty = true;
+            return true;
+        }
+        return false;
     }
 
     public boolean isWorking(OfflinePlayer p) {
@@ -207,6 +264,10 @@ public class Job implements Listener {
         return filename;
     }
 
+    public boolean isInviteOnly() {
+        return inviteOnly;
+    }
+
     @EventHandler
     public void onLeave(PlayerQuitEvent event) {
         if (event.getPlayer().getName().equals(admin.getName())) {
@@ -229,8 +290,10 @@ public class Job implements Listener {
         try (JsonWriter writer = new JsonWriter(new FileWriter(file))) {
             writer.beginArray().beginObject();
             writer.name("name").value(name);
+            writer.name("version").value(Jobs.version);
             writer.name("runby").value(admin.getName());
             writer.name("status").value(status);
+            writer.name("inviteonly").value(inviteOnly);
             writer.name("world").value(world.getName());
             writer.name("started").value(started);
 
@@ -248,6 +311,12 @@ public class Job implements Listener {
             writer.name("banned").beginArray();
             for (String banned : bannedworkers) {
                 writer.value(banned);
+            }
+            writer.endArray();
+
+            writer.name("invited").beginArray();
+            for (String invitee : invitedworkers) {
+                writer.value(invitee);
             }
             writer.endArray();
 

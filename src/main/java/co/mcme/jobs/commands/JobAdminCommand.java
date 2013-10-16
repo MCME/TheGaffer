@@ -26,6 +26,8 @@ public class JobAdminCommand implements TabExecutor {
         actions.add("setwarp");
         actions.add("bringall");
         actions.add("listworkers");
+        actions.add("inviteworker");
+        actions.add("uninviteworker");
         Collections.sort(actions);
     }
 
@@ -166,6 +168,50 @@ public class JobAdminCommand implements TabExecutor {
                                 }
                             } else {
                                 sender.sendMessage(ChatColor.RED + target.getName() + " is not banned from this job.");
+                            }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "No running job found by that name.");
+                    }
+                    return true;
+                }
+                case "inviteworker": {
+                    if (Jobs.runningJobs.containsKey(args[1])) {
+                        Job targetJob = Jobs.runningJobs.get(args[1]);
+                        if (targetJob.getAdmin().getName().equals(sender.getName())
+                                || targetJob.getHelpers().contains(sender.getName())
+                                || sender.hasPermission("jobs.ignoreownjob")) {
+                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
+                            if (targetJob.inviteWorker(target)) {
+                                if (target.isOnline()) {
+                                    target.getPlayer().sendMessage(ChatColor.AQUA + "You have been invited to the " + targetJob.getName() + " job.");
+                                }
+                            } else {
+                                sender.sendMessage(ChatColor.RED + target.getName() + " is already invited to this job.");
+                            }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "No running job found by that name.");
+                    }
+                    return true;
+                }
+                case "uninviteworker": {
+                    if (Jobs.runningJobs.containsKey(args[1])) {
+                        Job targetJob = Jobs.runningJobs.get(args[1]);
+                        if (targetJob.getAdmin().getName().equals(sender.getName())
+                                || targetJob.getHelpers().contains(sender.getName())
+                                || sender.hasPermission("jobs.ignoreownjob")) {
+                            OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
+                            if (targetJob.inviteWorker(target)) {
+                                if (target.isOnline()) {
+                                    target.getPlayer().sendMessage(ChatColor.RED + "You have been uninvited from the " + targetJob.getName() + " job.");
+                                }
+                            } else {
+                                sender.sendMessage(ChatColor.RED + target.getName() + " is not invited to this job.");
                             }
                         } else {
                             sender.sendMessage(ChatColor.RED + "You don't have permission to edit the " + targetJob.getName() + " job.");

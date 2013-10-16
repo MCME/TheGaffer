@@ -33,11 +33,14 @@ public final class Jobs extends JavaPlugin {
     public static boolean debug = false;
     static File inactiveDir;
     static File activeDir;
+    static File outdatedDir;
+    public static String version;
 
     @Override
     public void onEnable() {
         inactiveDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "inactive");
         activeDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "active");
+        outdatedDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "outdated");
         if (!activeDir.exists()) {
             activeDir.mkdirs();
             Util.info("Did not find the active jobs directory");
@@ -45,6 +48,10 @@ public final class Jobs extends JavaPlugin {
         if (!inactiveDir.exists()) {
             inactiveDir.mkdirs();
             Util.info("Did not find the inactive jobs directory");
+        }
+        if (!outdatedDir.exists()) {
+            outdatedDir.mkdirs();;
+            Util.info("Did not find the outdated jobs directory");
         }
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getPluginManager().registerEvents(new ProtectionListener(), this);
@@ -59,6 +66,7 @@ public final class Jobs extends JavaPlugin {
                 Cleanup.scheduledCleanup();
             }
         }, 0, (5 * 60) * 20);
+        version = getServer().getPluginManager().getPlugin("TheGaffer").getDescription().getVersion();
     }
 
     @Override
@@ -85,7 +93,7 @@ public final class Jobs extends JavaPlugin {
         loadJobs();
     }
 
-    public static void storeJob(String jobname, String admin, String status) {
+    public static void storeJob(String jobname, String admin, String status, boolean invite) {
         Player p = Bukkit.getPlayer(admin);
         if (status.equalsIgnoreCase("new")) {
             Location adminloc = Bukkit.getPlayer(admin).getLocation();
@@ -95,7 +103,7 @@ public final class Jobs extends JavaPlugin {
             adminloc.setX(newx);
             adminloc.setY(newy);
             adminloc.setZ(newz);
-            Job newjob = new Job(jobname, admin, true, adminloc, adminloc.getWorld().getName());
+            Job newjob = new Job(jobname, admin, true, adminloc, adminloc.getWorld().getName(), invite);
             runningJobs.put(jobname, newjob);
             try {
                 newjob.writeToFile();
@@ -198,5 +206,9 @@ public final class Jobs extends JavaPlugin {
 
     public static File getActiveDir() {
         return activeDir;
+    }
+    
+    public static File getOutdatedDir() {
+        return outdatedDir;
     }
 }
