@@ -33,10 +33,11 @@ The first argument is the action you would like to perform. The current actions 
 *Those in bold are only available to Staff*
 
 ### Start
-This is the action used to create a new job. If an old job is found with the same name, it will be restarted with you as the admin. The name of the job is __case-sensitive__.
+This is the action used to create a new job. A "private" can be added to make the job invite only. If an old job is found with the same name, it will be restarted with you as the admin. The name of the job is __case-sensitive__.
 
 ###### Example
 /job start river *This will start a job called **river**.
+/job start river private *This will start a job called **river** that is invite only.
 
 ### Stop
 This is the action that will stop a job. When a job is stopped, the world becomes locked again, and the job is moved to the archive.
@@ -132,4 +133,16 @@ This action allows you to list the workers of a job.
 This action allows you to bring all workers on the job to your location.
 
 ###### Example
-/jobadmin bringall GreenHills ryanturambar *This will bring all workers on the __GreenHille__ job to your location.*
+/jobadmin bringall GreenHills ryanturambar *This will bring all workers on the __GreenHills__ job to your location.*
+
+### inviteworker
+This action allows you to invite a worker to a job.
+
+###### Example
+/jobadmin inviteworker GreenHIlls ryanturambar *This will invite ryanturambar to the __GreenHills__ job*
+
+### uninviteworker
+This action allows you to invite a worker to a job.
+
+###### Example
+/jobadmin uninviteworker GreenHIlls ryanturambar *This will uninvite ryanturambar from the __GreenHills__ job*
