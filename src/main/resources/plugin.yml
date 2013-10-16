@@ -7,8 +7,16 @@ description: Job API for MCME.
 author: meggawatts
 permissions:
   jobs.run:
-    description: Ability to start and stop own jobs.
     default: op
+    children: 
+      jobs.run.actions.addhelper: true
+      jobs.run.actions.removehelper: true
+      jobs.run.actions.kickworker: true
+      jobs.run.actions.banworker: true
+      jobs.run.actions.unbanworker: true
+      jobs.run.actions.setwarp: true
+      jobs.run.actions.bringall: true
+      jobs.run.actions.listworkers: true
   jobs.ignorestatus:
     description: Ignore job build permissions
     default: op
@@ -25,6 +33,33 @@ permissions:
     description: allows joining a running job.
   jobs.check:
     description: allows checking the running jobs.
+  jobs.run.actions.addhelper:
+    default: op
+    description: Allows user to add a helper to a job they have permissions for
+  jobs.run.actions.removehelper:
+    default: op
+    description: Allows user to remove a helper from a job they have permissions for
+  jobs.run.actions.kickworker:
+    default: op
+    description: Allows user to kick a worker from a job they have permissions for
+  jobs.run.actions.banworker:
+    default: op
+    description: Allows user to ban a worker from a job they have permissions for
+  jobs.run.actions.unbanworker:
+    default: op
+    description: Allows user to unban a worker from a job they have permissions for
+  jobs.run.actions.setwarp:
+    default: op
+    description: Allows user to set the warp of a job they have permissions for
+  jobs.run.actions.bringall:
+    default: op
+    description: Allows user to bring all workers on a job they have permissions for to them
+  jobs.run.actions.listworkers:
+    default: op
+    description: Allows user to list workers on any job
+  jobs.run.actions.*:
+    default: op
+    description: Allows user to execute every job action
   jobs.user:
     default: true
     children:
@@ -49,4 +84,4 @@ commands:
             /job info <jobname>
   jobadmin:
     usage: |
-           /jobadmin <jobName> <action> <variable>
+           /jobadmin <action> <jobName> <variable>
