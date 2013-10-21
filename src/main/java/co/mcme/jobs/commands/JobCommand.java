@@ -116,7 +116,7 @@ public class JobCommand implements TabExecutor {
                                         player.sendMessage(ChatColor.RED + "You cannot be added to that job.");
                                     }
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                    player.sendMessage(ChatColor.RED + "No job running by the name of `" + args[1] + "`");
                                 }
                             } else {
                                 player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to join.");
@@ -138,7 +138,7 @@ public class JobCommand implements TabExecutor {
                                     player.teleport(jobToJoin.getWarp());
                                     player.sendMessage(ChatColor.GRAY + "Warped to " + ChatColor.AQUA + jobToJoin.getName());
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "No job ruuning by the name of `" + args[1] + "`");
+                                    player.sendMessage(ChatColor.RED + "No job running by the name of `" + args[1] + "`");
                                 }
                             } else {
                                 player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to warp to.");
