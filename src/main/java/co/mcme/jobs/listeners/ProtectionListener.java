@@ -1,7 +1,6 @@
 /*
  * This file is really messy, and needs a lot of work
  */
-
 package co.mcme.jobs.listeners;
 
 import co.mcme.jobs.Job;
@@ -35,7 +34,13 @@ public class ProtectionListener implements Listener {
                         if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
                             event.setCancelled(false);
                         } else {
-                            event.setCancelled(!job.isWorking(toCheck));
+                            if (job.isWorking(toCheck)) {
+                                int x = toCheck.getPlayer().getLocation().getBlockX();
+                                int z = toCheck.getPlayer().getLocation().getBlockZ();
+                                event.setCancelled(!job.getBounds().contains(x, z));
+                            } else {
+                                event.setCancelled(true);
+                            }
                         }
                     }
                 }
@@ -60,7 +65,13 @@ public class ProtectionListener implements Listener {
                         if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
                             event.setCancelled(false);
                         } else {
-                            event.setCancelled(!job.isWorking(toCheck));
+                            if (job.isWorking(toCheck)) {
+                                int x = toCheck.getPlayer().getLocation().getBlockX();
+                                int z = toCheck.getPlayer().getLocation().getBlockZ();
+                                event.setCancelled(!job.getBounds().contains(x, z));
+                            } else {
+                                event.setCancelled(true);
+                            }
                         }
                     }
                 }
@@ -85,7 +96,13 @@ public class ProtectionListener implements Listener {
                         if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
                             event.setCancelled(false);
                         } else {
-                            event.setCancelled(!job.isWorking(toCheck));
+                            if (job.isWorking(toCheck)) {
+                                int x = toCheck.getPlayer().getLocation().getBlockX();
+                                int z = toCheck.getPlayer().getLocation().getBlockZ();
+                                event.setCancelled(!job.getBounds().contains(x, z));
+                            } else {
+                                event.setCancelled(true);
+                            }
                         }
                     }
                 }
@@ -110,7 +127,13 @@ public class ProtectionListener implements Listener {
                         if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
                             event.setCancelled(false);
                         } else {
-                            event.setCancelled(!job.isWorking(toCheck));
+                            if (job.isWorking(toCheck)) {
+                                int x = toCheck.getPlayer().getLocation().getBlockX();
+                                int z = toCheck.getPlayer().getLocation().getBlockZ();
+                                event.setCancelled(!job.getBounds().contains(x, z));
+                            } else {
+                                event.setCancelled(true);
+                            }
                         }
                     }
                 }

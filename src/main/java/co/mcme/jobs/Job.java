@@ -4,6 +4,8 @@ import co.mcme.jobs.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
+import java.awt.Polygon;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -33,6 +35,8 @@ public class Job implements Listener {
     private String filename;
     private boolean inviteOnly;
     private ArrayList<String> invitedworkers = new ArrayList();
+    private Polygon area;
+    private Rectangle2D bounds;
 
     public Job(String n, String a, boolean s, Location loc, String w, boolean i) {
         this.admin = Bukkit.getOfflinePlayer(a);
@@ -45,6 +49,10 @@ public class Job implements Listener {
             Jobs.protected_worlds.add(world);
         }
         this.inviteOnly = i;
+        int zbounds[] = {loc.getBlockZ() - 100, loc.getBlockZ() + 250};
+        int xbounds[] = {loc.getBlockX() - 100, loc.getBlockX() + 250};
+        area = new Polygon(xbounds, zbounds, xbounds.length);
+        bounds = area.getBounds2D();
     }
 
     public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname, boolean i) {
@@ -65,6 +73,10 @@ public class Job implements Listener {
         }
         this.filename = fname;
         this.inviteOnly = i;
+        int zbounds[] = {loc.getBlockZ() - 100, loc.getBlockZ() + 250};
+        int xbounds[] = {loc.getBlockX() - 100, loc.getBlockX() + 250};
+        area = new Polygon(xbounds, zbounds, xbounds.length);
+        bounds = area.getBounds2D();
     }
 
     public Job(String n, String a, boolean s, ArrayList<String> helpers, Location loc, Long started, ArrayList<String> parti, String w, ArrayList<String> banned, String fname, boolean i, ArrayList<String> ip) {
@@ -190,6 +202,10 @@ public class Job implements Listener {
         world = newloc.getWorld();
         Jobs.opened_worlds.put(this, world);
         dirty = true;
+        int zbounds[] = {newloc.getBlockZ() - 100, newloc.getBlockZ() + 250};
+        int xbounds[] = {newloc.getBlockX() - 100, newloc.getBlockX() + 250};
+        area = new Polygon(xbounds, zbounds, xbounds.length);
+        bounds = area.getBounds2D();
     }
 
     public void setStatus(boolean news) {
@@ -266,6 +282,14 @@ public class Job implements Listener {
 
     public boolean isInviteOnly() {
         return inviteOnly;
+    }
+    
+    public Rectangle2D getBounds() {
+        return bounds;
+    }
+    
+    public Polygon getArea() {
+        return area;
     }
 
     @EventHandler
