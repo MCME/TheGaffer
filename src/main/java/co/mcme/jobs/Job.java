@@ -45,9 +45,6 @@ public class Job implements Listener {
         this.warpto = loc;
         started = System.currentTimeMillis();
         this.world = Bukkit.getWorld(w);
-        if (status) {
-            Jobs.protected_worlds.add(world);
-        }
         this.inviteOnly = i;
         int zbounds[] = {loc.getBlockZ() - 100, loc.getBlockZ() + 250};
         int xbounds[] = {loc.getBlockX() - 100, loc.getBlockX() + 250};
@@ -68,9 +65,6 @@ public class Job implements Listener {
         this.started = started;
         this.workers = parti;
         this.world = Bukkit.getWorld(w);
-        if (status) {
-            Jobs.protected_worlds.add(world);
-        }
         this.filename = fname;
         this.inviteOnly = i;
         int zbounds[] = {loc.getBlockZ() - 100, loc.getBlockZ() + 250};
@@ -92,9 +86,6 @@ public class Job implements Listener {
         this.started = started;
         this.workers = parti;
         this.world = Bukkit.getWorld(w);
-        if (status) {
-            Jobs.protected_worlds.add(world);
-        }
         this.filename = fname;
         this.inviteOnly = i;
         this.invitedworkers = ip;
@@ -200,7 +191,6 @@ public class Job implements Listener {
         newloc.setZ((int) newloc.getZ());
         warpto = newloc;
         world = newloc.getWorld();
-        Jobs.opened_worlds.put(this, world);
         dirty = true;
         int zbounds[] = {newloc.getBlockZ() - 100, newloc.getBlockZ() + 250};
         int xbounds[] = {newloc.getBlockX() - 100, newloc.getBlockX() + 250};

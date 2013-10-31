@@ -1,14 +1,10 @@
-/*
- * This file is really messy, and needs a lot of work
- */
 package co.mcme.jobs.listeners;
 
 import co.mcme.jobs.Job;
-import static co.mcme.jobs.Jobs.opened_worlds;
-import static co.mcme.jobs.Jobs.protected_worlds;
-import co.mcme.jobs.util.Util;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import co.mcme.jobs.Jobs;
+import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,124 +18,204 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
-        World happenedin = event.getBlock().getWorld();
-        Util.debug("Place event fired in " + happenedin.getName());
-        if (protected_worlds.contains(happenedin)) {
-            Util.debug("Place event is in protected world");
-            if (opened_worlds.containsValue(happenedin)) {
-                Util.debug("Place event is is in opened world");
-                OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
-                for (Job job : opened_worlds.keySet()) {
-                    if (job.getWorld().equals(happenedin)) {
-                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
-                            event.setCancelled(false);
-                        } else {
-                            if (job.isWorking(toCheck)) {
-                                int x = toCheck.getPlayer().getLocation().getBlockX();
-                                int z = toCheck.getPlayer().getLocation().getBlockZ();
-                                event.setCancelled(!job.getBounds().contains(x, z));
-                            } else {
-                                event.setCancelled(true);
-                            }
+        if (event.getPlayer().hasPermission("jobs.ignorestatus")) {
+            event.setBuild(true);
+        } else {
+            World world = event.getBlock().getWorld();
+            if (!Jobs.runningJobs.isEmpty()) {
+                HashMap<Job, World> workingworlds = new HashMap();
+                HashMap<Job, Rectangle2D> areas = new HashMap();
+                for (Job job : Jobs.runningJobs.values()) {
+                    workingworlds.put(job, job.getWorld());
+                    areas.put(job, job.getBounds());
+                }
+                if (workingworlds.containsValue(world)) {
+                    boolean playerisworking = false;
+                    for (Job job : workingworlds.keySet()) {
+                        if (job.isWorking(event.getPlayer())) {
+                            playerisworking = true;
                         }
                     }
+                    if (playerisworking) {
+                        boolean isinjobarea = false;
+                        int x = event.getBlock().getX();
+                        int z = event.getBlock().getZ();
+                        for (Rectangle2D area : areas.values()) {
+                            if (area.contains(x, z)) {
+                                isinjobarea = true;
+                            }
+                        }
+                        if (isinjobarea) {
+                            event.setBuild(true);
+                        } else {
+                            event.getPlayer().sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                            event.setBuild(false);
+                        }
+                    } else {
+                        event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                        event.setBuild(false);
+                    }
+                } else {
+                    event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                    event.setBuild(false);
                 }
             } else {
-                Util.debug("Protected world is not open!");
-                event.setCancelled(!event.getPlayer().hasPermission("jobs.ignorestatus"));
+                event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                event.setBuild(false);
             }
         }
     }
 
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
-        World happenedin = event.getBlock().getWorld();
-        Util.debug("Break event fired in " + happenedin.getName());
-        if (protected_worlds.contains(happenedin)) {
-            Util.debug("Break event is in protected world");
-            if (opened_worlds.containsValue(happenedin)) {
-                Util.debug("Break event is in opened world");
-                OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
-                for (Job job : opened_worlds.keySet()) {
-                    if (job.getWorld().equals(happenedin)) {
-                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
-                            event.setCancelled(false);
-                        } else {
-                            if (job.isWorking(toCheck)) {
-                                int x = toCheck.getPlayer().getLocation().getBlockX();
-                                int z = toCheck.getPlayer().getLocation().getBlockZ();
-                                event.setCancelled(!job.getBounds().contains(x, z));
-                            } else {
-                                event.setCancelled(true);
-                            }
+        if (event.getPlayer().hasPermission("jobs.ignorestatus")) {
+            event.setCancelled(false);
+        } else {
+            World world = event.getBlock().getWorld();
+            if (!Jobs.runningJobs.isEmpty()) {
+                HashMap<Job, World> workingworlds = new HashMap();
+                HashMap<Job, Rectangle2D> areas = new HashMap();
+                for (Job job : Jobs.runningJobs.values()) {
+                    workingworlds.put(job, job.getWorld());
+                    areas.put(job, job.getBounds());
+                }
+                if (workingworlds.containsValue(world)) {
+                    boolean playerisworking = false;
+                    for (Job job : workingworlds.keySet()) {
+                        if (job.isWorking(event.getPlayer())) {
+                            playerisworking = true;
                         }
                     }
+                    if (playerisworking) {
+                        boolean isinjobarea = false;
+                        int x = event.getBlock().getX();
+                        int z = event.getBlock().getZ();
+                        for (Rectangle2D area : areas.values()) {
+                            if (area.contains(x, z)) {
+                                isinjobarea = true;
+                            }
+                        }
+                        if (isinjobarea) {
+                            event.setCancelled(false);
+                        } else {
+                            event.getPlayer().sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                            event.setCancelled(true);
+                        }
+                    } else {
+                        event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                        event.setCancelled(true);
+                    }
+                } else {
+                    event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                    event.setCancelled(true);
                 }
             } else {
-                Util.debug("Protected world is not open!");
-                event.setCancelled(!event.getPlayer().hasPermission("jobs.ignorestatus"));
+                event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                event.setCancelled(true);
             }
         }
     }
 
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent event) {
-        World happenedin = event.getEntity().getWorld();
-        Util.debug("Hanging break event fired in " + happenedin.getName());
         if (event.getEntity() instanceof Player) {
-            if (protected_worlds.contains(happenedin)) {
-                Util.debug("Hanging break event is in protected world");
-
-                OfflinePlayer toCheck = (OfflinePlayer) event.getEntity();
-                for (Job job : opened_worlds.keySet()) {
-                    if (job.getWorld().equals(happenedin)) {
-                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
-                            event.setCancelled(false);
-                        } else {
-                            if (job.isWorking(toCheck)) {
-                                int x = toCheck.getPlayer().getLocation().getBlockX();
-                                int z = toCheck.getPlayer().getLocation().getBlockZ();
-                                event.setCancelled(!job.getBounds().contains(x, z));
-                            } else {
-                                event.setCancelled(true);
+            Player player = (Player) event.getRemover();
+            if (player.hasPermission("jobs.ignorestatus")) {
+                event.setCancelled(false);
+            } else {
+                World world = event.getEntity().getWorld();
+                if (!Jobs.runningJobs.isEmpty()) {
+                    HashMap<Job, World> workingworlds = new HashMap();
+                    HashMap<Job, Rectangle2D> areas = new HashMap();
+                    for (Job job : Jobs.runningJobs.values()) {
+                        workingworlds.put(job, job.getWorld());
+                        areas.put(job, job.getBounds());
+                    }
+                    if (workingworlds.containsValue(world)) {
+                        boolean playerisworking = false;
+                        for (Job job : workingworlds.keySet()) {
+                            if (job.isWorking(player)) {
+                                playerisworking = true;
                             }
                         }
+                        if (playerisworking) {
+                            boolean isinjobarea = false;
+                            double x = event.getEntity().getLocation().getX();
+                            double z = event.getEntity().getLocation().getZ();
+                            for (Rectangle2D area : areas.values()) {
+                                if (area.contains(x, z)) {
+                                    isinjobarea = true;
+                                }
+                            }
+                            if (isinjobarea) {
+                                event.setCancelled(false);
+                            } else {
+                                player.sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                                event.setCancelled(true);
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                            event.setCancelled(true);
+                        }
+                    } else {
+                        player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                        event.setCancelled(true);
                     }
+                } else {
+                    player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                    event.setCancelled(true);
                 }
             }
-        } else {
-            Util.debug("Protected world is not open!");
-            event.setCancelled(!((Player) event.getEntity()).hasPermission("jobs.ignorestatus"));
         }
     }
 
     @EventHandler
     public void onHangingPlace(HangingPlaceEvent event) {
-        World happenedin = event.getBlock().getWorld();
-        Util.debug("Hanging place event fired in " + happenedin.getName());
-        if (protected_worlds.contains(happenedin)) {
-            Util.debug("Hanging place event is in protected world");
-            if (opened_worlds.containsValue(happenedin)) {
-                Util.debug("Hanging place event is in opened world");
-                OfflinePlayer toCheck = Bukkit.getOfflinePlayer(event.getPlayer().getName());
-                for (Job job : opened_worlds.keySet()) {
-                    if (job.getWorld().equals(happenedin)) {
-                        if (toCheck.getPlayer().hasPermission("jobs.ignorestatus")) {
-                            event.setCancelled(false);
-                        } else {
-                            if (job.isWorking(toCheck)) {
-                                int x = toCheck.getPlayer().getLocation().getBlockX();
-                                int z = toCheck.getPlayer().getLocation().getBlockZ();
-                                event.setCancelled(!job.getBounds().contains(x, z));
-                            } else {
-                                event.setCancelled(true);
-                            }
+        Player player = (Player) event.getPlayer();
+        if (player.hasPermission("jobs.ignorestatus")) {
+            event.setCancelled(false);
+        } else {
+            World world = event.getEntity().getWorld();
+            if (!Jobs.runningJobs.isEmpty()) {
+                HashMap<Job, World> workingworlds = new HashMap();
+                HashMap<Job, Rectangle2D> areas = new HashMap();
+                for (Job job : Jobs.runningJobs.values()) {
+                    workingworlds.put(job, job.getWorld());
+                    areas.put(job, job.getBounds());
+                }
+                if (workingworlds.containsValue(world)) {
+                    boolean playerisworking = false;
+                    for (Job job : workingworlds.keySet()) {
+                        if (job.isWorking(player)) {
+                            playerisworking = true;
                         }
                     }
+                    if (playerisworking) {
+                        boolean isinjobarea = false;
+                        double x = event.getEntity().getLocation().getX();
+                        double z = event.getEntity().getLocation().getZ();
+                        for (Rectangle2D area : areas.values()) {
+                            if (area.contains(x, z)) {
+                                isinjobarea = true;
+                            }
+                        }
+                        if (isinjobarea) {
+                            event.setCancelled(false);
+                        } else {
+                            player.sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                            event.setCancelled(true);
+                        }
+                    } else {
+                        player.sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                        event.setCancelled(true);
+                    }
+                } else {
+                    player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                    event.setCancelled(true);
                 }
             } else {
-                Util.debug("Protected world is not open!");
-                event.setCancelled(!event.getPlayer().hasPermission("jobs.ignorestatus"));
+                player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                event.setCancelled(true);
             }
         }
     }

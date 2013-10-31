@@ -17,7 +17,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,8 +26,6 @@ public final class Jobs extends JavaPlugin {
     static Configuration conf;
     public static HashMap<String, Job> runningJobs = new HashMap();
     public static TreeMap<String, Job> notRunningJobs = new TreeMap();
-    public static ArrayList<World> protected_worlds = new ArrayList();
-    public static HashMap<Job, World> opened_worlds = new HashMap();
     public static HashMap<Job, Long> timedout_waiting = new HashMap();
     public static boolean debug = false;
     static File inactiveDir;
@@ -86,10 +83,6 @@ public final class Jobs extends JavaPlugin {
         conf = getConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
-        ArrayList<String> worlds_config = (ArrayList) getConfig().getStringList("protect_worlds");
-        for (String name : worlds_config) {
-            protected_worlds.add(Bukkit.getWorld(name));
-        }
         loadJobs();
     }
 
@@ -110,7 +103,6 @@ public final class Jobs extends JavaPlugin {
             } catch (IOException ex) {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
-            opened_worlds.put(newjob, adminloc.getWorld());
             for (Player targetP : Bukkit.getOnlinePlayers()) {
                 targetP.sendMessage(ChatColor.GRAY + admin + " has started a new job called '" + jobname + "'");
                 targetP.playSound(targetP.getLocation(), Sound.WITHER_DEATH, 1, 100);
@@ -123,7 +115,6 @@ public final class Jobs extends JavaPlugin {
                 oldjob.sendToAll(ChatColor.GRAY + "The " + ChatColor.AQUA + oldjob.getName() + ChatColor.GRAY + " job has ended.");
                 notRunningJobs.put(oldjob.getName(), oldjob);
                 runningJobs.remove(jobname);
-                opened_worlds.remove(oldjob);
                 try {
                     oldjob.writeToFile();
                 } catch (IOException ex) {
@@ -177,7 +168,6 @@ public final class Jobs extends JavaPlugin {
             job.setStatus(false);
             notRunningJobs.put(job.getName(), job);
             runningJobs.remove(job.getName());
-            opened_worlds.remove(job);
             try {
                 job.writeToFile();
             } catch (IOException ex) {
@@ -191,7 +181,6 @@ public final class Jobs extends JavaPlugin {
             job.setStatus(true);
             runningJobs.put(job.getName(), job);
             notRunningJobs.remove(job.getName());
-            opened_worlds.put(job, job.getWorld());
             try {
                 job.writeToFile();
             } catch (IOException ex) {
