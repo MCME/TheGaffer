@@ -40,8 +40,8 @@ public class ProtectionListener implements Listener {
                         boolean isinjobarea = false;
                         int x = event.getBlock().getX();
                         int z = event.getBlock().getZ();
-                        for (Rectangle2D area : areas.values()) {
-                            if (area.contains(x, z)) {
+                        for (Job job : Jobs.runningJobs.values()) {
+                            if (job.isWorking(event.getPlayer()) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
                             }
                         }
@@ -90,8 +90,8 @@ public class ProtectionListener implements Listener {
                         boolean isinjobarea = false;
                         int x = event.getBlock().getX();
                         int z = event.getBlock().getZ();
-                        for (Rectangle2D area : areas.values()) {
-                            if (area.contains(x, z)) {
+                        for (Job job : Jobs.runningJobs.values()) {
+                            if (job.isWorking(player) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
                             }
                         }
@@ -142,8 +142,8 @@ public class ProtectionListener implements Listener {
                             boolean isinjobarea = false;
                             double x = event.getEntity().getLocation().getX();
                             double z = event.getEntity().getLocation().getZ();
-                            for (Rectangle2D area : areas.values()) {
-                                if (area.contains(x, z)) {
+                            for (Job job : Jobs.runningJobs.values()) {
+                                if (job.isWorking(player) && job.getBounds().contains(x, z)) {
                                     isinjobarea = true;
                                 }
                             }
@@ -194,8 +194,8 @@ public class ProtectionListener implements Listener {
                         boolean isinjobarea = false;
                         double x = event.getEntity().getLocation().getX();
                         double z = event.getEntity().getLocation().getZ();
-                        for (Rectangle2D area : areas.values()) {
-                            if (area.contains(x, z)) {
+                        for (Job job : Jobs.runningJobs.values()) {
+                            if (job.isWorking(player) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
                             }
                         }
