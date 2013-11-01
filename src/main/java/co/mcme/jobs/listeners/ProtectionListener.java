@@ -91,7 +91,7 @@ public class ProtectionListener implements Listener {
                         int x = event.getBlock().getX();
                         int z = event.getBlock().getZ();
                         for (Job job : Jobs.runningJobs.values()) {
-                            if (job.isWorking(player) && job.getBounds().contains(x, z)) {
+                            if (job.isWorking(event.getPlayer()) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
                             }
                         }
