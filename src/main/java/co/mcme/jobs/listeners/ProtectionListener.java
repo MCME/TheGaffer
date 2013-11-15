@@ -46,10 +46,10 @@ public class ProtectionListener implements Listener {
                             }
                         }
                         if (isinjobarea) {
-                            event.setBuild(true);
+                            event.setCancelled(false);
                         } else {
                             event.getPlayer().sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
-                            event.setBuild(false);
+                            event.setCancelled(true);
                         }
                     } else {
                         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not part of any job.");

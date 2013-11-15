@@ -4,7 +4,7 @@
 
     <groupId>co.mcme</groupId>
     <artifactId>TheGaffer</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -14,7 +14,6 @@
     <name>TheGaffer</name>
     <url>http://mcme.co/</url>
     <build>
-        <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -42,7 +41,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>${project.artifactId}</finalName>
                             <relocations>
                                 <relocation>
                                     <pattern>com.google.gson</pattern>
