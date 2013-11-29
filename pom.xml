@@ -43,12 +43,13 @@
                         <configuration>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.google.gson</pattern>
-                                    <shadedPattern>co.mcme.jobs.libs.com.google.gson</shadedPattern>
+                                    <pattern>com</pattern>
+                                    <shadedPattern>co.mcme.jobs.libs.com</shadedPattern>
                                 </relocation>
                             </relocations>
                             <artifactSet>
                                 <excludes>
+                                    <exclude>org.projectlombok:lombok</exclude>
                                     <exclude>org.bukkit:bukkit</exclude>
                                 </excludes>
                             </artifactSet>
@@ -78,6 +79,11 @@
             <artifactId>bukkit</artifactId>
             <version>1.6.2-R0.1-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.12.2</version>
         </dependency>
     </dependencies>
 </project>

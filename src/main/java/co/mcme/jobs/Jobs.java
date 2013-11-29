@@ -2,20 +2,22 @@ package co.mcme.jobs;
 
 import co.mcme.jobs.commands.JobAdminCommand;
 import co.mcme.jobs.commands.JobCommand;
+import co.mcme.jobs.commands.JobCreationConversation;
 import co.mcme.jobs.listeners.PlayerListener;
 import co.mcme.jobs.listeners.ProtectionListener;
 import co.mcme.jobs.util.Util;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.Sound;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
@@ -28,16 +30,30 @@ public final class Jobs extends JavaPlugin {
     public static TreeMap<String, Job> notRunningJobs = new TreeMap();
     public static HashMap<Job, Long> timedout_waiting = new HashMap();
     public static boolean debug = false;
-    static File inactiveDir;
-    static File activeDir;
-    static File outdatedDir;
     public static String version;
+    @Getter
+    static File inactiveDir;
+    @Getter
+    static File activeDir;
+    @Getter
+    static File outdatedDir;
+    @Getter
+    static Server serverInstance;
+    @Getter
+    static Jobs pluginInstance;
+    @Getter
+    static File pluginDataFolder;
+    @Getter
+    static String fileSeperator = System.getProperty("file.separator");
 
     @Override
     public void onEnable() {
-        inactiveDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "inactive");
-        activeDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "active");
-        outdatedDir = new File(Bukkit.getPluginManager().getPlugin("TheGaffer").getDataFolder().getPath() + System.getProperty("file.separator") + "jobs" + System.getProperty("file.separator") + "outdated");
+        serverInstance = getServer();
+        pluginInstance = this;
+        pluginDataFolder = pluginInstance.getDataFolder();
+        inactiveDir = new File(pluginDataFolder.getPath() + fileSeperator + "jobs" + fileSeperator + "inactive");
+        activeDir = new File(pluginDataFolder.getPath() + fileSeperator + "jobs" + fileSeperator + "active");
+        outdatedDir = new File(pluginDataFolder.getPath() + fileSeperator + "jobs" + fileSeperator + "outdated");
         if (!activeDir.exists()) {
             activeDir.mkdirs();
             Util.info("Did not find the active jobs directory");
@@ -56,6 +72,7 @@ public final class Jobs extends JavaPlugin {
         debug = getConfig().getBoolean("general.debug");
         getCommand("jobadmin").setExecutor(new JobAdminCommand());
         getCommand("job").setExecutor(new JobCommand());
+        getCommand("createjob").setExecutor(new JobCreationConversation());
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
@@ -187,17 +204,5 @@ public final class Jobs extends JavaPlugin {
                 Logger.getLogger(Jobs.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
-
-    public static File getInactiveDir() {
-        return inactiveDir;
-    }
-
-    public static File getActiveDir() {
-        return activeDir;
-    }
-    
-    public static File getOutdatedDir() {
-        return outdatedDir;
     }
 }

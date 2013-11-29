@@ -79,6 +79,9 @@ permissions:
       jobs.write: true
       jobs.reload: true
 commands:
+  createjob:
+    usage: |
+           /asdasd
   job:
     usage: |
             /job <start|stop> <jobname>
