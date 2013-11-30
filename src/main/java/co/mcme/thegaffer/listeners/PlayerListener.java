@@ -15,7 +15,7 @@
  */
 package co.mcme.thegaffer.listeners;
 
-import static co.mcme.jobs.Jobs.runningJobs;
+import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
@@ -26,7 +26,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (runningJobs.size() > 0) {
+        if (JobDatabase.getActiveJobs().size() > 0) {
             event.getPlayer().sendMessage(ChatColor.GRAY + "There is a job running! Use /job check to find out what it is!");
         }
         if (event.getPlayer().hasPermission(PermissionsUtil.getCreatePermission())) {

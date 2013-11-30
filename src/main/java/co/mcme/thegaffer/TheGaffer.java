@@ -15,9 +15,8 @@
  */
 package co.mcme.thegaffer;
 
-import co.mcme.jobs.Cleanup;
-import co.mcme.jobs.listeners.PlayerListener;
 import co.mcme.thegaffer.commands.JobCreationConversation;
+import co.mcme.thegaffer.listeners.PlayerListener;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.JobDatabase;
@@ -26,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import lombok.Getter;
 import org.bukkit.Server;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -46,6 +46,8 @@ public class TheGaffer extends JavaPlugin {
     static String fileExtension = ".job";
     @Getter
     static boolean debug = false;
+    @Getter
+    static Configuration pluginConfig;
 
     @Override
     public void onEnable() {
@@ -53,6 +55,7 @@ public class TheGaffer extends JavaPlugin {
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
         debug = getConfig().getBoolean("general.debug");
+        setupConfig();
         try {
             JobDatabase.loadJobs();
         } catch (IOException ex) {
@@ -76,6 +79,12 @@ public class TheGaffer extends JavaPlugin {
         } catch (IOException ex) {
             Util.severe(ex.getMessage());
         }
+    }
+    
+    public void setupConfig() {
+        pluginConfig = getConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
     
     public static void scheduleOwnerTimeout(Job job) {
