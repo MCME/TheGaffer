@@ -28,12 +28,15 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-public class Job implements Listener{
+public class Job implements Listener {
 
     @Getter
     @Setter
@@ -113,6 +116,23 @@ public class Job implements Listener{
     @JsonIgnore
     public boolean isPlayerWorking(OfflinePlayer p) {
         return workers.contains(p.getName());
+    }
+
+    @JsonIgnore
+    public World getBukkitWorld() {
+        return TheGaffer.getServerInstance().getWorld(world);
+    }
+    
+    @JsonIgnore
+    public Player[] getWorkersAsPlayers() {
+        ArrayList<Player> players = new ArrayList();
+        for (String pName : workers) {
+            OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
+            if (p.isOnline()) {
+                players.add(p.getPlayer());
+            }
+        }
+        return players.toArray(new Player[players.size()]);
     }
 
     public HelperResponse addHelper(OfflinePlayer p) {
@@ -231,8 +251,8 @@ public class Job implements Listener{
     public int sendToAll(String message) {
         return sendToHelpers(message) + sendToWorkers(message);
     }
-    
-    @EventHandler
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onLeave(PlayerQuitEvent event) {
         if (event.getPlayer().getName().equals(owner)) {
             //Schedule timeout

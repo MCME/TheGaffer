@@ -17,11 +17,10 @@ package co.mcme.thegaffer;
 
 import co.mcme.jobs.util.Util;
 import co.mcme.thegaffer.storage.Job;
+import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobWarp;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -41,6 +40,8 @@ public class TheGaffer extends JavaPlugin {
     static String fileSeperator = System.getProperty("file.separator");
     @Getter
     static ObjectMapper jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+    @Getter
+    static String fileExtension = ".job";
 
     @Override
     public void onEnable() {
@@ -50,11 +51,15 @@ public class TheGaffer extends JavaPlugin {
         Location loc = new Location(serverInstance.getWorlds().get(0), 0, 85, 0);
         JobWarp warp = new JobWarp(loc);
         Job debug = new Job("derpjob", "meggawatts", true, warp, warp.getWorld(), false);
-        Util.debug(debug.addHelper(serverInstance.getOfflinePlayer("Credoo")).getMessage());
+        JobDatabase.activateJob(debug);
+    }
+    
+    @Override
+    public void onDisable() {
         try {
-            jsonMapper.writeValue(new File(pluginDataFolder + fileSeperator + "test.json"), debug);
+            JobDatabase.saveJobs();
         } catch (IOException ex) {
-            Logger.getLogger(TheGaffer.class.getName()).log(Level.SEVERE, null, ex);
+            
         }
     }
 }
