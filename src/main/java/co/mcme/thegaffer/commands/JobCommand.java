@@ -82,7 +82,7 @@ public class JobCommand implements TabExecutor {
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage());
+                                    player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
                                 }
                             } else {
                                 player.sendMessage(ChatColor.RED + "No job running by the name of `" + args[1] + "`");
