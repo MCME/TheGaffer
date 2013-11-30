@@ -1,87 +1,15 @@
 name: ${project.artifactId}
-main: co.mcme.jobs.Jobs
+main: co.mcme.thegaffer.TheGaffer
 version: ${project.version}
 website: ${project.url}
 authors: [meggawatts]
 description: Job API for MCME.
 author: meggawatts
-permissions:
-  jobs.run:
-    default: op
-    children: 
-      jobs.run.actions.addhelper: true
-      jobs.run.actions.removehelper: true
-      jobs.run.actions.kickworker: true
-      jobs.run.actions.banworker: true
-      jobs.run.actions.unbanworker: true
-      jobs.run.actions.setwarp: true
-      jobs.run.actions.bringall: true
-      jobs.run.actions.listworkers: true
-      jobs.run.actions.inviteworker: true
-      jobs.admin.run: true
-  jobs.ignorestatus:
-    description: Ignore job build permissions
-    default: op
-  jobs.write:
-    description: Forces a job to write it's file
-    default: op
-  jobs.reload:
-    description: Reloads job list from file
-    default: op
-  jobs.ignoreownjob:
-    descripton: allows user to bypass the owner restriction on jobs.
-    default: op
-  jobs.join:
-    description: allows joining a running job.
-  jobs.check:
-    description: allows checking the running jobs.
-  jobs.run.actions.addhelper:
-    default: op
-    description: Allows user to add a helper to a job they have permissions for
-  jobs.run.actions.removehelper:
-    default: op
-    description: Allows user to remove a helper from a job they have permissions for
-  jobs.run.actions.kickworker:
-    default: op
-    description: Allows user to kick a worker from a job they have permissions for
-  jobs.run.actions.banworker:
-    default: op
-    description: Allows user to ban a worker from a job they have permissions for
-  jobs.run.actions.unbanworker:
-    default: op
-    description: Allows user to unban a worker from a job they have permissions for
-  jobs.run.actions.setwarp:
-    default: op
-    description: Allows user to set the warp of a job they have permissions for
-  jobs.run.actions.bringall:
-    default: op
-    description: Allows user to bring all workers on a job they have permissions for to them
-  jobs.run.actions.listworkers:
-    default: op
-    description: Allows user to list workers on any job
-  jobs.run.actions.inviteworker:
-    default: op
-    description: Allows user to invite a worker to a job they have permissions for
-  jobs.run.actions.*:
-    default: op
-    description: Allows user to execute every job action
-  jobs.user:
-    default: true
-    children:
-      jobs.join: true
-      jobs.check: true
-  jobs.admin:
-    default: op
-    children:
-      jobs.ignorestatus: true
-      jobs.user: true
-      jobs.run: true
-      jobs.write: true
-      jobs.reload: true
 commands:
   createjob:
+    description: Launches a job creation conversation
     usage: |
-           /asdasd
+           /createjob
   job:
     usage: |
             /job <start|stop> <jobname>
