@@ -24,8 +24,10 @@ import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -133,6 +135,18 @@ public class Job implements Listener {
             }
         }
         return players.toArray(new Player[players.size()]);
+    }
+    
+    @JsonIgnore
+    public String getInfo() {
+        StringBuilder out = new StringBuilder();
+        out.append(ChatColor.GRAY).append(getName()).append("\n");
+        out.append("Started by: ").append(ChatColor.AQUA).append(getOwner()).append("\n").append(ChatColor.GRAY);
+        out.append("Started on: ").append(ChatColor.AQUA).append(new Date(getStartTime()).toGMTString()).append("\n").append(ChatColor.GRAY);
+        out.append("Location: ").append(ChatColor.AQUA).append(getWorld()).append(" (x: ").append(getWarp().getX()).append(", y: ").append(getWarp().getY()).append(", z: ").append(getWarp().getZ()).append(")").append("\n").append(ChatColor.GRAY);
+        String status = (running) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
+        out.append("Status: ").append(status);
+        return out.toString();
     }
 
     public HelperResponse addHelper(OfflinePlayer p) {

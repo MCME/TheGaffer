@@ -31,6 +31,7 @@ public class JobDatabase {
 
     @Getter
     private static final TreeMap<String, Job> activeJobs = new TreeMap();
+    @Getter
     private static final TreeMap<String, Job> inactiveJobs = new TreeMap();
 
     public static int loadJobs() throws IOException {

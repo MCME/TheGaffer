@@ -15,6 +15,7 @@
  */
 package co.mcme.thegaffer;
 
+import co.mcme.thegaffer.commands.JobCommand;
 import co.mcme.thegaffer.commands.JobCreationConversation;
 import co.mcme.thegaffer.listeners.PlayerListener;
 import co.mcme.thegaffer.storage.Job;
@@ -62,6 +63,7 @@ public class TheGaffer extends JavaPlugin {
             Util.severe(ex.getMessage());
         }
         getCommand("createjob").setExecutor(new JobCreationConversation());
+        getCommand("job").setExecutor(new JobCommand());
         serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
         serverInstance.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
