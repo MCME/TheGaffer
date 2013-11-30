@@ -4,7 +4,7 @@ import co.mcme.jobs.Job;
 import co.mcme.jobs.Jobs;
 import static co.mcme.jobs.Jobs.notRunningJobs;
 import static co.mcme.jobs.Jobs.runningJobs;
-import co.mcme.jobs.util.Util;
+import co.mcme.thegaffer.utilities.Util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

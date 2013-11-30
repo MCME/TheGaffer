@@ -1,6 +1,6 @@
 package co.mcme.jobs;
 
-import co.mcme.jobs.util.Util;
+import co.mcme.thegaffer.utilities.Util;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.bukkit.Bukkit;

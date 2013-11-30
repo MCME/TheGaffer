@@ -1,12 +1,11 @@
-package co.mcme.jobs.util;
+package co.mcme.thegaffer.utilities;
 
-import co.mcme.jobs.Jobs;
+import co.mcme.thegaffer.TheGaffer;
 import java.util.logging.Logger;
 
 public class Util {
 
     private static final Logger log = Logger.getLogger("Minecraft");
-    private static int maxLength = 105;
 
     public static void info(String msg) {
         log.info("[TheGaffer] " + msg);
@@ -21,8 +20,8 @@ public class Util {
     }
 
     public static void debug(String msg) {
-        if (Jobs.debug) {
-            Util.info("DEBUG: " + msg);
+        if (TheGaffer.isDebug()) {
+            Util.info("[TheGaffer] DEBUG: " + msg);
         }
     }
 }

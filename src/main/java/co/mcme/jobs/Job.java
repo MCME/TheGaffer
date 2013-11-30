@@ -1,6 +1,6 @@
 package co.mcme.jobs;
 
-import co.mcme.jobs.util.Util;
+import co.mcme.thegaffer.utilities.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;

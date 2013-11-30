@@ -15,6 +15,8 @@
  */
 package co.mcme.thegaffer;
 
+import static co.mcme.jobs.Jobs.debug;
+import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobWarp;
@@ -41,16 +43,19 @@ public class TheGaffer extends JavaPlugin {
     static ObjectMapper jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
     @Getter
     static String fileExtension = ".job";
+    @Getter
+    static boolean debug = false;
 
     @Override
     public void onEnable() {
         serverInstance = getServer();
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
+        debug = getConfig().getBoolean("general.debug");
         try {
             JobDatabase.loadJobs();
         } catch (IOException ex) {
-            //Log this
+            Util.severe(ex.getMessage());
         }
         Location loc = new Location(serverInstance.getWorlds().get(0), 0, 85, 0);
         JobWarp warp = new JobWarp(loc);
@@ -63,7 +68,7 @@ public class TheGaffer extends JavaPlugin {
         try {
             JobDatabase.saveJobs();
         } catch (IOException ex) {
-            //Log this
+            Util.severe(ex.getMessage());
         }
     }
 }

@@ -5,7 +5,7 @@ import co.mcme.jobs.commands.JobCommand;
 import co.mcme.jobs.commands.JobCreationConversation;
 import co.mcme.jobs.listeners.PlayerListener;
 import co.mcme.jobs.listeners.ProtectionListener;
-import co.mcme.jobs.util.Util;
+import co.mcme.thegaffer.utilities.Util;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;

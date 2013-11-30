@@ -16,7 +16,7 @@
 package co.mcme.jobs.commands;
 
 import co.mcme.jobs.Jobs;
-import co.mcme.jobs.util.Util;
+import co.mcme.thegaffer.utilities.Util;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;

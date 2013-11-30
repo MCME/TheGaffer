@@ -2,7 +2,7 @@ package co.mcme.jobs.files;
 
 import co.mcme.jobs.Job;
 import co.mcme.jobs.Jobs;
-import co.mcme.jobs.util.Util;
+import co.mcme.thegaffer.utilities.Util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
