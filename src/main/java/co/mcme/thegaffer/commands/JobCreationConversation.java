@@ -13,12 +13,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with TheGaffer.  If not, see <http://www.gnu.org/licenses/>.
  */
-package co.mcme.jobs.commands;
+package co.mcme.thegaffer.commands;
 
-import co.mcme.jobs.Jobs;
+import co.mcme.thegaffer.TheGaffer;
+import co.mcme.thegaffer.storage.Job;
+import co.mcme.thegaffer.storage.JobDatabase;
+import co.mcme.thegaffer.storage.JobWarp;
 import co.mcme.thegaffer.utilities.Util;
+import java.io.IOException;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,7 +42,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
     private ConversationFactory conversationFactory;
     
     public JobCreationConversation() {
-        conversationFactory = new ConversationFactory(Jobs.getPluginInstance())
+        conversationFactory = new ConversationFactory(TheGaffer.getPluginInstance())
                 .withModality(true)
                 .withEscapeSequence("/cancel")
                 .withPrefix(new jobCreatePrefix())
@@ -93,7 +96,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            if (!Jobs.runningJobs.containsKey(input)) {
+            if (!JobDatabase.getActiveJobs().containsKey(input)) {
                 context.setSessionData("jobname", input);
                 return new privatePrompt();
             } else {
@@ -141,10 +144,18 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            Jobs.storeJob((String) context.getSessionData("jobname"), ((Player) context.getForWhom()).getName(), "new", (Boolean) context.getSessionData("private"));
-            Player forWhom = ((Player) context.getForWhom());
-            forWhom.playSound(forWhom.getLocation(), Sound.WITHER_DEATH, 1, 100);
-            return "Successfully created the " + (String) context.getSessionData("jobname") + " job!";
+            String jobname = (String) context.getSessionData("jobname");
+            String owner = ((Player) context.getForWhom()).getName();
+            JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
+            boolean Private = (boolean) context.getSessionData("private");
+            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private);
+            JobDatabase.activateJob(jerb);
+            try {
+                JobDatabase.saveJobs();
+            } catch (IOException ex) {
+                Util.severe(ex.getMessage());
+            }
+            return "Successfully created the " + jobname + " job!";
         }
         
     }

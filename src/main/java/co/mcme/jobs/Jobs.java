@@ -2,7 +2,6 @@ package co.mcme.jobs;
 
 import co.mcme.jobs.commands.JobAdminCommand;
 import co.mcme.jobs.commands.JobCommand;
-import co.mcme.jobs.commands.JobCreationConversation;
 import co.mcme.jobs.listeners.PlayerListener;
 import co.mcme.jobs.listeners.ProtectionListener;
 import co.mcme.thegaffer.utilities.Util;
@@ -72,7 +71,6 @@ public final class Jobs extends JavaPlugin {
         debug = getConfig().getBoolean("general.debug");
         getCommand("jobadmin").setExecutor(new JobAdminCommand());
         getCommand("job").setExecutor(new JobCommand());
-        getCommand("createjob").setExecutor(new JobCreationConversation());
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {

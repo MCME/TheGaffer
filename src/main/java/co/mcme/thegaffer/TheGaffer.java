@@ -16,6 +16,7 @@
 package co.mcme.thegaffer;
 
 import static co.mcme.jobs.Jobs.debug;
+import co.mcme.thegaffer.commands.JobCreationConversation;
 import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
@@ -57,10 +58,7 @@ public class TheGaffer extends JavaPlugin {
         } catch (IOException ex) {
             Util.severe(ex.getMessage());
         }
-        Location loc = new Location(serverInstance.getWorlds().get(0), 0, 85, 0);
-        JobWarp warp = new JobWarp(loc);
-        Job debug = new Job("derpjob", "meggawatts", true, warp, warp.getWorld(), false);
-        JobDatabase.activateJob(debug);
+        getCommand("createjob").setExecutor(new JobCreationConversation());
     }
 
     @Override
