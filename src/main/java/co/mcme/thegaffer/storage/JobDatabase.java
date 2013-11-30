@@ -99,12 +99,12 @@ public class JobDatabase {
             inactiveJobFolder.mkdirs();
         }
         for (Job jerb : activeJobs.values()) {
-            File location = new File(activeJobFolder, jerb.getName() + ".job");
+            File location = new File(activeJobFolder, jerb.getName() + TheGaffer.getFileExtension());
             TheGaffer.getJsonMapper().writeValue(location, jerb);
             jerb.setDirty(false);
         }
         for (Job jerb : inactiveJobs.values()) {
-            File location = new File(inactiveJobFolder, jerb.getName() + ".job");
+            File location = new File(inactiveJobFolder, jerb.getName() + TheGaffer.getFileExtension());
             TheGaffer.getJsonMapper().writeValue(location, jerb);
             jerb.setDirty(false);
         }
