@@ -2,8 +2,6 @@ package co.mcme.jobs;
 
 import co.mcme.jobs.commands.JobAdminCommand;
 import co.mcme.jobs.commands.JobCommand;
-import co.mcme.jobs.listeners.PlayerListener;
-import co.mcme.jobs.listeners.ProtectionListener;
 import co.mcme.thegaffer.utilities.Util;
 import java.io.File;
 import java.io.IOException;
@@ -31,12 +29,6 @@ public final class Jobs extends JavaPlugin {
     public static boolean debug = false;
     public static String version;
     @Getter
-    static File inactiveDir;
-    @Getter
-    static File activeDir;
-    @Getter
-    static File outdatedDir;
-    @Getter
     static Server serverInstance;
     @Getter
     static Jobs pluginInstance;
@@ -50,34 +42,10 @@ public final class Jobs extends JavaPlugin {
         serverInstance = getServer();
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
-        inactiveDir = new File(pluginDataFolder.getPath() + fileSeperator + "jobs" + fileSeperator + "inactive");
-        activeDir = new File(pluginDataFolder.getPath() + fileSeperator + "jobs" + fileSeperator + "active");
-        outdatedDir = new File(pluginDataFolder.getPath() + fileSeperator + "jobs" + fileSeperator + "outdated");
-        if (!activeDir.exists()) {
-            activeDir.mkdirs();
-            Util.info("Did not find the active jobs directory");
-        }
-        if (!inactiveDir.exists()) {
-            inactiveDir.mkdirs();
-            Util.info("Did not find the inactive jobs directory");
-        }
-        if (!outdatedDir.exists()) {
-            outdatedDir.mkdirs();;
-            Util.info("Did not find the outdated jobs directory");
-        }
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-        getServer().getPluginManager().registerEvents(new ProtectionListener(), this);
         setupConfig();
         debug = getConfig().getBoolean("general.debug");
         getCommand("jobadmin").setExecutor(new JobAdminCommand());
         getCommand("job").setExecutor(new JobCommand());
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-            @Override
-            public void run() {
-                Util.debug("Starting cleanup");
-                Cleanup.scheduledCleanup();
-            }
-        }, 0, (5 * 60) * 20);
         version = getServer().getPluginManager().getPlugin("TheGaffer").getDescription().getVersion();
     }
 

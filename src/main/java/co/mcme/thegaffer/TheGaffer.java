@@ -15,16 +15,16 @@
  */
 package co.mcme.thegaffer;
 
-import static co.mcme.jobs.Jobs.debug;
+import co.mcme.jobs.Cleanup;
+import co.mcme.jobs.listeners.PlayerListener;
 import co.mcme.thegaffer.commands.JobCreationConversation;
-import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.Job;
+import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.JobDatabase;
-import co.mcme.thegaffer.storage.JobWarp;
+import co.mcme.thegaffer.utilities.CleanupUtil;
 import java.io.File;
 import java.io.IOException;
 import lombok.Getter;
-import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -59,6 +59,14 @@ public class TheGaffer extends JavaPlugin {
             Util.severe(ex.getMessage());
         }
         getCommand("createjob").setExecutor(new JobCreationConversation());
+        serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
+        serverInstance.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                Util.debug("Starting running job cleanup.");
+                CleanupUtil.scheduledCleanup();
+            }
+        }, 0, (5 * 60) * 20);
     }
 
     @Override
@@ -68,5 +76,10 @@ public class TheGaffer extends JavaPlugin {
         } catch (IOException ex) {
             Util.severe(ex.getMessage());
         }
+    }
+    
+    public static void scheduleOwnerTimeout(Job job) {
+        Long time = System.currentTimeMillis();
+        CleanupUtil.getWaiting().put(job, time);
     }
 }

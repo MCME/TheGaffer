@@ -255,7 +255,7 @@ public class Job implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onLeave(PlayerQuitEvent event) {
         if (event.getPlayer().getName().equals(owner)) {
-            //Schedule timeout
+            TheGaffer.scheduleOwnerTimeout(this);
         }
     }
 }
