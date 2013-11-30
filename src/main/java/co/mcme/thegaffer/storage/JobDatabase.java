@@ -16,11 +16,14 @@
 package co.mcme.thegaffer.storage;
 
 import co.mcme.thegaffer.TheGaffer;
+import co.mcme.thegaffer.utilities.Util;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -120,6 +123,11 @@ public class JobDatabase {
             p.playSound(p.getLocation(), Sound.ENDERDRAGON_DEATH, 10, 1);
         }
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
+        try {
+            saveJobs();
+        } catch (IOException ex) {
+            Util.severe(ex.getMessage());
+        }
         return true;
     }
 
@@ -136,6 +144,11 @@ public class JobDatabase {
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
+        try {
+            saveJobs();
+        } catch (IOException ex) {
+            Util.severe(ex.getMessage());
+        }
         return true;
     }
 }
