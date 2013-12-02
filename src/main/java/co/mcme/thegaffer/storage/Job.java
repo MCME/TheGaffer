@@ -15,9 +15,11 @@
  */
 package co.mcme.thegaffer.storage;
 
+import co.mcme.thegaffer.GafferResponses;
 import co.mcme.thegaffer.GafferResponses.BanWorkerResponse;
 import co.mcme.thegaffer.GafferResponses.HelperResponse;
 import co.mcme.thegaffer.GafferResponses.InviteResponse;
+import co.mcme.thegaffer.GafferResponses.KickWorkerResponse;
 import co.mcme.thegaffer.GafferResponses.WorkerResponse;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
@@ -238,6 +240,22 @@ public class Job implements Listener {
         }
         bannedWorkers.remove(p.getName());
         return BanWorkerResponse.UNBAN_SUCCESS;
+    }
+    
+    public KickWorkerResponse kickWorker(OfflinePlayer p) {
+        if (!workers.contains(p.getName())) {
+            return KickWorkerResponse.NOT_IN_JOB;
+        }
+        workers.remove(p.getName());
+        return KickWorkerResponse.KICK_SUCCESS;
+    }
+    
+    public void bringAllWorkers(Location to) {
+        for (String wName : workers) {
+            if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {
+                TheGaffer.getServerInstance().getOfflinePlayer(wName).getPlayer().teleport(to);
+            }
+        }
     }
 
     public int sendToHelpers(String message) {

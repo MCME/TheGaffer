@@ -15,9 +15,11 @@
  */
 package co.mcme.thegaffer;
 
+import co.mcme.thegaffer.commands.JobAdminConversation;
 import co.mcme.thegaffer.commands.JobCommand;
 import co.mcme.thegaffer.commands.JobCreationConversation;
 import co.mcme.thegaffer.listeners.PlayerListener;
+import co.mcme.thegaffer.listeners.ProtectionListener;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.JobDatabase;
@@ -42,7 +44,7 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static String fileSeperator = System.getProperty("file.separator");
     @Getter
-    static ObjectMapper jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+    static ObjectMapper jsonMapper;
     @Getter
     static String fileExtension = ".job";
     @Getter
@@ -56,6 +58,7 @@ public class TheGaffer extends JavaPlugin {
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
         debug = getConfig().getBoolean("general.debug");
+        jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
         setupConfig();
         try {
             JobDatabase.loadJobs();
@@ -64,7 +67,9 @@ public class TheGaffer extends JavaPlugin {
         }
         getCommand("createjob").setExecutor(new JobCreationConversation());
         getCommand("job").setExecutor(new JobCommand());
+        getCommand("jobadmin").setExecutor(new JobAdminConversation());
         serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
+        serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
@@ -76,6 +81,9 @@ public class TheGaffer extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (jsonMapper == null) {
+            jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+        }
         try {
             JobDatabase.saveJobs();
         } catch (IOException ex) {

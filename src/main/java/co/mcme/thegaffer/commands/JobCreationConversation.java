@@ -19,6 +19,7 @@ import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobWarp;
+import co.mcme.thegaffer.utilities.PermissionsUtil;
 import co.mcme.thegaffer.utilities.Util;
 import java.io.IOException;
 import org.bukkit.ChatColor;
@@ -37,10 +38,10 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
-public class JobCreationConversation implements CommandExecutor, ConversationAbandonedListener  {
+public class JobCreationConversation implements CommandExecutor, ConversationAbandonedListener {
 
     private ConversationFactory conversationFactory;
-    
+
     public JobCreationConversation() {
         conversationFactory = new ConversationFactory(TheGaffer.getPluginInstance())
                 .withModality(true)
@@ -52,10 +53,10 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 .addConversationAbandonedListener(this);
         Util.info("Finished setting up conversation factory.");
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Conversable && sender.hasPermission("jobs.run")) {
+        if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;
         } else {
@@ -71,7 +72,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Create job timed out");
         }
     }
-    
+
     public class jobCreatePrefix implements ConversationPrefix {
 
         @Override
@@ -83,9 +84,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             }
             return prefix;
         }
-        
+
     }
-    
+
     private class namePrompt extends StringPrompt {
 
         @Override
@@ -103,10 +104,10 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 return new jobAlreadyRunningPrompt();
             }
         }
-        
+
     }
-    
-    private class jobAlreadyRunningPrompt extends MessagePrompt{
+
+    private class jobAlreadyRunningPrompt extends MessagePrompt {
 
         @Override
         protected Prompt getNextPrompt(ConversationContext context) {
@@ -117,9 +118,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public String getPromptText(ConversationContext context) {
             return "A job by that name is already running, pick another name.";
         }
-        
+
     }
-    
+
     private class privatePrompt extends BooleanPrompt {
 
         @Override
@@ -132,14 +133,14 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public String getPromptText(ConversationContext context) {
             return "Should this job be private? (true or false)";
         }
-        
+
     }
-    
+
     private class finishedPrompt extends MessagePrompt {
 
         @Override
         protected Prompt getNextPrompt(ConversationContext context) {
-            return null;
+            return Prompt.END_OF_CONVERSATION;
         }
 
         @Override
@@ -157,6 +158,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             }
             return "Successfully created the " + jobname + " job!";
         }
-        
+
     }
 }

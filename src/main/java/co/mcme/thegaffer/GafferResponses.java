@@ -84,8 +84,8 @@ public class GafferResponses {
 
         ALREADY_BANNED("%name% is already banned from %job%.", false),
         ALREADY_UNBANNED("%name% was not banned from %job%.", false),
-        BAN_SUCCESS("Successfully banned %name%.", false),
-        UNBAN_SUCCESS("Successfully unbanned %name%.", false);
+        BAN_SUCCESS("Successfully banned %name%.", true),
+        UNBAN_SUCCESS("Successfully unbanned %name%.", true);
 
         @Getter
         private final String message;
@@ -101,7 +101,7 @@ public class GafferResponses {
     public enum KickWorkerResponse implements GafferResponse {
 
         NOT_IN_JOB("%name% is not part of %job%.", false),
-        KICK_SUCCESS("Successfully kicked %name%.", false);
+        KICK_SUCCESS("Successfully kicked %name%.", true);
 
         @Getter
         private final String message;

@@ -120,7 +120,7 @@ public class JobDatabase {
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().broadcastMessage(ChatColor.AQUA + j.getOwner() + ChatColor.GRAY + " has started a job called \"" + j.getName() + ChatColor.GRAY + "\"");
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
-            p.playSound(p.getLocation(), Sound.ENDERDRAGON_DEATH, 10, 1);
+            p.playSound(p.getLocation(), Sound.WITHER_DEATH, 10, 1);
         }
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         try {
