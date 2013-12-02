@@ -32,6 +32,10 @@ public class JobCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("You are not a player");
+            return true;
+        }
         if ((args.length > 0) && ((sender instanceof Player))) {
             Player player = (Player) sender;
             if (args.length >= 2) {
