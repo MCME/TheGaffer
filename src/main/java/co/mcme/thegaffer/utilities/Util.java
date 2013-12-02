@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 public class Util {
 
-    private static final Logger log = Logger.getLogger("Minecraft");
+    private static final Logger log = TheGaffer.getServerInstance().getLogger();
 
     public static void info(String msg) {
         log.info("[TheGaffer] " + msg);
