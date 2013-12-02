@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TreeMap;
 import lombok.Getter;
 import org.bukkit.ChatColor;
@@ -68,47 +69,51 @@ public class JobDatabase {
         return count;
     }
 
-    public static void saveJobs() throws IOException {
+    public static void saveJobs() {
         File jobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs");
         if (!jobFolder.exists()) {
             jobFolder.mkdirs();
         }
         for (Job jerb : activeJobs.values()) {
-            boolean successful = true;
-            File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
-            File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
-            try {
-                TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
-                jerb.setDirty(false);
-            } catch (NoClassDefFoundError ex) {
-                successful = false;
-                Util.severe(ex.getMessage());
-            } finally {
-                if (successful) {
-                    if (afterLocation.exists()) {
-                        afterLocation.delete();
+            if (jerb.isDirty()) {
+                boolean successful = true;
+                File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
+                File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
+                try {
+                    TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
+                } catch (IOException ex) {
+                    Util.severe(Arrays.toString(ex.getStackTrace()));
+                    successful = false;
+                } finally {
+                    if (successful) {
+                        if (afterLocation.exists()) {
+                            afterLocation.delete();
+                        }
+                        newLocation.renameTo(afterLocation);
                     }
-                    newLocation.renameTo(afterLocation);
                 }
+                jerb.setDirty(false);
             }
         }
         for (Job jerb : inactiveJobs.values()) {
-            boolean successful = true;
-            File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
-            File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
-            try {
-                TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
-                jerb.setDirty(false);
-            } catch (NoClassDefFoundError ex) {
-                successful = false;
-                Util.severe(ex.getMessage());
-            } finally {
-                if (successful) {
-                    if (afterLocation.exists()) {
-                        afterLocation.delete();
+            if (jerb.isDirty()) {
+                boolean successful = true;
+                File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
+                File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
+                try {
+                    TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
+                } catch (IOException ex) {
+                    Util.severe(Arrays.toString(ex.getStackTrace()));
+                    successful = false;
+                } finally {
+                    if (successful) {
+                        if (afterLocation.exists()) {
+                            afterLocation.delete();
+                        }
+                        newLocation.renameTo(afterLocation);
                     }
-                    newLocation.renameTo(afterLocation);
                 }
+                jerb.setDirty(false);
             }
         }
     }
@@ -123,11 +128,7 @@ public class JobDatabase {
             p.playSound(p.getLocation(), Sound.WITHER_DEATH, 10, 2);
         }
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
-        try {
-            saveJobs();
-        } catch (IOException ex) {
-            Util.severe(ex.getMessage());
-        }
+        saveJobs();
         return true;
     }
 
@@ -144,11 +145,7 @@ public class JobDatabase {
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
-        try {
-            saveJobs();
-        } catch (IOException ex) {
-            Util.severe(ex.getMessage());
-        }
+        saveJobs();
         return true;
     }
 }

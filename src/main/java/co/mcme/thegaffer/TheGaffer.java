@@ -85,19 +85,15 @@ public class TheGaffer extends JavaPlugin {
         if (jsonMapper == null) {
             jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
         }
-        try {
-            JobDatabase.saveJobs();
-        } catch (IOException ex) {
-            Util.severe(ex.getMessage());
-        }
+        JobDatabase.saveJobs();
     }
-    
+
     public void setupConfig() {
         pluginConfig = getConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
     }
-    
+
     public static void scheduleOwnerTimeout(Job job) {
         Long time = System.currentTimeMillis();
         CleanupUtil.getWaiting().put(job, time);

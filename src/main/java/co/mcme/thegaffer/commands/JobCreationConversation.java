@@ -150,11 +150,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             boolean Private = (boolean) context.getSessionData("private");
             Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private);
             JobDatabase.activateJob(jerb);
-            try {
-                JobDatabase.saveJobs();
-            } catch (IOException ex) {
-                Util.severe(ex.getMessage());
-            }
+            JobDatabase.saveJobs();
             return "Successfully created the " + jobname + " job!";
         }
 
