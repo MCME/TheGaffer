@@ -16,11 +16,11 @@
 package co.mcme.thegaffer.commands;
 
 import co.mcme.thegaffer.GafferResponses.GafferResponse;
+import co.mcme.thegaffer.GafferResponses.GenericResponse;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
-import co.mcme.thegaffer.utilities.Util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +35,7 @@ import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.FixedSetPrompt;
 import org.bukkit.conversations.MessagePrompt;
+import org.bukkit.conversations.NumericPrompt;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
@@ -63,6 +64,7 @@ public class JobAdminConversation implements CommandExecutor {
         actions.add("listworkers");
         actions.add("inviteworker");
         actions.add("uninviteworker");
+        actions.add("setradius");
         Collections.sort(actions);
     }
 
@@ -198,6 +200,9 @@ public class JobAdminConversation implements CommandExecutor {
                 }
                 case "uninviteworker": {
                     return new uninviteWorkerPrompt();
+                }
+                case "setradius": {
+                    return new setRadiusPrompt();
                 }
                 default: {
                     return new whichActionPrompt();
@@ -359,6 +364,22 @@ public class JobAdminConversation implements CommandExecutor {
         @Override
         public String getPromptText(ConversationContext context) {
             return "Who would you like to uninvite from the job?";
+        }
+    }
+    
+    private class setRadiusPrompt extends NumericPrompt {
+        @Override
+        public Prompt acceptValidatedInput(ConversationContext context, Number input) {
+            context.setSessionData("jobradius", input);
+            Job job = (Job) context.getSessionData("job");
+            job.setJobRadius(input.intValue());
+            job.generateBounds();
+            return new responsePrompt(GenericResponse.SUCCESS, this);
+        }
+        
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Should big should the job area be? (radius 0 - 1000)";
         }
     }
 

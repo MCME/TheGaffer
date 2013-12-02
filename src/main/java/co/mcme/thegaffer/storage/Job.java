@@ -15,7 +15,6 @@
  */
 package co.mcme.thegaffer.storage;
 
-import co.mcme.thegaffer.GafferResponses;
 import co.mcme.thegaffer.GafferResponses.BanWorkerResponse;
 import co.mcme.thegaffer.GafferResponses.HelperResponse;
 import co.mcme.thegaffer.GafferResponses.InviteResponse;
@@ -77,6 +76,9 @@ public class Job implements Listener {
     private boolean Private;
     @Getter
     @Setter
+    private int jobRadius;
+    @Getter
+    @Setter
     @JsonIgnore
     private Polygon area;
     @Getter
@@ -88,7 +90,7 @@ public class Job implements Listener {
     @JsonIgnore
     private boolean dirty;
 
-    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private) {
+    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr) {
         this.name = name;
         this.owner = owner;
         this.running = running;
@@ -96,15 +98,27 @@ public class Job implements Listener {
         this.world = world;
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
+        if (jr > 1000) {
+            jr = 1000;
+        }
+        this.jobRadius = jr;
         Location bukkitLoc = warp.toBukkitLocation();
-        int zbounds[] = {bukkitLoc.getBlockZ() - 250, bukkitLoc.getBlockZ() + 250};
-        int xbounds[] = {bukkitLoc.getBlockX() - 250, bukkitLoc.getBlockX() + 250};
+        int zbounds[] = {bukkitLoc.getBlockZ() - jobRadius, bukkitLoc.getBlockZ() + jobRadius};
+        int xbounds[] = {bukkitLoc.getBlockX() - jobRadius, bukkitLoc.getBlockX() + jobRadius};
         this.area = new Polygon(xbounds, zbounds, xbounds.length);
         this.bounds = area.getBounds2D();
     }
 
     public Job() {
+    }
 
+    @JsonIgnore
+    public void generateBounds() {
+        Location bukkitLoc = warp.toBukkitLocation();
+        int zbounds[] = {bukkitLoc.getBlockZ() - jobRadius, bukkitLoc.getBlockZ() + jobRadius};
+        int xbounds[] = {bukkitLoc.getBlockX() - jobRadius, bukkitLoc.getBlockX() + jobRadius};
+        this.area = new Polygon(xbounds, zbounds, xbounds.length);
+        this.bounds = area.getBounds2D();
     }
 
     @JsonIgnore
@@ -126,7 +140,7 @@ public class Job implements Listener {
     public World getBukkitWorld() {
         return TheGaffer.getServerInstance().getWorld(world);
     }
-    
+
     @JsonIgnore
     public Player[] getWorkersAsPlayers() {
         ArrayList<Player> players = new ArrayList();
@@ -138,7 +152,7 @@ public class Job implements Listener {
         }
         return players.toArray(new Player[players.size()]);
     }
-    
+
     @JsonIgnore
     public String getInfo() {
         StringBuilder out = new StringBuilder();
@@ -241,7 +255,7 @@ public class Job implements Listener {
         bannedWorkers.remove(p.getName());
         return BanWorkerResponse.UNBAN_SUCCESS;
     }
-    
+
     public KickWorkerResponse kickWorker(OfflinePlayer p) {
         if (!workers.contains(p.getName())) {
             return KickWorkerResponse.NOT_IN_JOB;
@@ -249,7 +263,7 @@ public class Job implements Listener {
         workers.remove(p.getName());
         return KickWorkerResponse.KICK_SUCCESS;
     }
-    
+
     public void bringAllWorkers(Location to) {
         for (String wName : workers) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {

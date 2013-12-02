@@ -59,7 +59,7 @@ public class JobDatabase {
         for (Job jerb : tjobs) {
             jerb.setDirty(false);
             if (jerb.isRunning()) {
-                activeJobs.put(jerb.getName(), jerb);
+                activateJob(jerb);
                 count++;
             } else {
                 inactiveJobs.put(jerb.getName(), jerb);
@@ -122,6 +122,7 @@ public class JobDatabase {
         if (activeJobs.containsKey(j.getName())) {
             return false;
         }
+        j.generateBounds();
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().broadcastMessage(ChatColor.AQUA + j.getOwner() + ChatColor.GRAY + " has started a job called \"" + j.getName() + ChatColor.GRAY + "\"");
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {

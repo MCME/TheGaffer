@@ -113,6 +113,21 @@ public class GafferResponses {
             this.successful = wasSuccessful;
         }
     }
+    
+    public enum GenericResponse implements GafferResponse {
+        
+        FAILURE("Generic Failure", false),
+        SUCCESS("Generic Success", true);
+        @Getter
+        private final String message;
+        @Getter
+        private final boolean successful;
+
+        private GenericResponse(String message, boolean wasSuccessful) {
+            this.message = message;
+            this.successful = wasSuccessful;
+        }
+    }
 
     public interface GafferResponse {
 

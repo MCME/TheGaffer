@@ -20,8 +20,6 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobWarp;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
-import co.mcme.thegaffer.utilities.Util;
-import java.io.IOException;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -34,13 +32,14 @@ import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.MessagePrompt;
+import org.bukkit.conversations.NumericPrompt;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
 public class JobCreationConversation implements CommandExecutor, ConversationAbandonedListener {
 
-    private ConversationFactory conversationFactory;
+    private final ConversationFactory conversationFactory;
 
     public JobCreationConversation() {
         conversationFactory = new ConversationFactory(TheGaffer.getPluginInstance())
@@ -125,7 +124,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("private", input);
-            return new finishedPrompt();
+            return new howBigPrompt();
         }
 
         @Override
@@ -133,6 +132,20 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return "Should this job be private? (true or false)";
         }
 
+    }
+    
+    private class howBigPrompt extends NumericPrompt {
+        
+        @Override
+        public Prompt acceptValidatedInput(ConversationContext context, Number input) {
+            context.setSessionData("jobradius", input);
+            return new finishedPrompt();
+        }
+        
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Should big should the job area be? (radius 0 - 1000)";
+        }
     }
 
     private class finishedPrompt extends MessagePrompt {
@@ -148,7 +161,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
-            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private);
+            int radius = ((Number) context.getSessionData("jobradius")).intValue();
+            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius);
             JobDatabase.activateJob(jerb);
             JobDatabase.saveJobs();
             return "Successfully created the " + jobname + " job!";
