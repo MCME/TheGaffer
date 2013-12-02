@@ -61,7 +61,8 @@ public class TheGaffer extends JavaPlugin {
         jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
         setupConfig();
         try {
-            JobDatabase.loadJobs();
+            int jobsLoaded = JobDatabase.loadJobs();
+            Util.info("Loaded " + jobsLoaded + " jobs.");
         } catch (IOException ex) {
             Util.severe(ex.getMessage());
         }
