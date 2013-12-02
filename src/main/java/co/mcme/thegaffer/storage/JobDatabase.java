@@ -74,33 +74,41 @@ public class JobDatabase {
             jobFolder.mkdirs();
         }
         for (Job jerb : activeJobs.values()) {
+            boolean successful = true;
             File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
             File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
             try {
                 TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
                 jerb.setDirty(false);
             } catch (NoClassDefFoundError ex) {
-                
+                successful = false;
+                Util.severe(ex.getMessage());
             } finally {
-                if (afterLocation.exists()) {
-                    afterLocation.delete();
+                if (successful) {
+                    if (afterLocation.exists()) {
+                        afterLocation.delete();
+                    }
+                    newLocation.renameTo(afterLocation);
                 }
-                newLocation.renameTo(afterLocation);
             }
         }
         for (Job jerb : inactiveJobs.values()) {
+            boolean successful = true;
             File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
             File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
             try {
                 TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
                 jerb.setDirty(false);
             } catch (NoClassDefFoundError ex) {
-                
+                successful = false;
+                Util.severe(ex.getMessage());
             } finally {
-                if (afterLocation.exists()) {
-                    afterLocation.delete();
+                if (successful) {
+                    if (afterLocation.exists()) {
+                        afterLocation.delete();
+                    }
+                    newLocation.renameTo(afterLocation);
                 }
-                newLocation.renameTo(afterLocation);
             }
         }
     }
