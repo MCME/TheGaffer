@@ -145,7 +145,7 @@ public class Job implements Listener {
         out.append(ChatColor.GRAY).append(getName()).append("\n");
         out.append("Started by: ").append(ChatColor.AQUA).append(getOwner()).append("\n").append(ChatColor.GRAY);
         out.append("Started on: ").append(ChatColor.AQUA).append(new Date(getStartTime()).toGMTString()).append("\n").append(ChatColor.GRAY);
-        out.append("Location: ").append(ChatColor.AQUA).append(getWorld()).append(" (x: ").append(getWarp().getX()).append(", y: ").append(getWarp().getY()).append(", z: ").append(getWarp().getZ()).append(")").append("\n").append(ChatColor.GRAY);
+        out.append("Location: ").append(ChatColor.AQUA).append(getWorld()).append(" (x: ").append((int) getWarp().getX()).append(", y: ").append((int) getWarp().getY()).append(", z: ").append((int) getWarp().getZ()).append(")").append("\n").append(ChatColor.GRAY);
         String status = (running) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
         out.append("Status: ").append(status);
         return out.toString();
