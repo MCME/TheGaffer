@@ -51,7 +51,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 .withTimeout(600)
                 .thatExcludesNonPlayersWithMessage("You must be a player to send this command")
                 .addConversationAbandonedListener(this);
-        Util.info("Finished setting up conversation factory.");
     }
 
     @Override

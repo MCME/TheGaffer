@@ -53,7 +53,6 @@ public class JobAdminConversation implements CommandExecutor {
                 .withFirstPrompt(new whichJobPrompt())
                 .withTimeout(900)
                 .thatExcludesNonPlayersWithMessage("You must be a player to send this command");
-        Util.debug("Finished setting up conversation factory.");
         actions.add("addhelper");
         actions.add("removehelper");
         actions.add("kickworker");
