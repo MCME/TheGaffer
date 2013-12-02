@@ -37,7 +37,7 @@ public class JobDatabase {
 
     public static int loadJobs() throws IOException {
         int count = 0;
-        File activeJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs" + TheGaffer.getFileSeperator() + "active");
+        File activeJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs");
         if (!activeJobFolder.exists()) {
             activeJobFolder.mkdirs();
         }
@@ -60,29 +60,7 @@ public class JobDatabase {
             if (jerb.isRunning()) {
                 activeJobs.put(jerb.getName(), jerb);
                 count++;
-            }
-        }
-        File inactiveJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs" + TheGaffer.getFileSeperator() + "inactive");
-        if (!inactiveJobFolder.exists()) {
-            inactiveJobFolder.mkdirs();
-        }
-        String[] iJ = inactiveJobFolder.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(TheGaffer.getFileExtension());
-            }
-        });
-        ArrayList<Job> tijobs = new ArrayList();
-        for (String fName : iJ) {
-            File jFile = new File(activeJobFolder, fName);
-            if (!jFile.isDirectory()) {
-                Job job = TheGaffer.getJsonMapper().readValue(jFile, Job.class);
-                tijobs.add(job);
-            }
-        }
-        for (Job jerb : tijobs) {
-            jerb.setDirty(false);
-            if (jerb.isRunning()) {
+            } else {
                 inactiveJobs.put(jerb.getName(), jerb);
                 count++;
             }
@@ -91,21 +69,17 @@ public class JobDatabase {
     }
 
     public static void saveJobs() throws IOException {
-        File activeJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs" + TheGaffer.getFileSeperator() + "active");
-        File inactiveJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs" + TheGaffer.getFileSeperator() + "inactive");
-        if (!activeJobFolder.exists()) {
-            activeJobFolder.mkdirs();
-        }
-        if (!inactiveJobFolder.exists()) {
-            inactiveJobFolder.mkdirs();
+        File jobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs");
+        if (!jobFolder.exists()) {
+            jobFolder.mkdirs();
         }
         for (Job jerb : activeJobs.values()) {
-            File location = new File(activeJobFolder, jerb.getName() + TheGaffer.getFileExtension());
+            File location = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
             TheGaffer.getJsonMapper().writeValue(location, jerb);
             jerb.setDirty(false);
         }
         for (Job jerb : inactiveJobs.values()) {
-            File location = new File(inactiveJobFolder, jerb.getName() + TheGaffer.getFileExtension());
+            File location = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
             TheGaffer.getJsonMapper().writeValue(location, jerb);
             jerb.setDirty(false);
         }
@@ -118,7 +92,7 @@ public class JobDatabase {
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().broadcastMessage(ChatColor.AQUA + j.getOwner() + ChatColor.GRAY + " has started a job called \"" + j.getName() + ChatColor.GRAY + "\"");
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
-            p.playSound(p.getLocation(), Sound.WITHER_DEATH, 10, 1);
+            p.playSound(p.getLocation(), Sound.WITHER_DEATH, 10, 2);
         }
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         try {
@@ -136,7 +110,7 @@ public class JobDatabase {
         j.setRunning(false);
         j.sendToAll(ChatColor.GRAY + "The " + j.getName() + " job has ended.");
         for (Player p : j.getWorkersAsPlayers()) {
-            p.playSound(p.getLocation(), Sound.ENDERDRAGON_WINGS, 10, 1);
+            p.playSound(p.getLocation(), Sound.ENDERDRAGON_WINGS, 10, 2);
         }
         j.setDirty(true);
         activeJobs.remove(j.getName());
