@@ -22,8 +22,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
