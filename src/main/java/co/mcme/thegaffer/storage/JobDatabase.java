@@ -74,14 +74,34 @@ public class JobDatabase {
             jobFolder.mkdirs();
         }
         for (Job jerb : activeJobs.values()) {
-            File location = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
-            TheGaffer.getJsonMapper().writeValue(location, jerb);
-            jerb.setDirty(false);
+            File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
+            File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
+            try {
+                TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
+                jerb.setDirty(false);
+            } catch (NoClassDefFoundError ex) {
+                
+            } finally {
+                if (afterLocation.exists()) {
+                    afterLocation.delete();
+                }
+                newLocation.renameTo(afterLocation);
+            }
         }
         for (Job jerb : inactiveJobs.values()) {
-            File location = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
-            TheGaffer.getJsonMapper().writeValue(location, jerb);
-            jerb.setDirty(false);
+            File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
+            File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
+            try {
+                TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
+                jerb.setDirty(false);
+            } catch (NoClassDefFoundError ex) {
+                
+            } finally {
+                if (afterLocation.exists()) {
+                    afterLocation.delete();
+                }
+                newLocation.renameTo(afterLocation);
+            }
         }
     }
 
