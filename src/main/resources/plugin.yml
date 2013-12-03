@@ -12,12 +12,13 @@ commands:
            /createjob
   job:
     usage: |
-            /job <start|stop> <jobname>
+            /job stop <jobname>
             /job check
             /job archive
             /job join <jobname>
             /job warpto <jobname>
             /job info <jobname>
   jobadmin:
+    description: Launches the jobadmin conversation
     usage: |
-           /jobadmin <action> <jobName> <variable>
+           /jobadmin
