@@ -114,6 +114,9 @@ public class Job implements Listener {
 
     @JsonIgnore
     public void generateBounds() {
+        if (jobRadius > 1000) {
+            jobRadius = 1000;
+        }
         Location bukkitLoc = warp.toBukkitLocation();
         int zbounds[] = {bukkitLoc.getBlockZ() - jobRadius, bukkitLoc.getBlockZ() + jobRadius};
         int xbounds[] = {bukkitLoc.getBlockX() - jobRadius, bukkitLoc.getBlockX() + jobRadius};
