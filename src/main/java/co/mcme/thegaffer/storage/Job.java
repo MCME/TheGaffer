@@ -179,6 +179,8 @@ public class Job implements Listener {
             return HelperResponse.NO_PERMISSIONS;
         }
         helpers.add(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return HelperResponse.ADD_SUCCESS;
     }
 
@@ -187,6 +189,8 @@ public class Job implements Listener {
             return HelperResponse.NOT_HELPER;
         }
         helpers.remove(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return HelperResponse.REMOVE_SUCCESS;
     }
 
@@ -204,6 +208,8 @@ public class Job implements Listener {
             return WorkerResponse.NOT_INVITED;
         }
         workers.add(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return WorkerResponse.ADD_SUCCESS;
     }
 
@@ -212,6 +218,8 @@ public class Job implements Listener {
             return WorkerResponse.NOT_WORKER;
         }
         workers.remove(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return WorkerResponse.REMOVE_SUCCESS;
     }
 
@@ -226,6 +234,8 @@ public class Job implements Listener {
             return InviteResponse.NO_PERMISSIONS;
         }
         invitedWorkers.add(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return InviteResponse.ADD_SUCCESS;
     }
 
@@ -237,6 +247,8 @@ public class Job implements Listener {
             workers.remove(p.getName());
         }
         invitedWorkers.remove(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return InviteResponse.REMOVE_SUCCESS;
     }
 
@@ -248,6 +260,8 @@ public class Job implements Listener {
             return BanWorkerResponse.ALREADY_BANNED;
         }
         bannedWorkers.add(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return BanWorkerResponse.BAN_SUCCESS;
     }
 
@@ -256,6 +270,8 @@ public class Job implements Listener {
             return BanWorkerResponse.ALREADY_UNBANNED;
         }
         bannedWorkers.remove(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return BanWorkerResponse.UNBAN_SUCCESS;
     }
 
@@ -264,7 +280,27 @@ public class Job implements Listener {
             return KickWorkerResponse.NOT_IN_JOB;
         }
         workers.remove(p.getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
         return KickWorkerResponse.KICK_SUCCESS;
+    }
+    
+    public void updateLocation(Location loc) {
+        getWarp().setX(loc.getX());
+        getWarp().setY(loc.getY());
+        getWarp().setZ(loc.getZ());
+        getWarp().setYaw(loc.getYaw());
+        getWarp().setPitch(loc.getPitch());
+        getWarp().setWorld(loc.getWorld().getName());
+        setDirty(true);
+        JobDatabase.saveJobs();
+    }
+    
+    public void updateJobRadius(int newRadius) {
+        setJobRadius(newRadius);
+        generateBounds();
+        setDirty(true);
+        JobDatabase.saveJobs();
     }
 
     public void bringAllWorkers(Location to) {

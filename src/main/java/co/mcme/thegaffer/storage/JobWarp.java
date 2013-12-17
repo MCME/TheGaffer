@@ -48,15 +48,6 @@ public class JobWarp {
         
     }
 
-    public void updateLocation(Location loc) {
-        this.x = loc.getX();
-        this.y = loc.getY();
-        this.z = loc.getZ();
-        this.yaw = loc.getYaw();
-        this.pitch = loc.getPitch();
-        this.world = loc.getWorld().getName();
-    }
-
     public Location toBukkitLocation() {
         return new Location(TheGaffer.getServerInstance().getWorld(world), x, y, z, yaw, pitch);
     }

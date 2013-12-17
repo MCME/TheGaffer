@@ -296,7 +296,7 @@ public class JobAdminConversation implements CommandExecutor {
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
             Job job = (Job) context.getSessionData("job");
-            job.getWarp().updateLocation(((Player) context.getForWhom()).getLocation());
+            job.updateLocation(((Player) context.getForWhom()).getLocation());
             return Prompt.END_OF_CONVERSATION;
         }
 
@@ -372,8 +372,7 @@ public class JobAdminConversation implements CommandExecutor {
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
             Job job = (Job) context.getSessionData("job");
-            job.setJobRadius(input.intValue());
-            job.generateBounds();
+            job.updateJobRadius(input.intValue());
             return new responsePrompt(GenericResponse.SUCCESS, this);
         }
         
