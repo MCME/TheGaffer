@@ -80,14 +80,6 @@ public class TheGaffer extends JavaPlugin {
         }, 0, (5 * 60) * 20);
     }
 
-    @Override
-    public void onDisable() {
-        if (jsonMapper == null) {
-            jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-        }
-        JobDatabase.saveJobs();
-    }
-
     public void setupConfig() {
         pluginConfig = getConfig();
         getConfig().options().copyDefaults(true);
