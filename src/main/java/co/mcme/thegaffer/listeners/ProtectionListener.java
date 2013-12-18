@@ -134,7 +134,7 @@ public class ProtectionListener implements Listener {
     
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent event) {
-        if (event.getEntity() instanceof Player) {
+        if (event.getRemover() instanceof Player) {
             Player player = (Player) event.getRemover();
             if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
                 event.setCancelled(false);
