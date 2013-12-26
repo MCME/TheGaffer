@@ -20,6 +20,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobWarp;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
+import java.io.File;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -95,12 +96,31 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
+            File newJob = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs"
+                    + TheGaffer.getFileSeperator() + input + TheGaffer.getFileExtension());
+            if (newJob.exists()) {
+                return new jobAlreadyExistsPrompt();
+            }
             if (!JobDatabase.getActiveJobs().containsKey(input)) {
                 context.setSessionData("jobname", input);
                 return new privatePrompt();
             } else {
                 return new jobAlreadyRunningPrompt();
             }
+        }
+
+    }
+
+    private class jobAlreadyExistsPrompt extends MessagePrompt {
+
+        @Override
+        protected Prompt getNextPrompt(ConversationContext context) {
+            return new namePrompt();
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "A job by that name has been run in the past, please pick a different name.";
         }
 
     }
@@ -133,15 +153,15 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         }
 
     }
-    
+
     private class howBigPrompt extends NumericPrompt {
-        
+
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
             return new finishedPrompt();
         }
-        
+
         @Override
         public String getPromptText(ConversationContext context) {
             return "Should big should the job area be? (radius 0 - 1000)";
