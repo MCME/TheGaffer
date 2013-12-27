@@ -70,6 +70,9 @@ public class Job implements Listener {
     private Long startTime;
     @Getter
     @Setter
+    private Long endTime;
+    @Getter
+    @Setter
     private String world;
     @Getter
     @Setter

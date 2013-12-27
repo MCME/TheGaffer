@@ -26,9 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeMap;
 import lombok.Getter;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 public class JobDatabase {
@@ -137,6 +134,7 @@ public class JobDatabase {
             return false;
         }
         j.setRunning(false);
+        j.setEndTime(System.currentTimeMillis());
         j.setDirty(true);
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
