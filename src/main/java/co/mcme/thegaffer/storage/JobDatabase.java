@@ -16,6 +16,8 @@
 package co.mcme.thegaffer.storage;
 
 import co.mcme.thegaffer.TheGaffer;
+import co.mcme.thegaffer.events.JobEndEvent;
+import co.mcme.thegaffer.events.JobStartEvent;
 import co.mcme.thegaffer.utilities.Util;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -124,12 +126,9 @@ public class JobDatabase {
         }
         j.generateBounds();
         activeJobs.put(j.getName(), j);
-        TheGaffer.getServerInstance().broadcastMessage(ChatColor.AQUA + j.getOwner() + ChatColor.GRAY + " has started a job called \"" + j.getName() + ChatColor.GRAY + "\"");
-        for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
-            p.playSound(p.getLocation(), Sound.WITHER_DEATH, 10, 2);
-        }
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         saveJobs();
+        TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
         return true;
     }
 
@@ -138,15 +137,12 @@ public class JobDatabase {
             return false;
         }
         j.setRunning(false);
-        j.sendToAll(ChatColor.GRAY + "The " + j.getName() + " job has ended.");
-        for (Player p : j.getWorkersAsPlayers()) {
-            p.playSound(p.getLocation(), Sound.ENDERDRAGON_WINGS, 10, 2);
-        }
         j.setDirty(true);
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
         saveJobs();
+        TheGaffer.getServerInstance().getPluginManager().callEvent(new JobEndEvent(j));
         return true;
     }
 }
