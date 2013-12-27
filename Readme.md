@@ -8,11 +8,18 @@ A job is basically a glorified list. This list contains who is working on the jo
 The list of helpers on a job is crucial. A few minutes after the main runner of the job goes offline, *The Gaffer* will select another person from the list of helpers to continue the job. If *The Gaffer* cannot find another online helper to continue the job, the job is put on hold and held in the archive.
 
 # Usage
-Staff have access to 2 commands, /job, and /jobadmin.
+Staff have access to 3 commands, /createjob, /job, and /jobadmin.
 
-/job is used to create a new job, check running jobs and some plugin maintenance things.
+/job is used to check running jobs and some plugin maintenance things.
 
 /jobadmin is used to modify a currently running job.
+
+/createjob is used to create a new job.
+
+#### The Createjob command
+
+The createjob command is used to start a new job. Simply use _/createjob_ and you will be launched into an interactive conversation. Simply follow the in chat instructions, and chat your responses.
+
 
 #### The Job Command
 
@@ -22,7 +29,6 @@ The job command takes 2 arguments.
 
 The first argument is the action you would like to perform. The current actions are:
 
-* __start__
 * __stop__
 * check
 * join
@@ -31,9 +37,6 @@ The first argument is the action you would like to perform. The current actions 
 * archive
 
 *Those in bold are only available to Staff*
-
-### Start
-This is the action used to create a new job. A "private" can be added to make the job invite only. If an old job is found with the same name, it will be restarted with you as the admin. The name of the job is __case-sensitive__.
 
 ###### Example
 /job start river *This will start a job called **river**.
@@ -74,9 +77,9 @@ This action will list all of the past jobs that are no longer running.
 
 #### The Jobadmin Command
 
-The jobadmin commad takes 2 -3 additional arguments.
+The jobadmin commad will launch you into an interactive conversation that allows ou to edit jobs. SImply follow the in chat instructions, and chat your response.
 
-The first argument is the action you would like to perform. The current actions you can perform are:
+The current actions you can perform are:
 
 * addhelper
 * removehelper
@@ -96,53 +99,26 @@ Below is a description of each action and what they do.
 ### addhelper
 This action allows you to add an additional Staff member to the job. This Staff member can modify the job information such as the warp and also add additional helpers. The name is __case-sensitive__.
 
-###### Example
-/jobadmin addhelper GreenHills ryanturambar *This will add ryanturambar to the Staff list, but __not__ RyanTurambar*
-
 ### removehelper
 This action allows you to remove a Staff member from the job. This Staff member will no longer be able to modify the job. The name is __case-sensitive__.
-
-###### Example
-/jobadmin removehelper GreenHills ryanturambar *This will remove ryanturambar from the Staff list for the job __GreenHills__, but __not__ RyanTurambar*
 
 ### kickworker
 This action allows you to kick a worker from the job. This worker will no longer be able to modify the world, but can rejoin. The name is __case-sensitive__.
 
-###### Example
-/jobadmin kickworker GreenHills ryanturambar *This will kick ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
-
 ### banworker
 This action allows you to ban a worker from the job. This worker will no longer be able to rejoin the job. The name is __case-sensitive__.
-
-###### Example
-/jobadmin banworker GreenHills ryanturambar *This will ban ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
 
 ### unbanworker
 This action allows you to unban a worker from the job. This worker will now be able to rejoin the job. The name is __case-sensitive__.
 
-###### Example
-/jobadmin unbanworker GreenHills ryanturambar *This will unban ryanturambar from the job __GreenHills__, but __not__ RyanTurambar*
-
 ### listworkers
 This action allows you to list the workers of a job.
-
-###### Example
-/jobadmin listworkers GreenHills *This will list all of the workers in the job __GreenHills__.*
 
 ### bringall
 This action allows you to bring all workers on the job to your location.
 
-###### Example
-/jobadmin bringall GreenHills ryanturambar *This will bring all workers on the __GreenHills__ job to your location.*
-
 ### inviteworker
 This action allows you to invite a worker to a job.
 
-###### Example
-/jobadmin inviteworker GreenHIlls ryanturambar *This will invite ryanturambar to the __GreenHills__ job*
-
 ### uninviteworker
 This action allows you to invite a worker to a job.
-
-###### Example
-/jobadmin uninviteworker GreenHIlls ryanturambar *This will uninvite ryanturambar from the __GreenHills__ job*
