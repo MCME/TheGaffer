@@ -59,6 +59,7 @@ public class JobDatabase {
             jerb.setDirty(false);
             if (jerb.isRunning()) {
                 activateJob(jerb);
+                TheGaffer.scheduleOwnerTimeout(jerb);
                 count++;
             } else {
                 inactiveJobs.put(jerb.getName(), jerb);
