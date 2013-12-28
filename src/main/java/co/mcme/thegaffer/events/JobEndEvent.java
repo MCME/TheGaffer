@@ -19,26 +19,30 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobWarp;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
-public class JobEndEvent extends Event {
+public class JobEndEvent extends JobEvent {
 
     private static final HandlerList handlers = new HandlerList();
     @Getter
     private final Job job;
     @Getter
+    @JsonIgnore
     private final OfflinePlayer jobRunner;
     @Getter
     private final String jobName;
     @Getter
     private final JobWarp jobWarp;
+    @Getter
+    private final boolean open;
 
     public JobEndEvent(Job job) {
         this.job = job;
         this.jobRunner = job.getOwnerAsOfflinePlayer();
         this.jobName = job.getName();
         this.jobWarp = job.getWarp();
+        open = false;
     }
 
     @Override
