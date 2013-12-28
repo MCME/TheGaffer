@@ -322,6 +322,10 @@ public class Job implements Listener {
                 count++;
             }
         }
+        if (getOwnerAsOfflinePlayer().isOnline()) {
+            getOwnerAsOfflinePlayer().getPlayer().sendMessage(message);
+            count++;
+        }
         return count;
     }
 
