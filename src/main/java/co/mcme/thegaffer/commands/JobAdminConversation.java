@@ -30,6 +30,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.Conversable;
+import org.bukkit.conversations.ConversationAbandonedEvent;
+import org.bukkit.conversations.ConversationAbandonedListener;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.ConversationPrefix;
@@ -40,7 +42,7 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
-public class JobAdminConversation implements CommandExecutor {
+public class JobAdminConversation implements CommandExecutor, ConversationAbandonedListener {
 
     private final ConversationFactory conversationFactory;
 
@@ -75,6 +77,15 @@ public class JobAdminConversation implements CommandExecutor {
             return true;
         } else {
             return false;
+        }
+    }
+    
+    @Override
+    public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
+        if (abandonedEvent.gracefulExit()) {
+            abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Jobadmin exited.");
+        } else {
+            abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Jobadmin timed out");
         }
     }
 
