@@ -211,6 +211,9 @@ public class Job implements Listener {
             return WorkerResponse.NOT_INVITED;
         }
         workers.add(p.getName());
+        if (p.isOnline()) {
+            p.getPlayer().teleport(warp.toBukkitLocation());
+        }
         setDirty(true);
         JobDatabase.saveJobs();
         return WorkerResponse.ADD_SUCCESS;
