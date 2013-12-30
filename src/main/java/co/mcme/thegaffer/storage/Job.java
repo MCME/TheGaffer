@@ -184,6 +184,7 @@ public class Job implements Listener {
         helpers.add(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
+        sendToHelpers(ChatColor.AQUA + p.getName() + " has been added as a helper to the job.");
         return HelperResponse.ADD_SUCCESS;
     }
 
@@ -216,6 +217,7 @@ public class Job implements Listener {
         }
         setDirty(true);
         JobDatabase.saveJobs();
+        sendToAll(ChatColor.AQUA + p.getName() + " has joined the job.");
         return WorkerResponse.ADD_SUCCESS;
     }
 
@@ -226,6 +228,7 @@ public class Job implements Listener {
         workers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
+        sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
         return WorkerResponse.REMOVE_SUCCESS;
     }
 
