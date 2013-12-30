@@ -184,7 +184,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
             Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius);
             JobDatabase.activateJob(jerb);
-            JobDatabase.saveJobs();
             return "Successfully created the " + jobname + " job!";
         }
 
