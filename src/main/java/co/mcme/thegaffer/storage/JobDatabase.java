@@ -125,6 +125,7 @@ public class JobDatabase {
         j.generateBounds();
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
+        j.setDirty(true);
         saveJobs();
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
         return true;
