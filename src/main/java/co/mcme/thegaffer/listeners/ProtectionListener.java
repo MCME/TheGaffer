@@ -37,6 +37,9 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
             event.setCancelled(false);
         } else {
@@ -87,6 +90,9 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
             event.setCancelled(false);
         } else {
@@ -137,6 +143,9 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (event.getRemover() instanceof Player) {
             Player player = (Player) event.getRemover();
             if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
@@ -190,6 +199,9 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onHangingPlace(HangingPlaceEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         Player player = (Player) event.getPlayer();
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
             event.setCancelled(false);
@@ -241,6 +253,9 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
