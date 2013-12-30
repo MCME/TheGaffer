@@ -51,7 +51,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
     public JobAdminConversation() {
         conversationFactory = new ConversationFactory(TheGaffer.getPluginInstance())
                 .withModality(true)
-                .withEscapeSequence("/cancel")
+                .withEscapeSequence("!cancel")
                 .withPrefix(new jobAdminPrefix())
                 .withFirstPrompt(new whichJobPrompt())
                 .withTimeout(60)
@@ -131,7 +131,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                         + response.getMessage()
                         .replaceAll("%name%", (String) context.getSessionData("inputname"))
                         .replaceAll("%job%", (String) context.getSessionData("jobname"))
-                        + "\n" + " Please try again or cancel with /cancel";
+                        + "\n" + " Please try again or cancel with !cancel";
             }
         }
     }

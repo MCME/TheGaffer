@@ -45,7 +45,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
     public JobCreationConversation() {
         conversationFactory = new ConversationFactory(TheGaffer.getPluginInstance())
                 .withModality(true)
-                .withEscapeSequence("/cancel")
+                .withEscapeSequence("!cancel")
                 .withPrefix(new jobCreatePrefix())
                 .withFirstPrompt(new namePrompt())
                 .withTimeout(600)
@@ -91,7 +91,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public String getPromptText(ConversationContext context) {
             return "What would you like the name of the job to be?"
-                    + "\n" + "or exit with /cancel";
+                    + "\n" + "or exit with !cancel";
         }
 
         @Override
