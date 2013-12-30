@@ -52,7 +52,7 @@ public class JobAdminConversation implements CommandExecutor {
                 .withEscapeSequence("/cancel")
                 .withPrefix(new jobAdminPrefix())
                 .withFirstPrompt(new whichJobPrompt())
-                .withTimeout(900)
+                .withTimeout(60)
                 .thatExcludesNonPlayersWithMessage("You must be a player to send this command");
         actions.add("addhelper");
         actions.add("removehelper");
