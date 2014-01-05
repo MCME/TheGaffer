@@ -162,9 +162,13 @@ public class Job implements Listener {
     @JsonIgnore
     public String getInfo() {
         StringBuilder out = new StringBuilder();
-        out.append(ChatColor.GRAY).append(getName()).append("\n");
+        String inviteOnly = (Private) ? ChatColor.RED + "Private" : ChatColor.GREEN + "Public";
+        out.append(ChatColor.AQUA).append(getName()).append(ChatColor.GRAY).append(" (").append(inviteOnly).append(ChatColor.GRAY).append(")").append("\n");
         out.append("Started by: ").append(ChatColor.AQUA).append(getOwner()).append("\n").append(ChatColor.GRAY);
-        out.append("Started on: ").append(ChatColor.AQUA).append(new Date(getStartTime()).toGMTString()).append("\n").append(ChatColor.GRAY);
+        out.append("Started on: ").append(ChatColor.AQUA).append(new Date(startTime).toGMTString()).append("\n").append(ChatColor.GRAY);
+        if (!running) {
+            out.append("Stopped on: ").append(ChatColor.AQUA).append(new Date(endTime).toGMTString()).append("\n").append(ChatColor.GRAY);
+        }
         out.append("Location: ").append(ChatColor.AQUA).append(getWorld()).append(" (x: ").append((int) getWarp().getX()).append(", y: ").append((int) getWarp().getY()).append(", z: ").append((int) getWarp().getZ()).append(")").append("\n").append(ChatColor.GRAY);
         String status = (running) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
         out.append("Status: ").append(status);
