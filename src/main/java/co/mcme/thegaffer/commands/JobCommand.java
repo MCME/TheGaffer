@@ -16,17 +16,22 @@
 package co.mcme.thegaffer.commands;
 
 import co.mcme.thegaffer.GafferResponses.GafferResponse;
+import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
+import org.codehaus.jackson.map.SerializationConfig;
 
 public class JobCommand implements TabExecutor {
 
@@ -55,6 +60,28 @@ public class JobCommand implements TabExecutor {
                     } else {
                         player.sendMessage(ChatColor.RED + "You don't have permission.");
                     }
+                    return true;
+                }
+                if (args[0].equalsIgnoreCase("export")) {
+                        if (args[1] != null) {
+                            String jobname = args[1];
+                            if (JobDatabase.getActiveJobs().containsKey(jobname)) {
+                                Job job = JobDatabase.getActiveJobs().get(jobname);
+                                try {
+                                    TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+                                    String jobstr = TheGaffer.getJsonMapper().writeValueAsString(job);
+                                    TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+                                    String url = "http://mcme.co/jobs/export?job=" + jobstr;
+                                    player.sendMessage(ChatColor.GREEN + url);
+                                } catch (IOException ex) {
+                                    Logger.getLogger(JobCommand.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            } else {
+                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                        }
                     return true;
                 }
             }
