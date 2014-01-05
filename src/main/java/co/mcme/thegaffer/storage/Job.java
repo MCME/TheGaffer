@@ -297,7 +297,7 @@ public class Job implements Listener {
         JobDatabase.saveJobs();
         return KickWorkerResponse.KICK_SUCCESS;
     }
-    
+
     public void updateLocation(Location loc) {
         getWarp().setX(loc.getX());
         getWarp().setY(loc.getY());
@@ -308,7 +308,7 @@ public class Job implements Listener {
         setDirty(true);
         JobDatabase.saveJobs();
     }
-    
+
     public void updateJobRadius(int newRadius) {
         setJobRadius(newRadius);
         generateBounds();
