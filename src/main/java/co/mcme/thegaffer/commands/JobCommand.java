@@ -90,7 +90,7 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
+                        player.sendMessage(ChatColor.RED + "What job would you like to export?");
                     }
                     return true;
                 }
