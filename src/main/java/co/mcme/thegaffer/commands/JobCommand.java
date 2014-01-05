@@ -63,25 +63,35 @@ public class JobCommand implements TabExecutor {
                     return true;
                 }
                 if (args[0].equalsIgnoreCase("export")) {
-                        if (args[1] != null) {
-                            String jobname = args[1];
-                            if (JobDatabase.getActiveJobs().containsKey(jobname)) {
-                                Job job = JobDatabase.getActiveJobs().get(jobname);
-                                try {
-                                    TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
-                                    String jobstr = TheGaffer.getJsonMapper().writeValueAsString(job);
-                                    TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-                                    String url = "http://mcme.co/jobs/export?job=" + jobstr;
-                                    player.sendMessage(ChatColor.GREEN + url);
-                                } catch (IOException ex) {
-                                    Logger.getLogger(JobCommand.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            } else {
-                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                    if (args.length > 1) {
+                        if (JobDatabase.getActiveJobs().containsKey(args[1])) {
+                            Job job = JobDatabase.getActiveJobs().get(args[1]);
+                            try {
+                                TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+                                String jobstr = TheGaffer.getJsonMapper().writeValueAsString(job);
+                                TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+                                String url = "http://mcme.co/jobs/export?job=" + jobstr;
+                                player.sendMessage(ChatColor.GREEN + url);
+                            } catch (IOException ex) {
+                                Logger.getLogger(JobCommand.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        } else if (JobDatabase.getInactiveJobs().containsKey(args[1])) {
+                            Job job = JobDatabase.getInactiveJobs().get(args[1]);
+                            try {
+                                TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+                                String jobstr = TheGaffer.getJsonMapper().writeValueAsString(job);
+                                TheGaffer.getJsonMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+                                String url = "http://mcme.co/jobs/export?job=" + jobstr;
+                                player.sendMessage(ChatColor.GREEN + url);
+                            } catch (IOException ex) {
+                                Logger.getLogger(JobCommand.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                            player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
                         }
+                    } else {
+                        player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
+                    }
                     return true;
                 }
             }
