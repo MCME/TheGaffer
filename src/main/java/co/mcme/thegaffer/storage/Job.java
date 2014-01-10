@@ -305,6 +305,7 @@ public class Job implements Listener {
         getWarp().setYaw(loc.getYaw());
         getWarp().setPitch(loc.getPitch());
         getWarp().setWorld(loc.getWorld().getName());
+        generateBounds();
         setDirty(true);
         JobDatabase.saveJobs();
     }
