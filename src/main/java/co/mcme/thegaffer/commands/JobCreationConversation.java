@@ -96,6 +96,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
+            input = input.replaceAll(" ", "_");
             File newJob = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs"
                     + TheGaffer.getFileSeperator() + input + TheGaffer.getFileExtension());
             if (newJob.exists()) {
