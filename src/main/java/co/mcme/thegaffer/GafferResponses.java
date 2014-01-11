@@ -47,7 +47,8 @@ public class GafferResponses {
         NOT_WORKER("%name% is not part of the job.", false),
         NOT_ONLINE("%name% is not online.", false),
         ADD_SUCCESS("Welcome to %job%.", true),
-        REMOVE_SUCCESS("%name% removed from job.", true);
+        REMOVE_SUCCESS("%name% removed from job.", true),
+        WORKER_BANNED("%name is banned from %job%", false);
 
         @Getter
         private final String message;

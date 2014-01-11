@@ -206,6 +206,9 @@ public class Job implements Listener {
         if (workers.contains(p.getName())) {
             return WorkerResponse.ALREADY_WORKER;
         }
+        if (bannedWorkers.contains(p.getName())) {
+            return WorkerResponse.WORKER_BANNED;
+        }
         if (!p.isOnline()) {
             return WorkerResponse.NOT_ONLINE;
         }
