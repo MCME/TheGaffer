@@ -68,7 +68,8 @@ public class GafferResponses {
         NO_PERMISSIONS("%name% does not have the permissions to be invited to %job%.", false),
         NOT_ONLINE("%name% is not online.", false),
         ADD_SUCCESS("%name% invited to %job%.", true),
-        REMOVE_SUCCESS("%name% uninvited from %job%.", true);
+        REMOVE_SUCCESS("%name% uninvited from %job%.", true),
+        WORKER_BANNED("%name% is banned from %job%", false);
 
         @Getter
         private final String message;
