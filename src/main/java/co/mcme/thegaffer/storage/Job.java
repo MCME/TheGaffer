@@ -24,6 +24,7 @@ import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import lombok.Getter;
@@ -113,6 +114,13 @@ public class Job implements Listener {
     }
 
     public Job() {
+    }
+
+    @JsonIgnore
+    public File getFile() {
+        return new File(TheGaffer.getPluginDataFolder(),
+                TheGaffer.getFileSeperator() + "jobs" + TheGaffer.getFileSeperator()
+                + name + TheGaffer.getFileExtension());
     }
 
     @JsonIgnore
