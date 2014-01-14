@@ -18,6 +18,7 @@ package co.mcme.thegaffer.storage;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -92,10 +93,25 @@ public class JobItem {
             out.setItemMeta(meta);
         }
         if (bookMeta != null) {
-            out.setItemMeta(bookMeta);
+            BookMeta meta = (BookMeta) out.getItemMeta();
+            meta.setAuthor(bookMeta.getTitle());
+            meta.setPages(bookMeta.getPages());
+            meta.setTitle(bookMeta.getTitle());
+            if (bookMeta.getLore() != null) {
+                meta.setLore(bookMeta.getLore());
+            }
+            out.setItemMeta(meta);
         }
         if (armorMeta != null) {
-            out.setItemMeta(armorMeta);
+            LeatherArmorMeta meta = (LeatherArmorMeta) out.getItemMeta();
+            meta.setColor(Color.fromRGB(armorMeta.getRgb()));
+            if (armorMeta.getDisplayName() != null) {
+                meta.setDisplayName(armorMeta.getDisplayName());
+            }
+            if (armorMeta.getLore() != null) {
+                meta.setLore(armorMeta.getLore());
+            }
+            out.setItemMeta(meta);
         }
         return out;
     }

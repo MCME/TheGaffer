@@ -31,11 +31,17 @@ public class JobBookMeta {
     @Getter
     @Setter
     private String title;
+    @Getter
+    @Setter
+    private List<String> lore;
 
     public JobBookMeta(BookMeta meta) {
         this.author = meta.getAuthor();
         this.pages = meta.getPages();
         this.title = meta.getTitle();
+        if (meta.hasLore()) {
+            this.lore = meta.getLore();
+        }
     }
 
     public JobBookMeta() {

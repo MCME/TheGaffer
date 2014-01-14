@@ -32,13 +32,14 @@ public class JobLeatherArmorMeta {
     @Setter
     private List<String> lore;
 
-    @Getter
-    @Setter
-
     public JobLeatherArmorMeta(LeatherArmorMeta meta) {
         this.rgb = meta.getColor().asRGB();
-        this.displayName = meta.getDisplayName();
-        this.lore = meta.getLore();
+        if (meta.hasDisplayName()) {
+            this.displayName = meta.getDisplayName();
+        }
+        if (meta.hasLore()) {
+            this.lore = meta.getLore();
+        }
     }
 
     public JobLeatherArmorMeta() {
