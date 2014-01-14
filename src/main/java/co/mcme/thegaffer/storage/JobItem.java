@@ -43,7 +43,7 @@ public class JobItem {
     private List<String> lore;
     @Getter
     @Setter
-    private BookMeta bookMeta;
+    private JobBookMeta bookMeta;
     @Getter
     @Setter
     private LeatherArmorMeta armorMeta;
@@ -65,7 +65,7 @@ public class JobItem {
                 this.lore = i.getItemMeta().getLore();
             }
             if (i.getItemMeta() instanceof BookMeta) {
-                this.bookMeta = (BookMeta) i.getItemMeta();
+                this.bookMeta = new JobBookMeta((BookMeta) i.getItemMeta());
             }
             if (i.getItemMeta() instanceof LeatherArmorMeta) {
                 this.armorMeta = (LeatherArmorMeta) i.getItemMeta();
