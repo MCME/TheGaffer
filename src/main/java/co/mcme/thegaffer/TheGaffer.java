@@ -52,6 +52,16 @@ public class TheGaffer extends JavaPlugin {
     static boolean debug = false;
     @Getter
     static Configuration pluginConfig;
+    @Getter
+    static String SFTPHOST;
+    @Getter
+    static int SFTPPORT = 22;
+    @Getter
+    static String SFTPUSER;
+    @Getter
+    static String SFTPPASS;
+    @Getter
+    static String SFTPWORKINGDIR;
 
     @Override
     public void onEnable() {
@@ -85,6 +95,12 @@ public class TheGaffer extends JavaPlugin {
     public void setupConfig() {
         pluginConfig = getConfig();
         getConfig().options().copyDefaults(true);
+        debug = pluginConfig.getBoolean("general.debug");
+        SFTPHOST = pluginConfig.getString("export.host");
+        SFTPPORT = pluginConfig.getInt("export.port");
+        SFTPUSER = pluginConfig.getString("export.user");
+        SFTPPASS = pluginConfig.getString("export.password");
+        SFTPWORKINGDIR = "/var/www/mcme.co/html/jobs/storage/";
         saveConfig();
     }
 
