@@ -1,12 +1,4 @@
 general:
   debug: true
-<<<<<<< HEAD
 servlet:
     port: 8080
-=======
-export:
-    host: "host"
-    port: 22
-    user: "root"
-    password: ""
->>>>>>> 10755600c6231fe940854c0a0460ac7cc329ad3e
