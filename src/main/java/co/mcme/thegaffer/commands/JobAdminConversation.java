@@ -20,6 +20,8 @@ import co.mcme.thegaffer.GafferResponses.GenericResponse;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
+import co.mcme.thegaffer.storage.JobItem;
+import co.mcme.thegaffer.storage.JobKit;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +43,7 @@ import org.bukkit.conversations.NumericPrompt;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class JobAdminConversation implements CommandExecutor, ConversationAbandonedListener {
 
@@ -67,6 +70,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("inviteworker");
         actions.add("uninviteworker");
         actions.add("setradius");
+        actions.add("setkit");
         Collections.sort(actions);
     }
 
@@ -79,7 +83,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             return false;
         }
     }
-    
+
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
         if (abandonedEvent.gracefulExit()) {
@@ -214,6 +218,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 }
                 case "setradius": {
                     return new setRadiusPrompt();
+                }
+                case "setkit": {
+                    return new setKitPrompt();
                 }
                 default: {
                     return new whichActionPrompt();
@@ -377,8 +384,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             return "Who would you like to uninvite from the job?";
         }
     }
-    
+
     private class setRadiusPrompt extends NumericPrompt {
+
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
@@ -386,10 +394,41 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             job.updateJobRadius(input.intValue());
             return new responsePrompt(GenericResponse.SUCCESS, this);
         }
-        
+
         @Override
         public String getPromptText(ConversationContext context) {
             return "Should big should the job area be? (radius 0 - 1000)";
+        }
+    }
+
+    private class setKitPrompt extends MessagePrompt {
+
+        @Override
+        public Prompt getNextPrompt(ConversationContext context) {
+            Job job = (Job) context.getSessionData("job");
+            JobKit kit = new JobKit();
+            Player admin = (Player) context.getForWhom();
+            kit.setHelmet(new JobItem(admin.getInventory().getHelmet()));
+            kit.setChestplate(new JobItem(admin.getInventory().getChestplate()));
+            kit.setPants(new JobItem(admin.getInventory().getLeggings()));
+            kit.setBoots(new JobItem(admin.getInventory().getBoots()));
+            List<JobItem> contents = new ArrayList();
+            for (ItemStack i : admin.getInventory().getContents()) {
+                contents.add(new JobItem(i));
+            }
+            kit.setContents(contents.toArray(new JobItem[contents.size()]));
+            job.setKit(kit);
+            for (String pname : job.getWorkers()) {
+                if (TheGaffer.getServerInstance().getOfflinePlayer(pname).isOnline()) {
+                    job.getKit().replaceInventory(TheGaffer.getServerInstance().getOfflinePlayer(pname).getPlayer());
+                }
+            }
+            return Prompt.END_OF_CONVERSATION;
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Successfully set the kit of the job to your inventory.";
         }
     }
 
