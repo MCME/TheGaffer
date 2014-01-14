@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -71,6 +70,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("inviteworker");
         actions.add("uninviteworker");
         actions.add("setradius");
+        actions.add("setkit");
         Collections.sort(actions);
     }
 
