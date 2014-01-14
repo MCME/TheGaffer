@@ -16,26 +16,17 @@
 package co.mcme.thegaffer.commands;
 
 import co.mcme.thegaffer.GafferResponses.GafferResponse;
-import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
-import co.mcme.thegaffer.utilities.ExportUtil;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
-import org.codehaus.jackson.map.SerializationConfig;
 
 public class JobCommand implements TabExecutor {
 
@@ -63,28 +54,6 @@ public class JobCommand implements TabExecutor {
                         }
                     } else {
                         player.sendMessage(ChatColor.RED + "You don't have permission.");
-                    }
-                    return true;
-                }
-                if (args[0].equalsIgnoreCase("export")) {
-                    if (args.length > 1) {
-                        Job job = null;
-                        if (JobDatabase.getActiveJobs().containsKey(args[1])) {
-                            job = JobDatabase.getActiveJobs().get(args[1]);
-                        } else if (JobDatabase.getInactiveJobs().containsKey(args[1])) {
-                            job = JobDatabase.getInactiveJobs().get(args[1]);
-                        }
-                        if (job == null) {
-                            player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
-                        } else {
-                            try {
-                                player.sendMessage(ExportUtil.exportJob(job));
-                            } catch (SftpException | FileNotFoundException | JSchException ex) {
-                                Logger.getLogger(JobCommand.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    } else {
-                        player.sendMessage(ChatColor.RED + "What job would you like to export?");
                     }
                     return true;
                 }

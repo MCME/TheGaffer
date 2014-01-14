@@ -21,12 +21,15 @@ import co.mcme.thegaffer.commands.JobCreationConversation;
 import co.mcme.thegaffer.listeners.JobEventListener;
 import co.mcme.thegaffer.listeners.PlayerListener;
 import co.mcme.thegaffer.listeners.ProtectionListener;
+import co.mcme.thegaffer.servlet.GafferServer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.CleanupUtil;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
@@ -53,18 +56,11 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static Configuration pluginConfig;
     @Getter
-    static String SFTPHOST;
-    @Getter
-    static int SFTPPORT = 22;
-    @Getter
-    static String SFTPUSER;
-    @Getter
-    static String SFTPPASS;
-    @Getter
-    static String SFTPWORKINGDIR;
+    static int servletPort;
+    GafferServer server;
 
     @Override
-    public void onEnable() {
+    public synchronized void onEnable() {
         serverInstance = getServer();
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
@@ -90,17 +86,28 @@ public class TheGaffer extends JavaPlugin {
                 CleanupUtil.scheduledCleanup();
             }
         }, 0, (5 * 60) * 20);
+        server = new GafferServer(servletPort);
+        try {
+            server.startServer();
+        } catch (Exception ex) {
+            Util.severe(ex.toString());
+        }
+    }
+    
+    @Override
+    public synchronized void onDisable() {
+        try {
+            server.stopServer();
+        } catch (Exception ex) {
+            Logger.getLogger(TheGaffer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void setupConfig() {
         pluginConfig = getConfig();
         getConfig().options().copyDefaults(true);
         debug = pluginConfig.getBoolean("general.debug");
-        SFTPHOST = pluginConfig.getString("export.host");
-        SFTPPORT = pluginConfig.getInt("export.port");
-        SFTPUSER = pluginConfig.getString("export.user");
-        SFTPPASS = pluginConfig.getString("export.password");
-        SFTPWORKINGDIR = "/var/www/mcme.co/html/jobs/storage/";
+        servletPort = pluginConfig.getInt("servlet.port");
         saveConfig();
     }
 

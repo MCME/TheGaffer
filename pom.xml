@@ -48,8 +48,8 @@
                                     <shadedPattern>co.mcme.thegaffer.libs.org.codehaus</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.jcraft</pattern>
-                                    <shadedPattern>co.mcme.thegaffer.libs.com.jcraft</shadedPattern>
+                                    <pattern>org.eclipse</pattern>
+                                    <shadedPattern>co.mcme.thegaffer.libs.org.eclipse</shadedPattern>
                                 </relocation>
                             </relocations>
                             <artifactSet>
@@ -90,9 +90,9 @@
             <version>1.12.2</version>
         </dependency>
         <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.50</version>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.1.0.v20131115</version>
         </dependency>
     </dependencies>
 </project>
