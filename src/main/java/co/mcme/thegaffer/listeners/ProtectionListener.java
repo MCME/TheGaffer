@@ -272,7 +272,8 @@ public class ProtectionListener implements Listener {
                         || event.getClickedBlock().getType() == Material.MELON_STEM
                         || event.getClickedBlock().getType() == Material.POTATO
                         || event.getClickedBlock().getType() == Material.CARROT
-                        || event.getClickedBlock().getType() == Material.COCOA)) {
+                        || event.getClickedBlock().getType() == Material.COCOA
+                        || event.getClickedBlock().getType() == Material.LONG_GRASS)) {
                     restricted = true;
                 } else if (event.getItem().getData().getData() == 3) {
                     restricted = true;
