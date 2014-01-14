@@ -46,7 +46,7 @@ public class JobItem {
     private JobBookMeta bookMeta;
     @Getter
     @Setter
-    private LeatherArmorMeta armorMeta;
+    private JobLeatherArmorMeta armorMeta;
 
     public JobItem(ItemStack i) {
         if (i == null) {
@@ -68,7 +68,7 @@ public class JobItem {
                 this.bookMeta = new JobBookMeta((BookMeta) i.getItemMeta());
             }
             if (i.getItemMeta() instanceof LeatherArmorMeta) {
-                this.armorMeta = (LeatherArmorMeta) i.getItemMeta();
+                this.armorMeta = new JobLeatherArmorMeta((LeatherArmorMeta) i.getItemMeta());
             }
         }
     }
