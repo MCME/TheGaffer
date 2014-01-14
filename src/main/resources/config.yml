@@ -2,3 +2,8 @@ protect_worlds:
   - bvz
 general:
   debug: true
+export:
+    host: "host"
+    port: 22
+    user: "root"
+    password: ""
