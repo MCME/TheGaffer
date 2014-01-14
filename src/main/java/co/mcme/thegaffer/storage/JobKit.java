@@ -39,6 +39,7 @@ public class JobKit {
     private JobItem boots;
 
     public void replaceInventory(Player p) {
+        p.getInventory().clear();
         for (JobItem i : contents) {
             p.getInventory().addItem(i.toBukkitItem());
         }
