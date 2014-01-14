@@ -246,6 +246,9 @@ public class Job implements Listener {
         if (!workers.contains(p.getName())) {
             return WorkerResponse.NOT_WORKER;
         }
+        if (p.isOnline()) {
+            p.getPlayer().getInventory().clear();
+        }
         workers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
