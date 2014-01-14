@@ -93,6 +93,9 @@ public class Job implements Listener {
     @Setter
     @JsonIgnore
     private boolean dirty;
+    @Getter
+    @Setter
+    private JobKit kit;
 
     public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr) {
         this.name = name;
@@ -229,6 +232,9 @@ public class Job implements Listener {
         workers.add(p.getName());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
+            if (kit != null) {
+                kit.replaceInventory(p.getPlayer());
+            }
         }
         setDirty(true);
         JobDatabase.saveJobs();
