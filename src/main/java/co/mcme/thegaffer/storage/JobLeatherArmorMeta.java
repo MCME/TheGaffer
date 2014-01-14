@@ -16,14 +16,25 @@
 package co.mcme.thegaffer.storage;
 
 import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class JobLeatherArmorMeta {
 
+    @Getter
+    @Setter
     private int rgb;
+    @Getter
+    @Setter
     private String displayName;
+    @Getter
+    @Setter
     private List<String> lore;
-    
+
+    @Getter
+    @Setter
+
     public JobLeatherArmorMeta(LeatherArmorMeta meta) {
         this.rgb = meta.getColor().asRGB();
         this.displayName = meta.getDisplayName();
