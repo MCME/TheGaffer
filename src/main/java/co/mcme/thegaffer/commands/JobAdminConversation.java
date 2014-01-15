@@ -406,17 +406,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
             Job job = (Job) context.getSessionData("job");
-            JobKit kit = new JobKit();
-            Player admin = (Player) context.getForWhom();
-            kit.setHelmet(new JobItem(admin.getInventory().getHelmet()));
-            kit.setChestplate(new JobItem(admin.getInventory().getChestplate()));
-            kit.setPants(new JobItem(admin.getInventory().getLeggings()));
-            kit.setBoots(new JobItem(admin.getInventory().getBoots()));
-            List<JobItem> contents = new ArrayList();
-            for (ItemStack i : admin.getInventory().getContents()) {
-                contents.add(new JobItem(i));
-            }
-            kit.setContents(contents.toArray(new JobItem[contents.size()]));
+            JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
             job.setKit(kit);
             for (String pname : job.getWorkers()) {
                 if (TheGaffer.getServerInstance().getOfflinePlayer(pname).isOnline()) {
