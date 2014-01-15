@@ -18,6 +18,7 @@ package co.mcme.thegaffer.commands;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
+import co.mcme.thegaffer.storage.JobKit;
 import co.mcme.thegaffer.storage.JobWarp;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
@@ -154,6 +155,21 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         }
 
     }
+    
+    private class kitPrompt extends BooleanPrompt {
+
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
+            context.setSessionData("setkit", input);
+            return new howBigPrompt();
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Set the kit of the job now? (true or false)";
+        }
+
+    }
 
     private class howBigPrompt extends NumericPrompt {
 
@@ -182,8 +198,13 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
+            boolean setKit = (boolean) context.getSessionData("setkit");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
             Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius);
+            if (setKit) {
+                JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
+                jerb.setKit(kit);
+            }
             JobDatabase.activateJob(jerb);
             return "Successfully created the " + jobname + " job!";
         }
