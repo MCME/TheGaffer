@@ -15,10 +15,13 @@
  */
 package co.mcme.thegaffer.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class JobKit {
 
@@ -48,5 +51,21 @@ public class JobKit {
         p.getInventory().setLeggings(pants.toBukkitItem());
         p.getInventory().setBoots(boots.toBukkitItem());
         p.updateInventory();
+    }
+
+    public JobKit() {
+
+    }
+
+    public JobKit(PlayerInventory inv) {
+        helmet = new JobItem(inv.getHelmet());
+        chestplate = new JobItem(inv.getChestplate());
+        pants = new JobItem(inv.getLeggings());
+        boots = new JobItem(inv.getBoots());
+        List<JobItem> contentS = new ArrayList();
+        for (ItemStack i : inv.getContents()) {
+            contentS.add(new JobItem(i));
+        }
+        contents = contentS.toArray(new JobItem[contentS.size()]);
     }
 }
