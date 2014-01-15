@@ -15,6 +15,7 @@
  */
 package co.mcme.thegaffer.servlet;
 
+import co.mcme.thegaffer.utilities.Util;
 import lombok.Getter;
 import org.eclipse.jetty.server.Server;
 
@@ -27,15 +28,27 @@ public class GafferServer {
 
     public GafferServer(int port) {
         this.port = port;
+        server = new Server(port);
+        server.setHandler(new GafferHandler());
     }
 
     public void startServer() throws Exception {
-        server = new Server(port);
-        server.setHandler(new GafferHandler());
-        server.start();
+        try {
+            if (server != null) {
+                server.start();
+            }
+        } catch (Exception e) {
+            Util.severe("Failed to start servlet on port: " + port + " : " + e.getMessage());
+        }
     }
 
     public void stopServer() throws Exception {
-        server.stop();
+        try {
+            if (server != null) {
+                server.stop();
+            }
+        } catch (Exception e) {
+            Util.severe("Failed to stop servlet on port: " + port + " : " + e.getMessage());
+        }
     }
 }
