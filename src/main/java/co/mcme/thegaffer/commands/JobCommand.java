@@ -16,8 +16,10 @@
 package co.mcme.thegaffer.commands;
 
 import co.mcme.thegaffer.GafferResponses.GafferResponse;
+import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
+import co.mcme.thegaffer.utilities.CleanupUtil;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,18 @@ public class JobCommand implements TabExecutor {
                     }
                     return true;
                 }
+            }
+            if (args[0].equalsIgnoreCase("debug")) {
+                if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                    StringBuilder out = new StringBuilder();
+                    out.append(ChatColor.AQUA).append("TheGaffer Debug").append("\n");
+                    out.append(ChatColor.GRAY).append("Servlet port: ").append(ChatColor.AQUA).append(TheGaffer.getServletPort()).append("\n");
+                    out.append(ChatColor.GRAY).append("Number of active jobs: ").append(ChatColor.AQUA).append(JobDatabase.getActiveJobs().size()).append("\n");
+                    out.append(ChatColor.GRAY).append("Number of inactive jobs: ").append(ChatColor.AQUA).append(JobDatabase.getInactiveJobs().size()).append("\n");
+                    out.append(ChatColor.GRAY).append("Number of jobs timing out: ").append(ChatColor.AQUA).append(CleanupUtil.getWaiting().size());
+                    player.sendMessage(out.toString());
+                }
+                return true;
             }
             if (args[0].equalsIgnoreCase("check")) {
                 if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
