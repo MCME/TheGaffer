@@ -20,6 +20,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.Util;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,26 +32,43 @@ public class GafferHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Util.debug("Processing http request for " + target);
-        if (target.equals("/list/active")) {
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            baseRequest.setHandled(true);
-            response.getWriter().println(TheGaffer.getJsonMapper().writeValueAsString(JobDatabase.getActiveJobs()));
-        } else if (target.equals("/list/inactive")) {
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            baseRequest.setHandled(true);
-            response.getWriter().println(TheGaffer.getJsonMapper().writeValueAsString(JobDatabase.getInactiveJobs()));
-        } else if (target.contains("/job/")) {
-            target = target.replaceAll("/job/", "");
-            if (JobDatabase.getActiveJobs().containsKey(target)) {
-                Job job = JobDatabase.getActiveJobs().get(target);
+        String[] targets = target.split("/");
+        if (targets[1].equalsIgnoreCase("list")) {
+            Map data = null;
+            if (targets[2].equalsIgnoreCase("active")) {
+                data = JobDatabase.getActiveJobs();
+                response.setStatus(HttpServletResponse.SC_OK);
+                baseRequest.setHandled(true);
+            }
+            if (targets[2].equalsIgnoreCase("inactive")) {
+                data = JobDatabase.getInactiveJobs();
+                response.setStatus(HttpServletResponse.SC_OK);
+                baseRequest.setHandled(true);
+            }
+            if (targets.length == 4 && targets[3].equalsIgnoreCase("namesonly")) {
+                if (data != null) {
+                    response.setContentType("application/json");
+                    response.getWriter().println(TheGaffer.getJsonMapper().writeValueAsString(data.keySet()));
+                } else {
+                    response.setStatus(404);
+                }
+            } else {
+                if (data != null) {
+                    response.setContentType("application/json");
+                    response.getWriter().println(TheGaffer.getJsonMapper().writeValueAsString(data));
+                } else {
+                    response.setStatus(404);
+                }
+            }
+        } else if (targets[1].equalsIgnoreCase("job")) {
+            if (JobDatabase.getActiveJobs().containsKey(targets[2])) {
+                Job job = JobDatabase.getActiveJobs().get(targets[2]);
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
                 baseRequest.setHandled(true);
                 response.getWriter().println(TheGaffer.getJsonMapper().writeValueAsString(job));
-            } else if (JobDatabase.getInactiveJobs().containsKey(target)) {
-                Job job = JobDatabase.getInactiveJobs().get(target);
+            } else if (JobDatabase.getInactiveJobs().containsKey(targets[2])) {
+                Job job = JobDatabase.getInactiveJobs().get(targets[2]);
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_OK);
                 baseRequest.setHandled(true);
