@@ -21,6 +21,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.CleanupUtil;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
+import co.mcme.thegaffer.utilities.Util;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
@@ -59,6 +60,10 @@ public class JobCommand implements TabExecutor {
                     }
                     return true;
                 }
+            }
+            if (args[0].equalsIgnoreCase("aero")) {
+                player.sendMessage(Util.dino);
+                return true;
             }
             if (args[0].equalsIgnoreCase("debug")) {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
