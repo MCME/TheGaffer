@@ -30,7 +30,7 @@ public class GafferHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Util.info(target);
+        Util.debug("Processing http request for " + target);
         if (target.equals("/list/active")) {
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
