@@ -32,7 +32,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
 
 public class JobCommand implements TabExecutor {
-
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -68,11 +68,14 @@ public class JobCommand implements TabExecutor {
             if (args[0].equalsIgnoreCase("debug")) {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                     StringBuilder out = new StringBuilder();
-                    out.append(ChatColor.AQUA).append("TheGaffer Debug").append("\n");
+                    out.append(ChatColor.DARK_PURPLE).append(ChatColor.BOLD).append("TheGaffer Debug").append("\n");
                     out.append(ChatColor.GRAY).append("Servlet port: ").append(ChatColor.AQUA).append(TheGaffer.getServletPort()).append("\n");
                     out.append(ChatColor.GRAY).append("Number of active jobs: ").append(ChatColor.AQUA).append(JobDatabase.getActiveJobs().size()).append("\n");
                     out.append(ChatColor.GRAY).append("Number of inactive jobs: ").append(ChatColor.AQUA).append(JobDatabase.getInactiveJobs().size()).append("\n");
-                    out.append(ChatColor.GRAY).append("Number of jobs timing out: ").append(ChatColor.AQUA).append(CleanupUtil.getWaiting().size());
+                    out.append(ChatColor.GRAY).append("Number of jobs timing out: ").append(ChatColor.AQUA).append(CleanupUtil.getWaiting().size()).append("\n");
+                    out.append(ChatColor.GRAY).append("Join permission: ").append(ChatColor.AQUA).append(PermissionsUtil.getJoinPermission().getName()).append("\n");
+                    out.append(ChatColor.GRAY).append("Ignore protection permission: ").append(ChatColor.AQUA).append(PermissionsUtil.getIgnoreWorldProtection().getName()).append("\n");
+                    out.append(ChatColor.GRAY).append("Create permission: ").append(ChatColor.AQUA).append(PermissionsUtil.getCreatePermission().getName()).append("\n");
                     player.sendMessage(out.toString());
                 }
                 return true;
