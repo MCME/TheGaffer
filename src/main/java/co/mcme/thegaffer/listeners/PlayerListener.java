@@ -15,11 +15,13 @@
  */
 package co.mcme.thegaffer.listeners;
 
+import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerListener implements Listener {
@@ -30,7 +32,14 @@ public class PlayerListener implements Listener {
             event.getPlayer().sendMessage(ChatColor.GRAY + "There is a job running! Use /job check to find out what it is!");
         }
         if (event.getPlayer().hasPermission(PermissionsUtil.getCreatePermission())) {
-            
+
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        if (TheGaffer.getOnJob().contains(event.getPlayer())) {
+            event.setFormat("[" + ChatColor.AQUA + "J" + ChatColor.WHITE + "] " + event.getFormat());
         }
     }
 }

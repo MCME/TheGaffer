@@ -229,6 +229,7 @@ public class Job implements Listener {
         if (Private && !(invitedWorkers.contains(p.getName()))) {
             return WorkerResponse.NOT_INVITED;
         }
+        TheGaffer.getOnJob().add(p);
         workers.add(p.getName());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
@@ -249,6 +250,7 @@ public class Job implements Listener {
         if (p.isOnline()) {
             p.getPlayer().getInventory().clear();
         }
+        TheGaffer.getOnJob().remove(p);
         workers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
