@@ -31,7 +31,7 @@ public class JobEventListener implements Listener {
     public void onJobEnd(JobEndEvent event) {
         Job job = event.getJob();
         job.sendToAll(ChatColor.GRAY + "The " + job.getName() + " job has ended.");
-        for (Player p : job.getWorkersAsPlayers()) {
+        for (Player p : job.getWorkersAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.ENDERDRAGON_WINGS, 10, 2);
         }
     }

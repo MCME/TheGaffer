@@ -147,12 +147,12 @@ public class JobDatabase {
         return true;
     }
 
-    public static boolean isPlayerWorking(OfflinePlayer p) {
+    public static Job getJobWorking(OfflinePlayer p) {
         for (Job job : activeJobs.values()) {
-            if (job.isPlayerWorking(p)) {
-                return true;
+            if (job.isPlayerWorking(p) || job.isPlayerHelper(p)) {
+                return job;
             }
         }
-        return false;
+        return null;
     }
 }

@@ -27,6 +27,8 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
@@ -159,7 +161,7 @@ public class Job implements Listener {
     }
 
     @JsonIgnore
-    public Player[] getWorkersAsPlayers() {
+    public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
         for (String pName : workers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
@@ -168,6 +170,45 @@ public class Job implements Listener {
             }
         }
         return players.toArray(new Player[players.size()]);
+    }
+
+    @JsonIgnore
+    public Player[] getAllAsPlayersArray() {
+        ArrayList<Player> players = new ArrayList();
+        for (String pName : workers) {
+            OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
+            if (p.isOnline()) {
+                players.add(p.getPlayer());
+            }
+        }
+        for (String pName : helpers) {
+            OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
+            if (p.isOnline()) {
+                players.add(p.getPlayer());
+            }
+        }
+        if (TheGaffer.getServerInstance().getOfflinePlayer(owner).isOnline()) {
+            players.add(TheGaffer.getServerInstance().getOfflinePlayer(owner).getPlayer());
+        }
+        Set<Player> dedupedPlayers = new LinkedHashSet<>(players);
+        players.clear();
+        players.addAll(dedupedPlayers);
+        return players.toArray(new Player[players.size()]);
+    }
+
+    @JsonIgnore
+    public ArrayList<Player> getWorkersAsPlayersList() {
+        ArrayList<Player> players = new ArrayList();
+        for (String pName : workers) {
+            OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
+            if (p.isOnline()) {
+                players.add(p.getPlayer());
+            }
+        }
+        Set<Player> dedupedPlayers = new LinkedHashSet<>(players);
+        players.clear();
+        players.addAll(dedupedPlayers);
+        return players;
     }
 
     @JsonIgnore
@@ -382,6 +423,21 @@ public class Job implements Listener {
     public void onLeave(PlayerQuitEvent event) {
         if (event.getPlayer().getName().equals(owner)) {
             TheGaffer.scheduleOwnerTimeout(this);
+        }
+    }
+
+    public void jobChat(Player p, String[] chat) {
+        String prefix;
+        String message;
+        if (p.getName().equals(owner) || helpers.contains(p.getName())) {
+            prefix = "[" + ChatColor.DARK_RED + "J" + ChatColor.RESET + "] ";
+            message = ChatColor.AQUA + chat[1] + ChatColor.RESET;
+        } else {
+            prefix = "[" + ChatColor.YELLOW + "J" + ChatColor.RESET + "] ";
+            message = ChatColor.WHITE + chat[1] + ChatColor.RESET;
+        }
+        for (Player player : getAllAsPlayersArray()) {
+            player.sendMessage(chat[0] + prefix + message);
         }
     }
 }
