@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeMap;
 import lombok.Getter;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 
 public class JobDatabase {
@@ -144,5 +145,14 @@ public class JobDatabase {
         saveJobs();
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobEndEvent(j));
         return true;
+    }
+
+    public static boolean isPlayerWorking(OfflinePlayer p) {
+        for (Job job : activeJobs.values()) {
+            if (job.isPlayerWorking(p)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

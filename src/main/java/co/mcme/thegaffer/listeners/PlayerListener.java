@@ -15,11 +15,11 @@
  */
 package co.mcme.thegaffer.listeners;
 
-import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -36,10 +36,12 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
-        if (TheGaffer.getOnJob().contains(event.getPlayer())) {
-            event.setFormat("[" + ChatColor.AQUA + "J" + ChatColor.WHITE + "] " + event.getFormat());
+        if (JobDatabase.getActiveJobs().size() > 0) {
+            if (JobDatabase.isPlayerWorking(event.getPlayer())) {
+                event.setFormat("[" + ChatColor.AQUA + "J" + ChatColor.WHITE + "] " + event.getFormat());
+            }
         }
     }
 }
