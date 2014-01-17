@@ -161,7 +161,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("setkit", input);
-            return new howBigPrompt();
+            return new finishedPrompt();
         }
 
         @Override
@@ -176,7 +176,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
-            return new finishedPrompt();
+            return new kitPrompt();
         }
 
         @Override
