@@ -34,6 +34,7 @@ public class GafferHandler extends AbstractHandler {
         Util.debug("Processing http request for " + target);
         String[] targets = target.split("/");
         response.setHeader("Server", "TheGaffer v" + TheGaffer.getPluginInstance().getDescription().getVersion());
+        response.setHeader("Access-Control-Allow-Origin", "*");
         if (targets.length < 3) {
             response.setStatus(HttpServletResponse.SC_OK);
             baseRequest.setHandled(true);
