@@ -40,6 +40,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncPlayerChatEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
         if (JobDatabase.getActiveJobs().size() > 0) {
             Job workingon = JobDatabase.getJobWorking(event.getPlayer());
             if (workingon != null) {
@@ -53,6 +56,7 @@ public class PlayerListener implements Listener {
                 chat[1] = event.getMessage();
                 workingon.jobChat(p, chat);
                 event.getRecipients().clear();
+                event.setCancelled(true);
             }
         }
     }
