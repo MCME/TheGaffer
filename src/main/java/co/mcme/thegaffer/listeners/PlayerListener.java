@@ -38,7 +38,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(AsyncPlayerChatEvent event) {
         if (event.isCancelled()) {
             return;
@@ -47,7 +47,7 @@ public class PlayerListener implements Listener {
             Job workingon = JobDatabase.getJobWorking(event.getPlayer());
             if (workingon != null) {
                 if (event.getMessage().charAt(0) == '!') {
-                    event.getMessage().replaceFirst("!", "");
+                    event.setMessage(event.getMessage().replaceFirst("!", ""));
                     return;
                 }
                 Player p = event.getPlayer();
@@ -55,7 +55,6 @@ public class PlayerListener implements Listener {
                 chat[0] = event.getFormat().replace(event.getMessage(), "").replace("%1$s", p.getDisplayName()).replace("%2$s", "");
                 chat[1] = event.getMessage();
                 workingon.jobChat(p, chat);
-                event.getRecipients().clear();
                 event.setCancelled(true);
             }
         }
