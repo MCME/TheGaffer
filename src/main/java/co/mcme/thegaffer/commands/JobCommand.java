@@ -19,10 +19,12 @@ import co.mcme.thegaffer.GafferResponses.GafferResponse;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
+import co.mcme.thegaffer.storage.JobKit;
 import co.mcme.thegaffer.utilities.CleanupUtil;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import co.mcme.thegaffer.utilities.Util;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -32,7 +34,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
 
 public class JobCommand implements TabExecutor {
-    
+
+    private HashMap<Player, JobKit> invs = new HashMap();
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
@@ -60,6 +64,25 @@ public class JobCommand implements TabExecutor {
                     }
                     return true;
                 }
+            }
+            if (args[0].equalsIgnoreCase("prep")) {
+                if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                    if (invs.containsKey(player)) {
+                        JobKit old = invs.get(player);
+                        old.replaceInventory(player);
+                        player.sendMessage(ChatColor.GREEN + "Recovered previous inventory.");
+                        invs.remove(player);
+                    } else {
+                        invs.put(player, new JobKit(player.getInventory()));
+                        player.getInventory().clear();
+                        player.sendMessage(ChatColor.GREEN + "Stored your inventory.");
+                        player.sendMessage(ChatColor.GREEN + "When ready, run this command again to get your inventory back.");
+                        player.updateInventory();
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "You don't have permission.");
+                }
+                return true;
             }
             if (args[0].equalsIgnoreCase("aero")) {
                 player.sendMessage(Util.dino);
