@@ -145,7 +145,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             if (context.getSessionData("jobname") == null) {
-                return "What job would you like to modify? \n" + formatSet() + "\n" + "or exit with /cancel";
+                return "What job would you like to modify? \n" + formatSet() + "\n" + "or exit with !cancel";
             } else {
                 return "That job is not running, please try again.";
             }
