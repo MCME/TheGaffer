@@ -149,7 +149,7 @@ public class JobDatabase {
 
     public static Job getJobWorking(OfflinePlayer p) {
         for (Job job : activeJobs.values()) {
-            if (job.isPlayerWorking(p) || job.isPlayerHelper(p)) {
+            if (job.isPlayerWorking(p) || job.isPlayerHelper(p) || p.getName().equals(job.getOwner())) {
                 return job;
             }
         }
