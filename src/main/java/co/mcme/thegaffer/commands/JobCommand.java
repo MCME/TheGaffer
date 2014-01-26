@@ -24,6 +24,7 @@ import co.mcme.thegaffer.utilities.CleanupUtil;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import co.mcme.thegaffer.utilities.Util;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import org.bukkit.ChatColor;
@@ -222,25 +223,34 @@ public class JobCommand implements TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args[0].equalsIgnoreCase("archive")) {
-            return new ArrayList();
+            return null;
         }
         if (args[0].equalsIgnoreCase("check")) {
-            return new ArrayList();
-        }
-        if (args[0].equalsIgnoreCase("start")) {
-            List<String> jobs = new ArrayList();
-            jobs.addAll(JobDatabase.getInactiveJobs().keySet());
-            return jobs;
+            return null;
         }
         if (args[0].equalsIgnoreCase("info")) {
             List<String> jobs = new ArrayList();
             jobs.addAll(JobDatabase.getActiveJobs().keySet());
             jobs.addAll(JobDatabase.getInactiveJobs().keySet());
             return jobs;
-        } else {
+        }
+        if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")) {
             List<String> jobs = new ArrayList();
             jobs.addAll(JobDatabase.getActiveJobs().keySet());
             return jobs;
         }
+        List<String> actions = new ArrayList();
+        actions.add("archive");
+        actions.add("warpto");
+        actions.add("info");
+        actions.add("join");
+        actions.add("check");
+        if (sender.hasPermission(PermissionsUtil.getCreatePermission())) {
+            actions.add("stop");
+            actions.add("debug");
+            actions.add("prep");
+        }
+        Collections.sort(actions);
+        return actions;
     }
 }
