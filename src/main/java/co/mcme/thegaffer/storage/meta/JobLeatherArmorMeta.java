@@ -13,7 +13,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with TheGaffer.  If not, see <http://www.gnu.org/licenses/>.
  */
-package co.mcme.thegaffer.storage;
+package co.mcme.thegaffer.storage.meta;
 
 import java.util.List;
 import lombok.Getter;
