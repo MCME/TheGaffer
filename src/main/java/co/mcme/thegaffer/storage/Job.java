@@ -35,6 +35,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -55,6 +56,9 @@ public class Job implements Listener {
     @Getter
     @Setter
     private boolean running;
+    @Getter
+    @Setter
+    private boolean paused;
     @Getter
     @Setter
     private JobWarp warp;
@@ -230,6 +234,22 @@ public class Job implements Listener {
         String status = (running) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
         out.append("Status: ").append(status);
         return out.toString();
+    }
+    
+    public void pauseJob(String pauser) {
+        this.paused = true;
+        sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has paused the job.");
+        for (Player p : getAllAsPlayersArray()) {
+            p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 0.2f);
+        }
+    }
+    
+    public void unpauseJob(String pauser) {
+        this.paused = false;
+        sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has unpaused the job.");
+        for (Player p : getAllAsPlayersArray()) {
+            p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 2f);
+        }
     }
 
     public HelperResponse addHelper(OfflinePlayer p) {

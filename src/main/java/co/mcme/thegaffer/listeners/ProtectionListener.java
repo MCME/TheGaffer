@@ -65,6 +65,11 @@ public class ProtectionListener implements Listener {
                         for (Job job : JobDatabase.getActiveJobs().values()) {
                             if (job.isPlayerWorking(event.getPlayer()) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
+                                if (job.isPaused()) {
+                                    event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    event.setCancelled(true);
+                                    return;
+                                }
                             }
                         }
                         if (isinjobarea) {
@@ -118,6 +123,11 @@ public class ProtectionListener implements Listener {
                         for (Job job : JobDatabase.getActiveJobs().values()) {
                             if (job.isPlayerWorking(event.getPlayer()) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
+                                if (job.isPaused()) {
+                                    event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    event.setCancelled(true);
+                                    return;
+                                }
                             }
                         }
                         if (isinjobarea) {
@@ -173,6 +183,11 @@ public class ProtectionListener implements Listener {
                             for (Job job : JobDatabase.getActiveJobs().values()) {
                                 if (job.isPlayerWorking(player) && job.getBounds().contains(x, z)) {
                                     isinjobarea = true;
+                                    if (job.isPaused()) {
+                                    player.sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    event.setCancelled(true);
+                                    return;
+                                }
                                 }
                             }
                             if (isinjobarea) {
@@ -228,6 +243,11 @@ public class ProtectionListener implements Listener {
                         for (Job job : JobDatabase.getActiveJobs().values()) {
                             if (job.isPlayerWorking(player) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
+                                if (job.isPaused()) {
+                                    event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    event.setCancelled(true);
+                                    return;
+                                }
                             }
                         }
                         if (isinjobarea) {
@@ -316,6 +336,11 @@ public class ProtectionListener implements Listener {
                         for (Job job : JobDatabase.getActiveJobs().values()) {
                             if (job.isPlayerWorking(event.getPlayer()) && job.getBounds().contains(x, z)) {
                                 isinjobarea = true;
+                                if (job.isPaused()) {
+                                    event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    event.setCancelled(true);
+                                    return;
+                                }
                             }
                         }
                         if (isinjobarea) {

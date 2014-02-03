@@ -66,6 +66,40 @@ public class JobCommand implements TabExecutor {
                     }
                     return true;
                 }
+                if (args[0].equalsIgnoreCase("pause")) {
+                    if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                        if (args[1] != null) {
+                            String jobname = args[1];
+                            if (JobDatabase.getActiveJobs().containsKey(jobname)) {
+                                Job target = JobDatabase.getActiveJobs().get(jobname);
+                            } else {
+                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                        }
+                    } else {
+                        player.sendMessage(ChatColor.RED + "You don't have permission.");
+                    }
+                    return true;
+                }
+                if (args[0].equalsIgnoreCase("unpause")) {
+                    if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                        if (args[1] != null) {
+                            String jobname = args[1];
+                            if (JobDatabase.getActiveJobs().containsKey(jobname)) {
+                                Job target = JobDatabase.getActiveJobs().get(jobname);
+                            } else {
+                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                            }
+                        } else {
+                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                        }
+                    } else {
+                        player.sendMessage(ChatColor.RED + "You don't have permission.");
+                    }
+                    return true;
+                }
             }
             if (args[0].equalsIgnoreCase("prep")) {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
