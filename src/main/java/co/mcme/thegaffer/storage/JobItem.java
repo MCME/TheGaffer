@@ -24,7 +24,6 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
@@ -73,9 +72,6 @@ public class JobItem {
             }
             if (i.getItemMeta() instanceof LeatherArmorMeta) {
                 this.armorMeta = new JobLeatherArmorMeta((LeatherArmorMeta) i.getItemMeta());
-            }
-            if (i.getItemMeta() instanceof FireworkMeta) {
-                
             }
         }
     }
