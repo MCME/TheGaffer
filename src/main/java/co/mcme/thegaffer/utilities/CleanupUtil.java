@@ -49,6 +49,26 @@ public class CleanupUtil {
         Util.debug("Finished running job cleanup.");
     }
     
+    public static void scheduledAbandonersCleanup() {
+        Long max = 300000L;
+        Util.debug("Starting to clean up abandoners");
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            if (job.getLeft().size() > 0) {
+                for (OfflinePlayer p : job.getLeft().keySet()) {
+                    Long since = job.getLeft().get(p);
+                    Long For = System.currentTimeMillis() - since;
+                    if (For >= max) {
+                        Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job.");
+                        job.removeWorker(p);
+                    } else {
+                        Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job in " + (max - For) / 1000 + " seconds.");
+                    }
+                }
+            }
+        }
+        Util.debug("Finished cleaning up abandoners");
+    }
+    
     public static void selectNewOwner(Job job) {
         ArrayList<OfflinePlayer> possibles = new ArrayList();
         for (String name : job.getHelpers()) {

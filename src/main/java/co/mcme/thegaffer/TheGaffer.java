@@ -84,6 +84,7 @@ public class TheGaffer extends JavaPlugin {
             public void run() {
                 Util.debug("Starting running job cleanup.");
                 CleanupUtil.scheduledCleanup();
+                CleanupUtil.scheduledAbandonersCleanup();
             }
         }, 0, (5 * 60) * 20);
         server = new GafferServer(servletPort);

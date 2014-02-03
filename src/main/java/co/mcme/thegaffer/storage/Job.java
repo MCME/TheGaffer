@@ -27,6 +27,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -39,6 +40,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -98,6 +100,9 @@ public class Job implements Listener {
     @Getter
     @Setter
     private JobKit kit;
+    @Getter
+    @JsonIgnore
+    private HashMap<OfflinePlayer, Long> left = new HashMap();
 
     public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr) {
         this.name = name;
@@ -423,6 +428,16 @@ public class Job implements Listener {
     public void onLeave(PlayerQuitEvent event) {
         if (event.getPlayer().getName().equals(owner)) {
             TheGaffer.scheduleOwnerTimeout(this);
+        }
+        if (workers.contains(event.getPlayer().getName())) {
+            left.put(event.getPlayer(), System.currentTimeMillis());
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoin(PlayerJoinEvent event) {
+        if (left.containsKey(event.getPlayer())) {
+            left.remove(event.getPlayer());
         }
     }
 
