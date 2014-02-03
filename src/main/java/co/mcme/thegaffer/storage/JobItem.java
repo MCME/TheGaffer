@@ -16,12 +16,15 @@
 package co.mcme.thegaffer.storage;
 
 import co.mcme.thegaffer.storage.meta.JobBookMeta;
+import co.mcme.thegaffer.storage.meta.JobEnchantmentMeta;
 import co.mcme.thegaffer.storage.meta.JobLeatherArmorMeta;
 import java.util.List;
+import java.util.Map.Entry;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -50,6 +53,9 @@ public class JobItem {
     @Getter
     @Setter
     private JobLeatherArmorMeta armorMeta;
+    @Getter
+    @Setter
+    private JobEnchantmentMeta enchantmentMeta;
 
     public JobItem(ItemStack i) {
         if (i == null) {
@@ -72,6 +78,9 @@ public class JobItem {
             }
             if (i.getItemMeta() instanceof LeatherArmorMeta) {
                 this.armorMeta = new JobLeatherArmorMeta((LeatherArmorMeta) i.getItemMeta());
+            }
+            if (i.getItemMeta().hasEnchants()) {
+                this.enchantmentMeta = new JobEnchantmentMeta(i.getItemMeta());
             }
         }
     }
@@ -114,6 +123,11 @@ public class JobItem {
                 meta.setLore(armorMeta.getLore());
             }
             out.setItemMeta(meta);
+        }
+        if (enchantmentMeta != null) {
+            for (Entry<String, Integer> entry : enchantmentMeta.getEnchants().entrySet()) {
+                out.addUnsafeEnchantment(Enchantment.getByName(entry.getKey()), entry.getValue());
+            }
         }
         return out;
     }
