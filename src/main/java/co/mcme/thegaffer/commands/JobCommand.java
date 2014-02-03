@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -73,11 +74,13 @@ public class JobCommand implements TabExecutor {
                         old.replaceInventory(player);
                         player.sendMessage(ChatColor.GREEN + "Recovered previous inventory.");
                         invs.remove(player);
+                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 2f);
                     } else {
                         invs.put(player, new JobKit(player.getInventory()));
                         player.getInventory().clear();
                         player.sendMessage(ChatColor.GREEN + "Stored your inventory.");
                         player.sendMessage(ChatColor.GREEN + "When ready, run this command again to get your inventory back.");
+                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 0.5f);
                         player.updateInventory();
                     }
                 } else {

@@ -18,6 +18,7 @@ package co.mcme.thegaffer.listeners;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -26,11 +27,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (JobDatabase.getActiveJobs().size() > 0) {
-            event.getPlayer().sendMessage(ChatColor.GRAY + "There is a job running! Use /job check to find out what it is!");
-        }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getCreatePermission())) {
-
+        if (JobDatabase.getActiveJobs().size() > 0 && event.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
+            event.getPlayer().sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "There is a job running! Use /job check to find out what it is!");
+            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ANVIL_LAND, 0.5f, 2f);
         }
     }
 }
