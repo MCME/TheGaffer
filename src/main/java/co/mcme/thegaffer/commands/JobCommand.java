@@ -72,6 +72,8 @@ public class JobCommand implements TabExecutor {
                             String jobname = args[1];
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
+                                target.pauseJob(player.getName());
+                                player.sendMessage(ChatColor.GREEN + "Paused " + target.getName());
                             } else {
                                 player.sendMessage(ChatColor.RED + "No job found by that name.");
                             }
@@ -89,6 +91,8 @@ public class JobCommand implements TabExecutor {
                             String jobname = args[1];
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
+                                target.unpauseJob(player.getName());
+                                player.sendMessage(ChatColor.GREEN + "Un paused " + target.getName());
                             } else {
                                 player.sendMessage(ChatColor.RED + "No job found by that name.");
                             }
@@ -271,7 +275,7 @@ public class JobCommand implements TabExecutor {
             jobs.addAll(JobDatabase.getInactiveJobs().keySet());
             return jobs;
         }
-        if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")) {
+        if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop") || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")) {
             List<String> jobs = new ArrayList();
             jobs.addAll(JobDatabase.getActiveJobs().keySet());
             return jobs;
@@ -286,6 +290,8 @@ public class JobCommand implements TabExecutor {
             actions.add("stop");
             actions.add("debug");
             actions.add("prep");
+            actions.add("pasue");
+            actions.add("unpause");
         }
         Collections.sort(actions);
         return actions;
