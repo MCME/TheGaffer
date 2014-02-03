@@ -15,15 +15,11 @@
  */
 package co.mcme.thegaffer.listeners;
 
-import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerListener implements Listener {
@@ -35,28 +31,6 @@ public class PlayerListener implements Listener {
         }
         if (event.getPlayer().hasPermission(PermissionsUtil.getCreatePermission())) {
 
-        }
-    }
-
-    //@EventHandler(priority = EventPriority.HIGHEST)
-    public void onChat(AsyncPlayerChatEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
-        if (JobDatabase.getActiveJobs().size() > 0) {
-            Job workingon = JobDatabase.getJobWorking(event.getPlayer());
-            if (workingon != null) {
-                if (event.getMessage().charAt(0) == '!') {
-                    event.setMessage(event.getMessage().replaceFirst("!", ""));
-                    return;
-                }
-                Player p = event.getPlayer();
-                String[] chat = new String[2];
-                chat[0] = event.getFormat().replace(event.getMessage(), "").replace("%1$s", p.getDisplayName()).replace("%2$s", "");
-                chat[1] = event.getMessage();
-                workingon.jobChat(p, chat);
-                event.setCancelled(true);
-            }
         }
     }
 }
