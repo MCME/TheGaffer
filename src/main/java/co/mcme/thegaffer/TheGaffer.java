@@ -79,7 +79,7 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
         serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
-        serverInstance.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+        serverInstance.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
                 Util.debug("Starting running job cleanup.");
