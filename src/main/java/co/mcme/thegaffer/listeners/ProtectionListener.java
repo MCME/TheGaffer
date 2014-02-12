@@ -15,6 +15,7 @@
  */
 package co.mcme.thegaffer.listeners;
 
+import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
@@ -40,7 +41,7 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName())) {
             event.setCancelled(false);
         } else {
             World world = event.getBlock().getWorld();
@@ -98,7 +99,7 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName())) {
             event.setCancelled(false);
         } else {
             World world = event.getBlock().getWorld();
@@ -158,7 +159,7 @@ public class ProtectionListener implements Listener {
         }
         if (event.getRemover() instanceof Player) {
             Player player = (Player) event.getRemover();
-            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
                 event.setCancelled(false);
             } else {
                 World world = event.getEntity().getWorld();
@@ -184,10 +185,10 @@ public class ProtectionListener implements Listener {
                                 if (job.isPlayerWorking(player) && job.getBounds().contains(x, z)) {
                                     isinjobarea = true;
                                     if (job.isPaused()) {
-                                    player.sendMessage(ChatColor.RED + "The job is currently paused.");
-                                    event.setCancelled(true);
-                                    return;
-                                }
+                                        player.sendMessage(ChatColor.RED + "The job is currently paused.");
+                                        event.setCancelled(true);
+                                        return;
+                                    }
                                 }
                             }
                             if (isinjobarea) {
@@ -218,7 +219,7 @@ public class ProtectionListener implements Listener {
             return;
         }
         Player player = (Player) event.getPlayer();
-        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
             event.setCancelled(false);
         } else {
             World world = event.getEntity().getWorld();
@@ -278,7 +279,7 @@ public class ProtectionListener implements Listener {
         }
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
-        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
             event.setCancelled(false);
         } else if (event.hasItem() && event.hasBlock()) {
             if (event.getItem().getType().equals(Material.INK_SACK)) {

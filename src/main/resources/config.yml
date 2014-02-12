@@ -2,3 +2,5 @@ general:
   debug: true
 servlet:
     port: 8080
+unprotectedworlds:
+    - plotworld

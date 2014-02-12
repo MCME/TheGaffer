@@ -28,6 +28,8 @@ import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.CleanupUtil;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
@@ -58,6 +60,8 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static int servletPort;
     GafferServer server;
+    @Getter
+    static List<String> unprotectedWorlds = new ArrayList();
 
     @Override
     public synchronized void onEnable() {
@@ -109,6 +113,7 @@ public class TheGaffer extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         debug = pluginConfig.getBoolean("general.debug");
         servletPort = pluginConfig.getInt("servlet.port");
+        unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
         saveConfig();
     }
 
