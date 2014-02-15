@@ -290,7 +290,7 @@ public class JobCommand implements TabExecutor {
             actions.add("stop");
             actions.add("debug");
             actions.add("prep");
-            actions.add("pasue");
+            actions.add("pause");
             actions.add("unpause");
         }
         Collections.sort(actions);
