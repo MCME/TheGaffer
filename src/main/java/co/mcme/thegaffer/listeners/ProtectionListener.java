@@ -16,6 +16,11 @@
 package co.mcme.thegaffer.listeners;
 
 import co.mcme.thegaffer.TheGaffer;
+import co.mcme.thegaffer.events.JobProtectionBlockBreakEvent;
+import co.mcme.thegaffer.events.JobProtectionBlockPlaceEvent;
+import co.mcme.thegaffer.events.JobProtectionHangingBreakEvent;
+import co.mcme.thegaffer.events.JobProtectionHangingPlaceEvent;
+import co.mcme.thegaffer.events.JobProtectionInteractEvent;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
@@ -38,11 +43,13 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
+        JobProtectionBlockPlaceEvent jobEvent;
         if (event.isCancelled()) {
             return;
         }
         if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName())) {
             event.setCancelled(false);
+            jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
         } else {
             World world = event.getBlock().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
@@ -68,39 +75,49 @@ public class ProtectionListener implements Listener {
                                 isinjobarea = true;
                                 if (job.isPaused()) {
                                     event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                                     event.setCancelled(true);
+                                    TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
                                     return;
                                 }
                             }
                         }
                         if (isinjobarea) {
+                            jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
                             event.setCancelled(false);
                         } else {
                             event.getPlayer().sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                            jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                             event.setCancelled(true);
                         }
                     } else {
                         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                        jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                         event.setBuild(false);
                     }
                 } else {
                     event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                    jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                     event.setBuild(false);
                 }
             } else {
                 event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                 event.setBuild(false);
             }
         }
+        TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
 
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
+        JobProtectionBlockBreakEvent jobEvent;
         if (event.isCancelled()) {
             return;
         }
         if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName())) {
             event.setCancelled(false);
+            jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
         } else {
             World world = event.getBlock().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
@@ -126,34 +143,43 @@ public class ProtectionListener implements Listener {
                                 isinjobarea = true;
                                 if (job.isPaused()) {
                                     event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                                     event.setCancelled(true);
+                                    TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
                                     return;
                                 }
                             }
                         }
                         if (isinjobarea) {
+                            jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
                             event.setCancelled(false);
                         } else {
                             event.getPlayer().sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                            jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                             event.setCancelled(true);
                         }
                     } else {
                         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                        jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                         event.setCancelled(true);
                     }
                 } else {
                     event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                    jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                     event.setCancelled(true);
                 }
             } else {
                 event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                 event.setCancelled(true);
             }
         }
+        TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
 
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent event) {
+        JobProtectionHangingBreakEvent jobEvent;
         if (event.isCancelled()) {
             return;
         }
@@ -161,6 +187,7 @@ public class ProtectionListener implements Listener {
             Player player = (Player) event.getRemover();
             if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
                 event.setCancelled(false);
+                jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
             } else {
                 World world = event.getEntity().getWorld();
                 if (!JobDatabase.getActiveJobs().isEmpty()) {
@@ -186,41 +213,54 @@ public class ProtectionListener implements Listener {
                                     isinjobarea = true;
                                     if (job.isPaused()) {
                                         player.sendMessage(ChatColor.RED + "The job is currently paused.");
+                                        jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                                         event.setCancelled(true);
+                                        TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
                                         return;
                                     }
                                 }
                             }
                             if (isinjobarea) {
+                                jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
                                 event.setCancelled(false);
                             } else {
                                 player.sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                                jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                                 event.setCancelled(true);
                             }
                         } else {
                             player.sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                            jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                             event.setCancelled(true);
                         }
                     } else {
                         player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                        jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                         event.setCancelled(true);
                     }
                 } else {
                     player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                    jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                     event.setCancelled(true);
                 }
             }
+        } else {
+            return;
         }
+        TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
 
     @EventHandler
     public void onHangingPlace(HangingPlaceEvent event) {
+        JobProtectionHangingPlaceEvent jobEvent;
         if (event.isCancelled()) {
             return;
         }
         Player player = (Player) event.getPlayer();
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
             event.setCancelled(false);
+            jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
+            TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
         } else {
             World world = event.getEntity().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
@@ -246,27 +286,34 @@ public class ProtectionListener implements Listener {
                                 isinjobarea = true;
                                 if (job.isPaused()) {
                                     event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                                     event.setCancelled(true);
+                                    TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
                                     return;
                                 }
                             }
                         }
                         if (isinjobarea) {
+                            jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
                             event.setCancelled(false);
                         } else {
                             player.sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
+                            jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                             event.setCancelled(true);
                         }
                     } else {
                         player.sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
+                        jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                         event.setCancelled(true);
                     }
                 } else {
                     player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
+                    jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                     event.setCancelled(true);
                 }
             } else {
                 player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
+                jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                 event.setCancelled(true);
             }
         }
@@ -274,13 +321,16 @@ public class ProtectionListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
+        JobProtectionInteractEvent jobEvent;
         if (event.isCancelled()) {
             return;
         }
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
+            jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
+            TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
         } else if (event.hasItem() && event.hasBlock()) {
             if (event.getItem().getType().equals(Material.INK_SACK)) {
                 if (event.getItem().getData().getData() == 15
@@ -341,33 +391,43 @@ public class ProtectionListener implements Listener {
                                 isinjobarea = true;
                                 if (job.isPaused()) {
                                     event.getPlayer().sendMessage(ChatColor.RED + "The job is currently paused.");
+                                    jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
+                                    TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
                                     event.setCancelled(true);
                                     return;
                                 }
                             }
                         }
                         if (isinjobarea) {
+                            jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
                             event.setCancelled(false);
                         } else {
                             event.getPlayer().sendMessage(ChatColor.RED + "You have gone out of bounds for the job.");
                             event.setUseItemInHand(Result.DENY);
+                            jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
                             event.setCancelled(true);
                         }
                     } else {
                         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not part of any job.");
                         event.setUseItemInHand(Result.DENY);
+                        jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
                         event.setCancelled(true);
                     }
                 } else {
                     event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build in this world.");
                     event.setUseItemInHand(Result.DENY);
+                    jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
                     event.setCancelled(true);
                 }
             } else {
                 event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build when there are no jobs.");
                 event.setUseItemInHand(Result.DENY);
+                jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
                 event.setCancelled(true);
             }
+        } else {
+            return;
         }
+        TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
 }

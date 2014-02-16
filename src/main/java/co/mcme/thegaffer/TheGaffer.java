@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
@@ -62,6 +63,8 @@ public class TheGaffer extends JavaPlugin {
     GafferServer server;
     @Getter
     static List<String> unprotectedWorlds = new ArrayList();
+    @Getter
+    static ArrayList<Player> listening = new ArrayList();
 
     @Override
     public synchronized void onEnable() {

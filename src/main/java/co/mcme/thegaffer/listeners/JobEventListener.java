@@ -16,9 +16,9 @@
 package co.mcme.thegaffer.listeners;
 
 import co.mcme.thegaffer.TheGaffer;
-import co.mcme.thegaffer.events.JobEndEvent;
-import co.mcme.thegaffer.events.JobStartEvent;
+import co.mcme.thegaffer.events.*;
 import co.mcme.thegaffer.storage.Job;
+import co.mcme.thegaffer.utilities.Util;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -43,5 +43,30 @@ public class JobEventListener implements Listener {
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.WITHER_DEATH, 10, 2);
         }
+    }
+
+    @EventHandler
+    public void onJobProtection(JobProtectionInteractEvent event) {
+        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+    }
+
+    @EventHandler
+    public void onJobProtection(JobProtectionBlockPlaceEvent event) {
+        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+    }
+
+    @EventHandler
+    public void onJobProtection(JobProtectionBlockBreakEvent event) {
+        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+    }
+
+    @EventHandler
+    public void onJobProtection(JobProtectionHangingBreakEvent event) {
+        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+    }
+
+    @EventHandler
+    public void onJobProtection(JobProtectionHangingPlaceEvent event) {
+        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
     }
 }

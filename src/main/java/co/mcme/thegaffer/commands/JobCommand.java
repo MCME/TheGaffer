@@ -105,6 +105,22 @@ public class JobCommand implements TabExecutor {
                     return true;
                 }
             }
+            if (args[0].equalsIgnoreCase("listen")) {
+                if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                    if (TheGaffer.getListening().contains(player)) {
+                        TheGaffer.getListening().remove(player);
+                        player.sendMessage(ChatColor.GREEN + "Removed from protection listening.");
+                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 2f);
+                    } else {
+                        TheGaffer.getListening().add(player);
+                        player.sendMessage(ChatColor.GREEN + "Added to protection listening, you will now be notified when someone tries to edit the map outside of a job.");
+                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 0.5f);
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "You don't have permission.");
+                }
+                return true;
+            }
             if (args[0].equalsIgnoreCase("prep")) {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                     if (invs.containsKey(player)) {
