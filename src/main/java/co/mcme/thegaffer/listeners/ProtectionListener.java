@@ -313,6 +313,8 @@ public class ProtectionListener implements Listener {
                     restricted = true;
                 }
             }
+        } else if (event.hasBlock() && event.getClickedBlock().getRelative(event.getBlockFace()).getType().equals(Material.FIRE)) {
+            restricted = true;
         }
         if (restricted) {
             World world = event.getClickedBlock().getWorld();
