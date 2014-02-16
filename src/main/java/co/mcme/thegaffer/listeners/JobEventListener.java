@@ -47,26 +47,26 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onJobProtection(JobProtectionInteractEvent event) {
-        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+       //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
     }
 
     @EventHandler
     public void onJobProtection(JobProtectionBlockPlaceEvent event) {
-        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
     }
 
     @EventHandler
     public void onJobProtection(JobProtectionBlockBreakEvent event) {
-        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
     }
 
     @EventHandler
     public void onJobProtection(JobProtectionHangingBreakEvent event) {
-        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
     }
 
     @EventHandler
     public void onJobProtection(JobProtectionHangingPlaceEvent event) {
-        Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
+        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
     }
 }
