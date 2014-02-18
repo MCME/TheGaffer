@@ -37,7 +37,7 @@ import org.bukkit.util.ChatPaginator;
 
 public class JobCommand implements TabExecutor {
 
-    private HashMap<Player, JobKit> invs = new HashMap();
+    private HashMap<Player, InvHolder> invs = new HashMap();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -124,13 +124,16 @@ public class JobCommand implements TabExecutor {
             if (args[0].equalsIgnoreCase("prep")) {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                     if (invs.containsKey(player)) {
-                        JobKit old = invs.get(player);
-                        old.replaceInventory(player);
+                        InvHolder holder = invs.get(player);
+                        player.getInventory().clear();
+                        player.getInventory().setArmorContents(holder.getArmorContents());
+                        player.getInventory().setContents(holder.getContents());
                         player.sendMessage(ChatColor.GREEN + "Recovered previous inventory.");
                         invs.remove(player);
                         player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 2f);
+                        player.updateInventory();
                     } else {
-                        invs.put(player, new JobKit(player.getInventory()));
+                        invs.put(player, new InvHolder(player.getInventory()));
                         player.getInventory().clear();
                         player.sendMessage(ChatColor.GREEN + "Stored your inventory.");
                         player.sendMessage(ChatColor.GREEN + "When ready, run this command again to get your inventory back.");
