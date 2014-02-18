@@ -19,14 +19,15 @@ import co.mcme.thegaffer.GafferResponses.GafferResponse;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
-import co.mcme.thegaffer.storage.JobKit;
 import co.mcme.thegaffer.utilities.CleanupUtil;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import co.mcme.thegaffer.utilities.Util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -290,15 +291,48 @@ public class JobCommand implements TabExecutor {
         }
         if (args[0].equalsIgnoreCase("info")) {
             List<String> jobs = new ArrayList();
-            jobs.addAll(JobDatabase.getActiveJobs().keySet());
-            jobs.addAll(JobDatabase.getInactiveJobs().keySet());
+            if (args[1] == null) {
+                jobs.addAll(JobDatabase.getActiveJobs().keySet());
+                jobs.addAll(JobDatabase.getInactiveJobs().keySet());
+            } else {
+                for (String s : JobDatabase.getActiveJobs().keySet()) {
+                    if (s.startsWith(args[1])) {
+                        jobs.add(s);
+                    }
+                }
+                for (String s : JobDatabase.getInactiveJobs().keySet()) {
+                    if (s.startsWith(args[1])) {
+                        jobs.add(s);
+                    }
+                }
+                if (jobs.isEmpty()) {
+                    return null;
+                }
+            }
+            Set<String> jobsUnique = new HashSet(jobs);
+            jobs.removeAll(jobs);
+            jobs.addAll(jobsUnique);
             return jobs;
         }
         if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")
                 || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")
                 || args[0].equalsIgnoreCase("warpto")) {
             List<String> jobs = new ArrayList();
-            jobs.addAll(JobDatabase.getActiveJobs().keySet());
+            if (args[1] == null) {
+                jobs.addAll(JobDatabase.getActiveJobs().keySet());
+            } else {
+                for (String s : JobDatabase.getActiveJobs().keySet()) {
+                    if (s.startsWith(args[1])) {
+                        jobs.add(s);
+                    }
+                }
+                if (jobs.isEmpty()) {
+                    return null;
+                }
+            }
+            Set<String> jobsUnique = new HashSet(jobs);
+            jobs.removeAll(jobs);
+            jobs.addAll(jobsUnique);
             return jobs;
         }
         List<String> actions = new ArrayList();
