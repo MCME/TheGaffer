@@ -294,7 +294,9 @@ public class JobCommand implements TabExecutor {
             jobs.addAll(JobDatabase.getInactiveJobs().keySet());
             return jobs;
         }
-        if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop") || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")) {
+        if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")
+                || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")
+                || args[0].equalsIgnoreCase("warpto")) {
             List<String> jobs = new ArrayList();
             jobs.addAll(JobDatabase.getActiveJobs().keySet());
             return jobs;
