@@ -101,7 +101,7 @@ public class TheGaffer extends JavaPlugin {
             Util.severe(ex.toString());
         }
     }
-    
+
     @Override
     public synchronized void onDisable() {
         try {
