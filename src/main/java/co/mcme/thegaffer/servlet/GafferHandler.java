@@ -43,7 +43,7 @@ public class GafferHandler extends AbstractHandler {
             response.getWriter().println("TheGaffer v" + TheGaffer.getPluginInstance().getDescription().getVersion());
             return;
         }
-        if (targets.length == 1 && targets[1].equalsIgnoreCase("log")) {
+        if (targets.length == 2 && targets[1].equalsIgnoreCase("log")) {
             response.setStatus(HttpServletResponse.SC_OK);
             baseRequest.setHandled(true);
             response.setContentType("application/json");
