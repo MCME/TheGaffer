@@ -72,7 +72,7 @@ public class TheGaffer extends JavaPlugin {
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
         debug = getConfig().getBoolean("general.debug");
-        jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+        jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
         setupConfig();
         try {
             int jobsLoaded = JobDatabase.loadJobs();
