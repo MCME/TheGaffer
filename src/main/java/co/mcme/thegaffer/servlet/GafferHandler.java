@@ -35,11 +35,19 @@ public class GafferHandler extends AbstractHandler {
         String[] targets = target.split("/");
         response.setHeader("Server", "TheGaffer v" + TheGaffer.getPluginInstance().getDescription().getVersion());
         response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("GafferVersion", TheGaffer.getPluginInstance().getDescription().getVersion());
+        response.setHeader("targets", TheGaffer.getJsonMapper().writeValueAsString(targets));
         if (targets.length < 3) {
             response.setStatus(HttpServletResponse.SC_OK);
             baseRequest.setHandled(true);
             response.getWriter().println("TheGaffer v" + TheGaffer.getPluginInstance().getDescription().getVersion());
             return;
+        }
+        if (targets.length == 1 && targets[1].equalsIgnoreCase("log")) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            baseRequest.setHandled(true);
+            response.setContentType("application/json");
+            response.getWriter().println(TheGaffer.getJsonMapper().writeValueAsString(Util.getLogs()));
         }
         if (targets.length >= 3) {
             if (targets[1].equalsIgnoreCase("list")) {
