@@ -251,7 +251,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         public Prompt acceptInput(ConversationContext context, String input) {
             Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.removeHelper(TheGaffer.getServerInstance().getOfflinePlayer(input));
+            GafferResponse response = job.removeHelper(TheGaffer.getServerInstance().getOfflinePlayer(input), "adminremoved: " + ((Player) context.getForWhom()).getName());
             return new responsePrompt(response, this);
         }
 

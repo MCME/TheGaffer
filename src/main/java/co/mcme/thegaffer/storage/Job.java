@@ -22,6 +22,7 @@ import co.mcme.thegaffer.GafferResponses.KickWorkerResponse;
 import co.mcme.thegaffer.GafferResponses.WorkerResponse;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
+import co.mcme.thegaffer.utilities.Util;
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -269,13 +270,14 @@ public class Job implements Listener {
         return HelperResponse.ADD_SUCCESS;
     }
 
-    public HelperResponse removeHelper(OfflinePlayer p) {
+    public HelperResponse removeHelper(OfflinePlayer p, String reason) {
         if (!helpers.contains(p.getName())) {
             return HelperResponse.NOT_HELPER;
         }
         helpers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
+        Util.debug(p.getName() + " was helper kicked from " + name + " with reason: " + reason);
         return HelperResponse.REMOVE_SUCCESS;
     }
 
@@ -308,7 +310,7 @@ public class Job implements Listener {
         return WorkerResponse.ADD_SUCCESS;
     }
 
-    public WorkerResponse removeWorker(OfflinePlayer p) {
+    public WorkerResponse removeWorker(OfflinePlayer p, String reason) {
         if (!workers.contains(p.getName())) {
             return WorkerResponse.NOT_WORKER;
         }
@@ -319,6 +321,7 @@ public class Job implements Listener {
         setDirty(true);
         JobDatabase.saveJobs();
         sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
+        Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         return WorkerResponse.REMOVE_SUCCESS;
     }
 

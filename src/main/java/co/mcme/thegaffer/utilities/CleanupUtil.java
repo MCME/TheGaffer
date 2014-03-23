@@ -59,7 +59,7 @@ public class CleanupUtil {
                     Long For = System.currentTimeMillis() - since;
                     if (For >= max) {
                         Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job.");
-                        job.removeWorker(p);
+                        job.removeWorker(p, "worker abandoned");
                     } else {
                         Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job in " + (max - For) / 1000 + " seconds.");
                     }
