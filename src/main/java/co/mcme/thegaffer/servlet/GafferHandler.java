@@ -31,7 +31,6 @@ public class GafferHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Util.debug("Processing http request for " + target);
         String[] targets = target.split("/");
         response.setHeader("Server", "TheGaffer v" + TheGaffer.getPluginInstance().getDescription().getVersion());
         response.setHeader("Access-Control-Allow-Origin", "*");
