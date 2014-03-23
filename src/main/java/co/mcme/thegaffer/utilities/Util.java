@@ -28,7 +28,7 @@ public class Util {
 
     public static void debug(String msg) {
         if (TheGaffer.isDebug()) {
-            Util.info("[TheGaffer] DEBUG: " + msg);
+            log.info("[TheGaffer] DEBUG: " + msg);
         }
         logs.add("DEBUG: " + msg);
     }
