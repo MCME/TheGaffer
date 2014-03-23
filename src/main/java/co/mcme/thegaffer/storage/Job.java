@@ -321,7 +321,7 @@ public class Job implements Listener {
         setDirty(true);
         JobDatabase.saveJobs();
         sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
-        Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
+        Util.debug(p.getName() + " was worker removed from " + name + " with reason: " + reason);
         return WorkerResponse.REMOVE_SUCCESS;
     }
 
@@ -380,13 +380,14 @@ public class Job implements Listener {
         return BanWorkerResponse.UNBAN_SUCCESS;
     }
 
-    public KickWorkerResponse kickWorker(OfflinePlayer p) {
+    public KickWorkerResponse kickWorker(OfflinePlayer p, String reason) {
         if (!workers.contains(p.getName())) {
             return KickWorkerResponse.NOT_IN_JOB;
         }
         workers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
+        Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         return KickWorkerResponse.KICK_SUCCESS;
     }
 
