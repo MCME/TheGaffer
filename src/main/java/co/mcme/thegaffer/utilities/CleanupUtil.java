@@ -55,11 +55,16 @@ public class CleanupUtil {
         for (Job job : JobDatabase.getActiveJobs().values()) {
             if (job.getLeft().size() > 0) {
                 for (OfflinePlayer p : job.getLeft().keySet()) {
+                    if (p.isOnline()) {
+                        Util.debug("Player: " + p.getName() + " was scheduled for abandonment, but is now online and was removed from abandoners list.");
+                        job.getLeft().remove(p);
+                    }
                     Long since = job.getLeft().get(p);
                     Long For = System.currentTimeMillis() - since;
                     if (For >= max) {
                         Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job.");
                         job.removeWorker(p, "worker abandoned");
+                        job.getLeft().remove(p);
                     } else {
                         Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job in " + (max - For) / 1000 + " seconds.");
                     }
