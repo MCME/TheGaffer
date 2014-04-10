@@ -1,5 +1,6 @@
 # The Gaffer
 [![Build Status](https://travis-ci.org/MCME/TheGaffer.svg?branch=master)](https://travis-ci.org/MCME/TheGaffer)
+
 *The Gaffer* is a bukkit plugin that adds a job system to the MCME Server.
 
 ### What is a "Job"
