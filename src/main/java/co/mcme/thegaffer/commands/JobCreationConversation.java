@@ -181,7 +181,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should big should the job area be? (radius 0 - 1000)";
+            return "How big should the job area be? (radius 0 - 1000)";
         }
     }
 
