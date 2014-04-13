@@ -44,6 +44,7 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class JobAdminConversation implements CommandExecutor, ConversationAbandonedListener {
 
@@ -71,6 +72,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("uninviteworker");
         actions.add("setradius");
         actions.add("setkit");
+        actions.add("clearworkerinven");
         Collections.sort(actions);
     }
 
@@ -221,6 +223,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 }
                 case "setkit": {
                     return new setKitPrompt();
+                }
+                case "clearworkerinven": {
+                    return new clearinven();
                 }
                 default: {
                     return new whichActionPrompt();
@@ -419,6 +424,27 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             return "Successfully set the kit of the job to your inventory.";
+        }
+    }
+    private class clearinven extends MessagePrompt {
+
+        @Override
+        public Prompt getNextPrompt(ConversationContext context) {
+            PlayerInventory pinven;
+            Job job = (Job) context.getSessionData("job");
+            for (Player curr : job.getWorkersAsPlayersArray()) {
+                if (TheGaffer.getServerInstance().getOfflinePlayer(curr.getPlayerListName()).isOnline()) {
+//                    job.getKit().replaceInventory(TheGaffer.getServerInstance().getOfflinePlayer(pname).getPlayer());
+                    pinven = curr.getInventory();
+                    pinven.clear();
+                }
+            }
+            return Prompt.END_OF_CONVERSATION;
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Cleared workers' inventories";
         }
     }
 
