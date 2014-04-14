@@ -161,7 +161,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("setkit", input);
-            return new finishedPrompt();
+            return new tsPrompt();
         }
 
         @Override
@@ -184,6 +184,21 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return "How big should the job area be? (radius 0 - 1000)";
         }
     }
+    
+    private class tsPrompt extends StringPrompt {
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            context.setSessionData("setTs", input);
+            return new finishedPrompt();
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "What is the name of the TeamSpeak channel? (0 for none)";
+        }
+
+    }
 
     private class finishedPrompt extends MessagePrompt {
 
@@ -194,13 +209,14 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
+            String ts= (String) context.getSessionData("setTs");
             String jobname = (String) context.getSessionData("jobname");
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
-            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius);
+            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius, ts);
             if (setKit) {
                 JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
                 jerb.setKit(kit);

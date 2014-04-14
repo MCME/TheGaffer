@@ -192,6 +192,11 @@ public class JobCommand implements TabExecutor {
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
+                                    if(jobToJoin.getTSchannel().equalsIgnoreCase("0")){
+                                        player.sendMessage(ChatColor.GRAY + "There is no TeamSpeak channel for this job");
+                                    } else {
+                                        player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
+                                    }
                                 } else {
                                     player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
                                 }
