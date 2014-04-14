@@ -90,7 +90,11 @@ The current actions you can perform are:
 * banworker
 * unbanworker
 * bringall
-*clearworkerinven
+* inviteworker
+* uninviteworker
+* setkit
+* setradius 
+* clearworkerinven
 
 The second argument is the Job you would like to perform the action on. This can be any Job that is currently running. The name of the job is __case-sensitive__.
 
