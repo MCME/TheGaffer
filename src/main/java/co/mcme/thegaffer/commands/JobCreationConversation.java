@@ -217,7 +217,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
-            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius, ts);
+            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius, ts, tsWarp);
             if (setKit) {
                 JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
                 jerb.setKit(kit);
