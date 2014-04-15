@@ -128,3 +128,6 @@ This action allows you to invite a worker to a job.
 
 ### uninviteworker
 This action allows you to invite a worker to a job.
+
+### clearworkerinven
+This action allows you to clear a workers' inventory.
