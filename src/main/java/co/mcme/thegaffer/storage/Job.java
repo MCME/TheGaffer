@@ -182,6 +182,16 @@ public class Job implements Listener {
     public String getTSchannel() {
         return this.ts;
     }
+    
+    @JsonIgnore
+    public JobWarp getTSwarp() {
+        return this.tsWarp;
+    }
+    
+    @JsonIgnore
+    public void setTSwarp(Location newloc) {
+        this.tsWap= new JobWarp(newloc);
+    }
 
     @JsonIgnore
     public Player[] getWorkersAsPlayersArray() {
