@@ -195,6 +195,7 @@ public class JobCommand implements TabExecutor {
                                     if(jobToJoin.getTSchannel().equalsIgnoreCase("0")){
                                         player.sendMessage(ChatColor.GRAY + "There is no TeamSpeak channel for this job");
                                     } else {
+                                        player.teleport(jobToJoin.getTSwarp().toBukkitLocation());
                                         player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
                                     }
                                 } else {
@@ -282,6 +283,28 @@ public class JobCommand implements TabExecutor {
                 }
                 return true;
             }
+            if(args[0].equalsIgnoreCase("admit")){
+                 if(player.hasPermission(PermissionsUtil.getCreatePermission())){
+                     Job senderJob = JobDatabase.getJobWorking(player);
+                     if(args.length>1){
+                         Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
+                         if(obj != null){
+                             if(senderJob.isPlayerWorking(obj)){
+                                 obj.teleport(senderJob.getTSwarp().toBukkitLocation());
+                                 return true;
+                             }
+                             player.sendMessage("That player can't be found!");
+                             return true;
+                         }
+                         player.sendMessage("That player can't be found!");
+                         return true;
+                     }
+                     return false;
+                 }else{
+                     player.sendMessage(ChatColor.RED + "You do not have permission.");
+                 }
+                 return false;
+             }
         }
         return false;
     }

@@ -63,7 +63,6 @@ public class Job implements Listener {
     @Getter
     @Setter
     private JobWarp warp;
-    @Getter
     @Setter
     private JobWarp tsWarp;
     @Setter
@@ -182,9 +181,11 @@ public class Job implements Listener {
         return this.ts;
     }
 
-   
+    @JsonIgnore
+    public JobWarp getTSwarp() {
+        return this.tsWarp;
+    }
     
-
     @JsonIgnore
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
