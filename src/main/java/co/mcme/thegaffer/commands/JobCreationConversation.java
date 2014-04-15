@@ -212,8 +212,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             String ts= (String) context.getSessionData("setTs");
             String jobname = (String) context.getSessionData("jobname");
             String owner = ((Player) context.getForWhom()).getName();
-            JobWarp warp = new JobWarp(warp.toBukkitLocation());
-            JobWarp tsWarp = new JobWarp(((Player) context.getFromWhom()).getLocation());
+            JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
+            JobWarp tsWarp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
