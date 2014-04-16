@@ -290,7 +290,7 @@ public class JobCommand implements TabExecutor {
                          Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
                          if(obj != null){
                              if(senderJob.isPlayerWorking(obj)){
-                                 obj.teleport(senderJob.getTSwarp().toBukkitLocation());
+                                 obj.teleport(senderJob.getWarp().toBukkitLocation());
                                  return true;
                              }
                              player.sendMessage("That player can't be found!");
