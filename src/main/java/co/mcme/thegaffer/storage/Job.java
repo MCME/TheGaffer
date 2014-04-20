@@ -81,6 +81,9 @@ public class Job implements Listener {
     private ArrayList<String> invitedWorkers = new ArrayList();
     @Getter
     @Setter
+    private ArrayList<String> admitedWorkers = new ArrayList();
+    @Getter
+    @Setter
     private Long startTime;
     @Getter
     @Setter
@@ -123,6 +126,7 @@ public class Job implements Listener {
         this.startTime = System.currentTimeMillis();
         this.ts = ts;
         this.tsWarp = tswarp;
+        admitedWorkers.add(this.owner);
         if (jr > 1000) {
             jr = 1000;
         }

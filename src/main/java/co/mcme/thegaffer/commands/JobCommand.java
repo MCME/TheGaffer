@@ -284,14 +284,16 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if(args[0].equalsIgnoreCase("admit")){
-                 if(player.hasPermission(PermissionsUtil.getCreatePermission())){
-                     Job senderJob = JobDatabase.getJobWorking(player);
+                Job senderJob = JobDatabase.getJobWorking(player);
+                 if(senderJob.getAdmitedWorkers().contains(player.getName())){
                      if(args.length>1){
                          Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
                          if(obj != null){
-                             if(senderJob.isPlayerWorking(obj)){
-                                 obj.teleport(senderJob.getWarp().toBukkitLocation());
-                                 return true;
+                             if(senderJob.isPlayerWorking(obj)&&!senderJob.getAdmitedWorkers().contains(obj.getName())){
+                                if(!senderJob.getTSchannel().equalsIgnoreCase("0")){
+                                    obj.teleport(senderJob.getWarp().toBukkitLocation());
+                                    return true;
+                                }
                              }
                              player.sendMessage("That player can't be found!");
                              return true;
