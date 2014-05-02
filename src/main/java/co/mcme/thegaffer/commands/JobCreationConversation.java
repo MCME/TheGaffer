@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -155,7 +155,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         }
 
     }
-    
+
     private class kitPrompt extends BooleanPrompt {
 
         @Override
@@ -184,7 +184,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return "How big should the job area be? (radius 0 - 1000)";
         }
     }
-    
+
     private class tsPrompt extends StringPrompt {
 
         @Override
@@ -213,6 +213,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             String jobname = (String) context.getSessionData("jobname");
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
+            JobWarp tsWarp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();

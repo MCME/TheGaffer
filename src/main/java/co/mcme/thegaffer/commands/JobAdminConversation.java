@@ -22,6 +22,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobItem;
 import co.mcme.thegaffer.storage.JobKit;
+import co.mcme.thegaffer.storage.JobWarp;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +74,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("setradius");
         actions.add("setkit");
         actions.add("clearworkerinven");
+        actions.add("setTeamSpeakwarp");
         Collections.sort(actions);
     }
 
@@ -226,6 +228,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 }
                 case "clearworkerinven": {
                     return new clearinven();
+                }
+                case "setTeamSpeakwarp": {
+                    return new setTeamSpeakwarp();
                 }
                 default: {
                     return new whichActionPrompt();
@@ -445,6 +450,23 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             return "Cleared workers' inventories";
+        }
+    }
+    private class setTeamSpeakwarp extends MessagePrompt {
+
+        @Override
+        public Prompt getNextPrompt(ConversationContext context) {
+            Job job = (Job) context.getSessionData("job");
+            JobWarp tswarp = new JobWarp(((Player) context.getForWhom()).getLocation());
+            job.setTsWarp(tswarp);
+            job.setDirty(true);
+            JobDatabase.saveJobs();
+            return Prompt.END_OF_CONVERSATION;
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Set the TeamSpeak warp";
         }
     }
 
