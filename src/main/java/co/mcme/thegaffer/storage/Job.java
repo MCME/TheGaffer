@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -116,7 +116,11 @@ public class Job implements Listener {
     @JsonIgnore
     private HashMap<OfflinePlayer, Long> left = new HashMap();
 
+<<<<<<< HEAD
     public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts, JobWarp tswarp) {
+=======
+    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts) {
+>>>>>>> origin
         this.name = name;
         this.owner = owner;
         this.running = running;
@@ -125,8 +129,11 @@ public class Job implements Listener {
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
         this.ts = ts;
+<<<<<<< HEAD
         this.tsWarp = tswarp;
         admitedWorkers.add(this.owner);
+=======
+>>>>>>> origin
         if (jr > 1000) {
             jr = 1000;
         }
@@ -179,18 +186,21 @@ public class Job implements Listener {
     public World getBukkitWorld() {
         return TheGaffer.getServerInstance().getWorld(world);
     }
-    
+
     @JsonIgnore
     public String getTSchannel() {
         return this.ts;
     }
 
     @JsonIgnore
+<<<<<<< HEAD
     public JobWarp getTSwarp() {
         return this.tsWarp;
     }
-    
+
     @JsonIgnore
+=======
+>>>>>>> origin
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
         for (String pName : workers) {
@@ -256,7 +266,7 @@ public class Job implements Listener {
         out.append("Status: ").append(status);
         return out.toString();
     }
-    
+
     public void pauseJob(String pauser) {
         this.paused = true;
         sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has paused the job.");
@@ -264,7 +274,7 @@ public class Job implements Listener {
             p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 0.2f);
         }
     }
-    
+
     public void unpauseJob(String pauser) {
         this.paused = false;
         sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has unpaused the job.");
@@ -477,7 +487,7 @@ public class Job implements Listener {
             left.put(event.getPlayer(), System.currentTimeMillis());
         }
     }
-    
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
         if (left.containsKey(event.getPlayer())) {

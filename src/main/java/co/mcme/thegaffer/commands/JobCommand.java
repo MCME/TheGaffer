@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -192,9 +193,7 @@ public class JobCommand implements TabExecutor {
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
-                                    if(jobToJoin.getTSchannel().equalsIgnoreCase("0")){
-                                        player.sendMessage(ChatColor.GRAY + "There is no TeamSpeak channel for this job");
-                                    } else {
+                                    if(!jobToJoin.getTSchannel().equalsIgnoreCase("0")){
                                         player.teleport(jobToJoin.getTSwarp().toBukkitLocation());
                                         player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
                                     }
@@ -284,6 +283,7 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if(args[0].equalsIgnoreCase("admit")){
+<<<<<<< HEAD
                 Job senderJob = JobDatabase.getJobWorking(player);
                 if(senderJob.getAdmitedWorkers().contains(player.getName())){
                      if(args.length>1){
@@ -308,6 +308,29 @@ public class JobCommand implements TabExecutor {
                  }
                  return false;
              }
+=======
+                if(player.hasPermission(PermissionsUtil.getCreatePermission())){
+                    Job senderJob = JobDatabase.getJobWorking(player);
+                    if(args.length>1){
+                        Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
+                        if(obj != null && player != null){
+                            if(senderJob.isPlayerWorking(obj)){
+                                obj.teleport(player.getLocation());
+                                return true;
+                            }
+                            player.sendMessage("That player can't be found!");
+                            return true;
+                        }
+                        player.sendMessage("That player can't be found!");
+                        return true;
+                    }
+                    return false;
+                }else{
+                    player.sendMessage(ChatColor.RED + "You do not have permission.");
+                }
+                return false;
+            }
+>>>>>>> origin
         }
         return false;
     }
