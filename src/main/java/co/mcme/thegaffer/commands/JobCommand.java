@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -194,6 +194,7 @@ public class JobCommand implements TabExecutor {
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
                                     if(!jobToJoin.getTSchannel().equalsIgnoreCase("0")){
+                                        player.teleport(jobToJoin.getTSwarp().toBukkitLocation());
                                         player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
                                     }
                                 } else {
@@ -282,6 +283,32 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if(args[0].equalsIgnoreCase("admit")){
+<<<<<<< HEAD
+                Job senderJob = JobDatabase.getJobWorking(player);
+                if(senderJob.getAdmitedWorkers().contains(player.getName())){
+                     if(args.length>1){
+                         Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
+                         if(obj != null){
+                             if(senderJob.isPlayerWorking(obj)&&!senderJob.getAdmitedWorkers().contains(obj.getName())){
+                                if(!senderJob.getTSchannel().equalsIgnoreCase("0")){
+                                    obj.teleport(senderJob.getWarp().toBukkitLocation());
+                                    senderJob.getAdmitedWorkers().add(obj.getName());
+                                    return true;
+                                }
+                             }
+                             player.sendMessage("That player can't be found!");
+                             return true;
+                         }
+                         player.sendMessage("That player can't be found!");
+                         return true;
+                     }
+                     return false;
+                 }else{
+                     player.sendMessage(ChatColor.RED + "You do not have permission.");
+                 }
+                 return false;
+             }
+=======
                 if(player.hasPermission(PermissionsUtil.getCreatePermission())){
                     Job senderJob = JobDatabase.getJobWorking(player);
                     if(args.length>1){
@@ -303,6 +330,7 @@ public class JobCommand implements TabExecutor {
                 }
                 return false;
             }
+>>>>>>> origin
         }
         return false;
     }
