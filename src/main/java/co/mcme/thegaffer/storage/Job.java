@@ -115,12 +115,7 @@ public class Job implements Listener {
     @Getter
     @JsonIgnore
     private HashMap<OfflinePlayer, Long> left = new HashMap();
-
-<<<<<<< HEAD
     public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts, JobWarp tswarp) {
-=======
-    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts) {
->>>>>>> origin
         this.name = name;
         this.owner = owner;
         this.running = running;
@@ -129,11 +124,8 @@ public class Job implements Listener {
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
         this.ts = ts;
-<<<<<<< HEAD
         this.tsWarp = tswarp;
         admitedWorkers.add(this.owner);
-=======
->>>>>>> origin
         if (jr > 1000) {
             jr = 1000;
         }
@@ -193,14 +185,11 @@ public class Job implements Listener {
     }
 
     @JsonIgnore
-<<<<<<< HEAD
     public JobWarp getTSwarp() {
         return this.tsWarp;
     }
 
     @JsonIgnore
-=======
->>>>>>> origin
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
         for (String pName : workers) {
