@@ -283,7 +283,6 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if(args[0].equalsIgnoreCase("admit")){
-<<<<<<< HEAD
                 Job senderJob = JobDatabase.getJobWorking(player);
                 if(senderJob.getAdmitedWorkers().contains(player.getName())){
                      if(args.length>1){
@@ -308,29 +307,6 @@ public class JobCommand implements TabExecutor {
                  }
                  return false;
              }
-=======
-                if(player.hasPermission(PermissionsUtil.getCreatePermission())){
-                    Job senderJob = JobDatabase.getJobWorking(player);
-                    if(args.length>1){
-                        Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
-                        if(obj != null && player != null){
-                            if(senderJob.isPlayerWorking(obj)){
-                                obj.teleport(player.getLocation());
-                                return true;
-                            }
-                            player.sendMessage("That player can't be found!");
-                            return true;
-                        }
-                        player.sendMessage("That player can't be found!");
-                        return true;
-                    }
-                    return false;
-                }else{
-                    player.sendMessage(ChatColor.RED + "You do not have permission.");
-                }
-                return false;
-            }
->>>>>>> origin
         }
         return false;
     }
