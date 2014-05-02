@@ -65,6 +65,9 @@ public class Job implements Listener {
     private JobWarp warp;
     @Getter
     @Setter
+    private String ts;
+    @Getter
+    @Setter
     private ArrayList<String> helpers = new ArrayList();
     @Getter
     @Setter
@@ -109,7 +112,7 @@ public class Job implements Listener {
     @JsonIgnore
     private HashMap<OfflinePlayer, Long> left = new HashMap();
 
-    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr) {
+    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts) {
         this.name = name;
         this.owner = owner;
         this.running = running;
@@ -117,6 +120,7 @@ public class Job implements Listener {
         this.world = world;
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
+        this.ts = ts;
         if (jr > 1000) {
             jr = 1000;
         }
@@ -168,6 +172,11 @@ public class Job implements Listener {
     @JsonIgnore
     public World getBukkitWorld() {
         return TheGaffer.getServerInstance().getWorld(world);
+    }
+    
+    @JsonIgnore
+    public String getTSchannel() {
+        return this.ts;
     }
 
     @JsonIgnore

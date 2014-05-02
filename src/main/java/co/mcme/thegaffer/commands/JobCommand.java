@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -192,6 +193,9 @@ public class JobCommand implements TabExecutor {
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
+                                    if(!jobToJoin.getTSchannel().equalsIgnoreCase("0")){
+                                        player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
+                                    }
                                 } else {
                                     player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
                                 }
@@ -276,6 +280,28 @@ public class JobCommand implements TabExecutor {
                     player.sendMessage(ChatColor.RED + "You don't have permission.");
                 }
                 return true;
+            }
+            if(args[0].equalsIgnoreCase("admit")){
+                if(player.hasPermission(PermissionsUtil.getCreatePermission())){
+                    Job senderJob = JobDatabase.getJobWorking(player);
+                    if(args.length>1){
+                        Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
+                        if(obj != null && player != null){
+                            if(senderJob.isPlayerWorking(obj)){
+                                obj.teleport(player.getLocation());
+                                return true;
+                            }
+                            player.sendMessage("That player can't be found!");
+                            return true;
+                        }
+                        player.sendMessage("That player can't be found!");
+                        return true;
+                    }
+                    return false;
+                }else{
+                    player.sendMessage(ChatColor.RED + "You do not have permission.");
+                }
+                return false;
             }
         }
         return false;
