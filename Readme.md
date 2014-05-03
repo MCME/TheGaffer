@@ -77,6 +77,12 @@ This action will list all of the past jobs that are no longer running.
 ###### Example
 /job archive
 
+### Admit
+The admit command works with TeamSpeak, it can only be called by the job owner or a player that has already been admitted. The command will teleport the target player to the Job Warp, this can only be done once to each player. (This will soon be automatic) 
+
+###### Example
+/job admit q220
+
 #### The Jobadmin Command
 
 The jobadmin commad will launch you into an interactive conversation that allows ou to edit jobs. SImply follow the in chat instructions, and chat your response.
@@ -133,3 +139,6 @@ This action allows you to invite a worker to a job.
 
 ### clearworkerinven
 This action allows you to clear a workers' inventory.
+
+## setTeamSpeakwarp
+This sets a warp for people not in TS. If a TS channel is specified and a TS warp set, then new workers will be sent to the TS warp. If there is no TS warp set workers are sent to the regular jobWarp. /job admit <playername> will send a player not in TS to the regular JobWarp.
