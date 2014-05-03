@@ -140,5 +140,5 @@ This action allows you to invite a worker to a job.
 ### clearworkerinven
 This action allows you to clear a workers' inventory.
 
-## setTeamSpeakwarp
+### setTeamSpeakwarp
 This sets a warp for people not in TS. If a TS channel is specified and a TS warp set, then new workers will be sent to the TS warp. If there is no TS warp set workers are sent to the regular jobWarp. /job admit <playername> will send a player not in TS to the regular JobWarp.
