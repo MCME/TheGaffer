@@ -165,22 +165,25 @@ public class JobDatabase {
         TheGaffer.getPluginInstance().getLogger().info("tread running");
         String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
 //        Path dbDir = Paths.get(dbPath);
-        for(String JobName : JobDatabase.getActiveJobs().keySet()){
-            Job job = JobDatabase.getActiveJobs().get(JobName);
-            if(!job.getTSchannel().equalsIgnoreCase("0")){
-                try {
-                    String TSpath = job.getTSchannel().toLowerCase();
-                    Scanner s;
-                    s = new Scanner(new File(dbPath + "/" + TSpath + ".txt"));
-                    while (s.hasNext()){
-                        InLobby.add(s.next());
+        if(!JobDatabase.getActiveJobs().isEmpty()){
+            for(String JobName : JobDatabase.getActiveJobs().keySet()){
+                Job job = JobDatabase.getActiveJobs().get(JobName);
+                TheGaffer.getPluginInstance().getLogger().info(job.getTSchannel());
+                if(!job.getTSchannel().equalsIgnoreCase("0")){
+                    try {
+                        String TSpath = job.getTSchannel().toLowerCase();
+                        Scanner s;
+                        s = new Scanner(new File(dbPath + "/" + TSpath + ".txt"));
+                        while (s.hasNext()){
+                            InLobby.add(s.next());
+                        }
+                        s.close();
+                        job.setAdmitedWorkers(InLobby);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    s.close();
-                    job.setAdmitedWorkers(InLobby);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
-         }
+             }
+        }
     }
 }
