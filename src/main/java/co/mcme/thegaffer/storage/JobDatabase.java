@@ -18,13 +18,18 @@ package co.mcme.thegaffer.storage;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.events.JobEndEvent;
 import co.mcme.thegaffer.events.JobStartEvent;
+import static co.mcme.thegaffer.storage.TSfetcher.InLobby;
 import co.mcme.thegaffer.utilities.Util;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
@@ -154,5 +159,28 @@ public class JobDatabase {
             }
         }
         return null;
+    }
+    
+    public static void TSfetch(){
+        TheGaffer.getPluginInstance().getLogger().info("tread running");
+        String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
+//        Path dbDir = Paths.get(dbPath);
+        for(String JobName : JobDatabase.getActiveJobs().keySet()){
+            Job job = JobDatabase.getActiveJobs().get(JobName);
+            if(!job.getTSchannel().equalsIgnoreCase("0")){
+                try {
+                    String TSpath = job.getTSchannel().toLowerCase();
+                    Scanner s;
+                    s = new Scanner(new File(dbPath + "/" + TSpath + ".txt"));
+                    while (s.hasNext()){
+                        InLobby.add(s.next());
+                    }
+                    s.close();
+                    job.setAdmitedWorkers(InLobby);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+         }
     }
 }
