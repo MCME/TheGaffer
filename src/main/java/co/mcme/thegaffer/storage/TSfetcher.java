@@ -10,9 +10,6 @@ package co.mcme.thegaffer.storage;
  *
  * @author Donovan
  */
-import co.mcme.thegaffer.TheGaffer;
-import java.io.File;
-import java.io.FileNotFoundException;
 //import java.nio.file.Path;
 //import java.nio.file.Paths;
 //import java.nio.file.StandardWatchEventKinds;
@@ -21,9 +18,6 @@ import java.io.FileNotFoundException;
 //import java.nio.file.WatchService;
 import java.util.ArrayList;
 //import java.util.List;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class TSfetcher extends BukkitRunnable {

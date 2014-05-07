@@ -63,8 +63,10 @@ public class Job implements Listener {
     @Getter
     @Setter
     private JobWarp warp;
+    @Getter
     @Setter
     private JobWarp tsWarp;
+    @Getter
     @Setter
     private String ts;
     @Getter
@@ -184,10 +186,10 @@ public class Job implements Listener {
         return this.ts;
     }
 
-    @JsonIgnore
-    public JobWarp getTSwarp() {
-        return this.tsWarp;
-    }
+//    @JsonIgnore
+//    public JobWarp getTSwarp() {
+//        return this.tsWarp;
+//    }
 
     @JsonIgnore
     public Player[] getWorkersAsPlayersArray() {

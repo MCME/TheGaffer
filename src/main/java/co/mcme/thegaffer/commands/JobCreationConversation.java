@@ -20,8 +20,14 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobKit;
 import co.mcme.thegaffer.storage.JobWarp;
+import co.mcme.thegaffer.storage.TSfetcher;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -158,6 +164,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     private class kitPrompt extends BooleanPrompt {
 
+        
+        
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("setkit", input);
@@ -166,6 +174,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
+            
             return "Set the kit of the job now? (true or false)";
         }
 
@@ -186,18 +195,52 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
     }
 
     private class tsPrompt extends StringPrompt {
+        
+        public ArrayList<String> Lobbies = new ArrayList<String>();
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            context.setSessionData("setTs", input);
-            return new finishedPrompt();
+            if(Lobbies.contains(input)){
+                context.setSessionData("setTs", input);
+                return new finishedPrompt();
+            }
+            return new TSfailPrompt();
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "What is the name of the TeamSpeak channel? (0 for none)";
+            try {
+                String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
+                Scanner s;
+                s = new Scanner(new File(dbPath + "/lobbies.txt"));
+                while (s.hasNext()){
+                    Lobbies.add(s.next());
+                }
+                s.close();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
+            for(String channel : Lobbies){
+                returner += channel + " ";
+            }
+            return returner;
         }
 
+    }
+    
+    private class TSfailPrompt extends MessagePrompt{
+        
+        @Override
+        protected Prompt getNextPrompt(ConversationContext context) {
+            return new tsPrompt();
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "That TeamSpeak channel doesn't exist!";
+        }
+        
     }
 
     private class finishedPrompt extends MessagePrompt {
