@@ -284,29 +284,13 @@ public class JobCommand implements TabExecutor {
             }
             if(args[0].equalsIgnoreCase("admit")){
                 Job senderJob = JobDatabase.getJobWorking(player);
-                for(String worker : senderJob.getAdmitedWorkers()){
-                    player.sendMessage(worker);
-                }
-//                if(senderJob.getAdmitedWorkers().contains(player.getName())){
-//                     if(args.length>1){
-//                         Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
-//                         if(obj != null){
-//                             if(senderJob.isPlayerWorking(obj)&&!senderJob.getAdmitedWorkers().contains(obj.getName())){
-//                                if(!senderJob.getTSchannel().equalsIgnoreCase("0")){
-//                                    obj.teleport(senderJob.getWarp().toBukkitLocation());
-//                                    senderJob.getAdmitedWorkers().add(obj.getName());
-//                                    return true;
-//                                }
-//                             }
-//                             player.sendMessage("That player can't be found!");
-//                             return true;
-//                         }
-//                         player.sendMessage("That player can't be found!");
-//                         return true;
-//                     }
-//                     return false;
-//                 }else{
-//                     player.sendMessage(ChatColor.RED + "You do not have permission.");
+                JobDatabase.TSfetch();
+                //if dev
+//                    for(String name : senderJob.getAdmitedWorkers()){
+//                        player.sendMessage(ChatColor.AQUA + name);
+//                    }
+                player.sendMessage("TS forced update!");
+                    return true;
                  }
                  return false;
 //             }

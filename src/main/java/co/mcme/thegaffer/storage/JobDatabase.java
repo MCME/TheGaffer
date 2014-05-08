@@ -18,10 +18,11 @@ package co.mcme.thegaffer.storage;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.events.JobEndEvent;
 import co.mcme.thegaffer.events.JobStartEvent;
-import static co.mcme.thegaffer.storage.TSfetcher.InLobby;
 import co.mcme.thegaffer.utilities.Util;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -162,23 +163,28 @@ public class JobDatabase {
     }
     
     public static void TSfetch(){
-        TheGaffer.getPluginInstance().getLogger().info("tread running");
+        ArrayList<String> InLobby = new ArrayList<String>();
         String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
 //        Path dbDir = Paths.get(dbPath);
         if(!JobDatabase.getActiveJobs().isEmpty()){
             for(String JobName : JobDatabase.getActiveJobs().keySet()){
-                Job job = JobDatabase.getActiveJobs().get(JobName);
-                TheGaffer.getPluginInstance().getLogger().info(job.getTSchannel());
-                if(!job.getTSchannel().equalsIgnoreCase("0")){
-                    try {
-                        String TSpath = job.getTSchannel().toLowerCase();
-                        Scanner s;
-                        s = new Scanner(new File(dbPath + "/" + TSpath + ".txt"));
-                        while (s.hasNext()){
-                            InLobby.add(s.next());
-                        }
-                        s.close();
-                        job.setAdmitedWorkers(InLobby);
+                    Job job = JobDatabase.getActiveJobs().get(JobName);
+                    if(!job.getTSchannel().equalsIgnoreCase("0")){
+                        InLobby.clear();
+                        try {
+                            Scanner s;
+                            s = new Scanner(new File(dbPath + "/" + job.getTSchannel() + ".txt"));
+                            while (s.hasNext()){
+                                InLobby.add(s.nextLine());
+                            }
+                            s.close();
+                            job.clearTS();
+                            for(String worker : InLobby){
+                                job.addAdmitedWorker(worker);
+    //                          TheGaffer.getPluginInstance().getLogger().info(worker);
+                            }
+                            job.setDirty(true);
+                            JobDatabase.saveJobs();
                     } catch (FileNotFoundException ex) {
                         Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
                     }

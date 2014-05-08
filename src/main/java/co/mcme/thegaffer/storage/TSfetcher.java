@@ -22,7 +22,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class TSfetcher extends BukkitRunnable {
   
-  public static ArrayList<String> InLobby = new ArrayList<String>();
   
   @Override
   public void run() {

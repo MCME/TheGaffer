@@ -200,7 +200,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            if(Lobbies.contains(input)){
+            if(Lobbies.contains(input) || input.equalsIgnoreCase("0")){
                 context.setSessionData("setTs", input);
                 return new finishedPrompt();
             }
@@ -214,7 +214,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 Scanner s;
                 s = new Scanner(new File(dbPath + "/lobbies.txt"));
                 while (s.hasNext()){
-                    Lobbies.add(s.next());
+                    Lobbies.add(s.nextLine());
                 }
                 s.close();
             } catch (FileNotFoundException ex) {
@@ -222,7 +222,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             }
             String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
             for(String channel : Lobbies){
-                returner += channel + " ";
+                returner += channel + ", ";
             }
             return returner;
         }
