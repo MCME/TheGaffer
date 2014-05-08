@@ -185,7 +185,18 @@ public class Job implements Listener {
     public String getTSchannel() {
         return this.ts;
     }
-
+    
+    @JsonIgnore
+    public void clearTS() {
+        admitedWorkers.removeAll(admitedWorkers);
+        admitedWorkers.clear();
+        admitedWorkers.add(owner);
+    }
+    
+    @JsonIgnore
+    public void addAdmitedWorker(String worker){
+        admitedWorkers.add(worker);
+    }
 //    @JsonIgnore
 //    public JobWarp getTSwarp() {
 //        return this.tsWarp;
