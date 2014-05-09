@@ -284,15 +284,20 @@ public class JobCommand implements TabExecutor {
             }
             if(args[0].equalsIgnoreCase("admit")){
                 Job senderJob = JobDatabase.getJobWorking(player);
-                JobDatabase.TSfetch();
-                //if dev
-//                    for(String name : senderJob.getAdmitedWorkers()){
-//                        player.sendMessage(ChatColor.AQUA + name);
-//                    }
-                player.sendMessage("TS forced update!");
+                if(senderJob != null){
+                    JobDatabase.TSfetch();
+                    //if dev
+    //                    for(String name : senderJob.getAdmitedWorkers()){
+    //                        player.sendMessage(ChatColor.AQUA + name);
+    //                    }
+                    player.sendMessage("TS forced update!");
+                    if(!senderJob.getAdmitedWorkers().contains(player.getName())){
+                        player.sendMessage("You are not in TeamSpeak!");
+                    }
                     return true;
-                 }
-                 return false;
+                    }
+                }
+                return false;
 //             }
         }
         return false;

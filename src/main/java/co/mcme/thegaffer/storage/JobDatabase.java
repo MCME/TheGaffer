@@ -32,7 +32,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
+import static org.bukkit.Bukkit.getPlayer;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 public class JobDatabase {
@@ -164,24 +166,35 @@ public class JobDatabase {
     
     public static void TSfetch(){
         ArrayList<String> InLobby = new ArrayList<String>();
+//        ArrayList<String> uncleared = new ArrayList<String>();
         String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
 //        Path dbDir = Paths.get(dbPath);
         if(!JobDatabase.getActiveJobs().isEmpty()){
             for(String JobName : JobDatabase.getActiveJobs().keySet()){
                     Job job = JobDatabase.getActiveJobs().get(JobName);
                     if(!job.getTSchannel().equalsIgnoreCase("0")){
-                        InLobby.clear();
                         try {
                             Scanner s;
-                            s = new Scanner(new File(dbPath + "/" + job.getTSchannel() + ".txt"));
+                            s = new Scanner(new File(dbPath + "/" + job.getTSchannel().toLowerCase() + ".txt"));
                             while (s.hasNext()){
-                                InLobby.add(s.nextLine());
+                                String player = s.nextLine();
+                                if(!job.getAdmitedWorkers().contains(player)){
+                                    Player worker = getPlayer(player);
+                                    worker.teleport(job.getWarp().toBukkitLocation());
+                                    job.addAdmitedWorker(player);
+                                }
+                                InLobby.add(player);
                             }
                             s.close();
-                            job.clearTS();
-                            for(String worker : InLobby){
-                                job.addAdmitedWorker(worker);
-    //                          TheGaffer.getPluginInstance().getLogger().info(worker);
+                            for(String player : job.getAdmitedWorkers()){
+                                if(!InLobby.contains(player) && !job.getOwner().equalsIgnoreCase(player)){
+                                    Player worker = getPlayer(player);
+                                    if(job.getWorkers().contains(player) && worker.isOnline()){
+                                        worker.teleport(job.getTsWarp().toBukkitLocation());
+                                        worker.sendMessage("You must be on TeamSpeak!");
+                                        job.getAdmitedWorkers().remove(player);
+                                    }
+                                }
                             }
                             job.setDirty(true);
                             JobDatabase.saveJobs();
