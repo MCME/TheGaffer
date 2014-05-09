@@ -194,7 +194,7 @@ public class JobCommand implements TabExecutor {
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
                                     if(!jobToJoin.getTSchannel().equalsIgnoreCase("0")){
-                                        player.teleport(jobToJoin.getTSwarp().toBukkitLocation());
+                                        player.teleport(jobToJoin.getTsWarp().toBukkitLocation());
                                         player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
                                     }
                                 } else {
@@ -284,29 +284,21 @@ public class JobCommand implements TabExecutor {
             }
             if(args[0].equalsIgnoreCase("admit")){
                 Job senderJob = JobDatabase.getJobWorking(player);
-                if(senderJob.getAdmitedWorkers().contains(player.getName())){
-                     if(args.length>1){
-                         Player obj = TheGaffer.getServerInstance().getPlayer(args[1]);
-                         if(obj != null){
-                             if(senderJob.isPlayerWorking(obj)&&!senderJob.getAdmitedWorkers().contains(obj.getName())){
-                                if(!senderJob.getTSchannel().equalsIgnoreCase("0")){
-                                    obj.teleport(senderJob.getWarp().toBukkitLocation());
-                                    senderJob.getAdmitedWorkers().add(obj.getName());
-                                    return true;
-                                }
-                             }
-                             player.sendMessage("That player can't be found!");
-                             return true;
-                         }
-                         player.sendMessage("That player can't be found!");
-                         return true;
-                     }
-                     return false;
-                 }else{
-                     player.sendMessage(ChatColor.RED + "You do not have permission.");
-                 }
-                 return false;
-             }
+                if(senderJob != null){
+                    JobDatabase.TSfetch();
+                    //if dev
+    //                    for(String name : senderJob.getAdmitedWorkers()){
+    //                        player.sendMessage(ChatColor.AQUA + name);
+    //                    }
+                    player.sendMessage("TS forced update!");
+                    if(!senderJob.getAdmitedWorkers().contains(player.getName())){
+                        player.sendMessage("You are not in TeamSpeak!");
+                    }
+                    return true;
+                    }
+                }
+                return false;
+//             }
         }
         return false;
     }

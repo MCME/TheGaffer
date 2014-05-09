@@ -26,6 +26,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.CleanupUtil;
+import co.mcme.thegaffer.storage.TSfetcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 
@@ -73,6 +75,7 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         debug = getConfig().getBoolean("general.debug");
         jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+        new TSfetcher().runTaskTimer(this, 20, 1200);
         setupConfig();
         try {
             int jobsLoaded = JobDatabase.loadJobs();
