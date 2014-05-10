@@ -20,7 +20,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.storage.JobKit;
 import co.mcme.thegaffer.storage.JobWarp;
-import co.mcme.thegaffer.storage.TSfetcher;
+import co.mcme.thegaffer.TeamSpeak.TSfetcher;
 import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
 import java.io.FileNotFoundException;

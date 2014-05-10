@@ -26,7 +26,7 @@ import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.utilities.Util;
 import co.mcme.thegaffer.storage.JobDatabase;
 import co.mcme.thegaffer.utilities.CleanupUtil;
-import co.mcme.thegaffer.storage.TSfetcher;
+import co.mcme.thegaffer.TeamSpeak.TSfetcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

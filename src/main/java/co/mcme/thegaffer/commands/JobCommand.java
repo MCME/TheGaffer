@@ -16,6 +16,7 @@
 package co.mcme.thegaffer.commands;
 
 import co.mcme.thegaffer.GafferResponses.GafferResponse;
+import co.mcme.thegaffer.TeamSpeak.TSupdate;
 import co.mcme.thegaffer.TheGaffer;
 import co.mcme.thegaffer.storage.Job;
 import co.mcme.thegaffer.storage.JobDatabase;
@@ -285,7 +286,7 @@ public class JobCommand implements TabExecutor {
             if(args[0].equalsIgnoreCase("admit")){
                 Job senderJob = JobDatabase.getJobWorking(player);
                 if(senderJob != null){
-                    JobDatabase.TSfetch();
+                    TSupdate.TSjobFetch();
                     //if dev
     //                    for(String name : senderJob.getAdmitedWorkers()){
     //                        player.sendMessage(ChatColor.AQUA + name);
