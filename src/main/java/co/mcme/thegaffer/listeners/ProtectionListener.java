@@ -335,6 +335,8 @@ public class ProtectionListener implements Listener {
         b_loc.add(0, 1, 0);
         Block f = b_loc.getBlock();
         Material f_mat = f.getType();
+        Material halfSlab = Material.getMaterial(44);
+        Material fullSlab = Material.getMaterial(43);
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
             jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
@@ -371,7 +373,9 @@ public class ProtectionListener implements Listener {
                     restricted = true;
                 }
             }
-
+            if(event.getItem().getType().getId() == halfSlab.getId()){
+                restricted = true;
+            }
 //            if (f_mat.equals(Material.FIRE)){
 //                player.sendMessage("enter2");
 //                b_loc.getBlock().getRelative(BlockFace.UP).setType(Material.FIRE);
