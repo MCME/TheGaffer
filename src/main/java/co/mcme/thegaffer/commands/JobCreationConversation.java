@@ -200,29 +200,37 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            if(Lobbies.contains(input) || input.equalsIgnoreCase("0")){
+            if(TheGaffer.isTS()){
+                if(Lobbies.contains(input) || input.equalsIgnoreCase("0")){
+                    context.setSessionData("setTs", input);
+                    return new finishedPrompt();
+                }
+                return new TSfailPrompt();
+            }else{
                 context.setSessionData("setTs", input);
                 return new finishedPrompt();
             }
-            return new TSfailPrompt();
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            try {
-                String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
-                Scanner s;
-                s = new Scanner(new File(dbPath + "/lobbies.txt"));
-                while (s.hasNext()){
-                    Lobbies.add(s.nextLine());
+            String returner = "What is the name of the TeamSpeak channel? (0 for none)";
+            if(TheGaffer.isTS()){
+                try {
+                    String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
+                    Scanner s;
+                    s = new Scanner(new File(dbPath + "/lobbies.txt"));
+                    while (s.hasNext()){
+                        Lobbies.add(s.nextLine());
+                    }
+                    s.close();
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                s.close();
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
-            for(String channel : Lobbies){
-                returner += channel + ", ";
+                returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
+                for(String channel : Lobbies){
+                    returner += channel + ", ";
+                }
             }
             return returner;
         }
