@@ -27,12 +27,16 @@ import co.mcme.thegaffer.utilities.PermissionsUtil;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -318,7 +322,6 @@ public class ProtectionListener implements Listener {
             }
         }
     }
-
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         JobProtectionInteractEvent jobEvent;
@@ -327,6 +330,11 @@ public class ProtectionListener implements Listener {
         }
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
+        Block b =event.getClickedBlock();
+        Location b_loc = b.getLocation();
+        b_loc.add(0, 1, 0);
+        Block f = b_loc.getBlock();
+        Material f_mat = f.getType();
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
             jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
@@ -363,7 +371,21 @@ public class ProtectionListener implements Listener {
                     restricted = true;
                 }
             }
-        } else if (event.hasBlock() && event.getClickedBlock().getRelative(event.getBlockFace()).getType().equals(Material.FIRE)) {
+
+//            if (f_mat.equals(Material.FIRE)){
+//                player.sendMessage("enter2");
+//                b_loc.getBlock().getRelative(BlockFace.UP).setType(Material.FIRE);
+//                f.setType(Material.FIRE);
+//                event.setCancelled(true);
+//            }
+            if(event.getAction() == Action.LEFT_CLICK_BLOCK){
+            if (player.getTargetBlock(null, 5).getType() == Material.FIRE){
+                event.setCancelled(true);
+                restricted = true;
+            }
+        }
+        } else if (event.hasBlock() && f_mat.equals(Material.FIRE)) {
+            b_loc.getBlock().getRelative(BlockFace.UP).setType(Material.FIRE);
             restricted = true;
         }
         if (restricted) {
