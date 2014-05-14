@@ -16,6 +16,7 @@ package com.mcmiddleearth.thegaffer.TeamSpeak;
 //import java.nio.file.WatchEvent;
 //import java.nio.file.WatchKey;
 //import java.nio.file.WatchService;
+import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class TSfetcher extends BukkitRunnable {
         }
     }
     //!curr.getTSchannel().equalsIgnoreCase("0") || 
-    if(ShouldGo){
+    if(ShouldGo && TheGaffer.isTSenabled()){
         TSupdate.TSjobFetch();
     }
   }
