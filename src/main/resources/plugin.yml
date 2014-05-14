@@ -1,5 +1,5 @@
 name: ${project.artifactId}
-main: com.mcmiddleeqrth.thegaffer.TheGaffer
+main: co.mcme.thegaffer.TheGaffer
 version: ${project.version}
 website: ${project.url}
 authors: [meggawatts, DonoA]
