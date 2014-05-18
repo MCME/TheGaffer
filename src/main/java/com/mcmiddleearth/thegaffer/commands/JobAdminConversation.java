@@ -88,6 +88,15 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             return false;
         }
     }
+    
+    public boolean Start(CommandSender sender, Command command, String label, String[] args) {
+        if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
+            conversationFactory.buildConversation((Conversable) sender).begin();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
