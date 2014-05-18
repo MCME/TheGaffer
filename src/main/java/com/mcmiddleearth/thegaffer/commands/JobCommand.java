@@ -300,8 +300,17 @@ public class JobCommand implements TabExecutor {
                         }
                     }
                 }
-                return false;
-//             }
+            if (args[0].equalsIgnoreCase("start")) {
+                JobCreationConversation jCC = new JobCreationConversation();
+                jCC.Start(sender, command, label, args);
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("admin")) {
+                JobAdminConversation jAC = new JobAdminConversation();
+                jAC.Start(sender, command, label, args);
+                return true;
+            }
+            return false;
         }
         return false;
     }
