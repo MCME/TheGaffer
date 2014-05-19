@@ -29,6 +29,8 @@ import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -327,6 +329,10 @@ public class ProtectionListener implements Listener {
         }
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
+        final Block block = event.getClickedBlock();
+        final BlockFace blockFace = event.getBlockFace();
+        final Block relativeBlock = block.getRelative(blockFace);
+        final Material fireMaterial = Material.FIRE;
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
             jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
@@ -363,7 +369,9 @@ public class ProtectionListener implements Listener {
                     restricted = true;
                 }
             }
-        } else if (event.hasBlock() && event.getClickedBlock().getRelative(event.getBlockFace()).getType().equals(Material.FIRE)) {
+        } else if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
+            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
+            event.setCancelled(true);
             restricted = true;
         }
         if (restricted) {
