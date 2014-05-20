@@ -1,6 +1,9 @@
 # The Gaffer
 [![Build Status](https://travis-ci.org/MCME/TheGaffer.svg?branch=master)](https://travis-ci.org/MCME/TheGaffer)
 
+### Current author: DonoA
+### Authors: Meggawatts, DonoA, q220
+
 *The Gaffer* is a bukkit plugin that adds a job system to the MCME Server.
 
 ### What is a "Job"
