@@ -479,21 +479,27 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Set the TeamSpeak warp";
+            return "Set the TeamSpeak warp:";
         }
     }
     private class setTSchannel extends StringPrompt {
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
+            if(TheGaffer.isTSenabled()){
             Job job = (Job) context.getSessionData("job");
             context.setSessionData("setTs", input);
             job.setTs(String.valueOf(input));
+            }
             return new responsePrompt(GenericResponse.SUCCESS, this);
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Enter the name of the Channel, 0 for none";
+            if(TheGaffer.isTSenabled()){
+                return "Enter the name of the Channel, 0 for none";
+            }else{
+                return "Unavailable";
+            }
         }
     }
 
