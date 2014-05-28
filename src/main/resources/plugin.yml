@@ -1,5 +1,5 @@
 name: ${project.artifactId}
-main: co.mcme.thegaffer.TheGaffer
+main: com.mcmiddleearth.thegaffer.TheGaffer
 version: ${project.version}
 website: ${project.url}
 authors: [meggawatts, DonoA]
@@ -19,6 +19,8 @@ commands:
             /job warpto <jobname>
             /job info <jobname>
             /job admit <player>
+            /job create
+            /job admin
   jobadmin:
     description: Launches the jobadmin conversation
     usage: |
