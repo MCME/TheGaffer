@@ -59,6 +59,8 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static boolean debug = false;
     @Getter
+    static boolean TS = false;
+    @Getter
     static Configuration pluginConfig;
     @Getter
     static boolean TSenabled;

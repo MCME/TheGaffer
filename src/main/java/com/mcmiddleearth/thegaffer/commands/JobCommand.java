@@ -298,7 +298,9 @@ public class JobCommand implements TabExecutor {
                         }
                         return true;
                         }
-                    }
+                    }else{
+                    player.sendMessage("Work in Progress");
+                }
                 }
             if (args[0].equalsIgnoreCase("start")) {
                 JobCreationConversation jCC = new JobCreationConversation();
