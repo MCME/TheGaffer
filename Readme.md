@@ -1,7 +1,10 @@
 # The Gaffer
 [![Build Status](https://travis-ci.org/MCME/TheGaffer.svg?branch=master)](https://travis-ci.org/MCME/TheGaffer)
 
-*The Gaffer* is a bukkit plugin that adds a job system to the MCME Server and protects the rest of the world.
+### Current author: DonoA
+### Authors: Meggawatts, DonoA, q220
+
+*The Gaffer* is a bukkit plugin that adds a job system to the MCME Server.
 
 ### What is a "Job"
 A job is basically a glorified list. This list contains who is working on the job, who is managing the workers, and where the job is. With MCME 2.0 we have decided to implement a more strict policy on building. In order to build on the new map, you must be a staff member, or be part of a job. *The Gaffer* handles building protection on its own, so it is very important to understand how the tool works.
@@ -45,22 +48,22 @@ The first argument is the action you would like to perform. The current actions 
 /job start river private *This will start a job called **river** that is invite only.
 
 ### Stop
-This is the action that will stop a job. When a job is stopped, the working area becomes protected again, and the job is moved to the archive.
+This is the action that will stop a job. When a job is stopped, the world becomes locked again, and the job is moved to the archive.
 
 ###### Example
 /job stop river *This will stop the job called river, but __not__ River*
 
 ### Check
-This is the action that allows the issuer to see the list of currently running jobs.
+This is the action that allows any player to see the list of currently running jobs.
 
 ### Join
-This is the action that allows the issuer to join a job. Once a user joins a job, they can build in within the allowed area. The name of the job is __case-sensitive__.
+This is the action that allows someone to join a job. Once a user joins a job, they can build in the world. The name of the job is __case-sensitive__.
 
 ###### Example
 /job join river *This will join the job river but __not__ River or rIVer*
 
 ### Warpto
-This is the action that will warp you to the jobs location. This location is set automatically during the job create conversation. It is the location where the conversation was handled. It can also be updated.
+This is the action that will warp you to the jobs location.
 
 ###### Example
 /job warpto river *This will warp you to the location of river but __not__ River*

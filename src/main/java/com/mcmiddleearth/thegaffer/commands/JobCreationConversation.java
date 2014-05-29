@@ -20,7 +20,7 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
-import com.mcmiddleearth.thegaffer.storage.TSfetcher;
+import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -69,6 +69,16 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return false;
         }
     }
+    
+    public boolean Start(CommandSender sender, Command command, String label, String[] args){
+        if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
+            conversationFactory.buildConversation((Conversable) sender).begin();
+            return true;
+        } else {
+            return false;
+        }
+    }
+            
 
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
@@ -200,7 +210,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            if(TheGaffer.isTS()){
+            if(TheGaffer.isTSenabled()){
                 if(Lobbies.contains(input) || input.equalsIgnoreCase("0")){
                     context.setSessionData("setTs", input);
                     return new finishedPrompt();
@@ -208,14 +218,13 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 return new TSfailPrompt();
             }else{
                 context.setSessionData("setTs", input);
-                return new finishedPrompt();
             }
+            return new finishedPrompt();
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            String returner = "What is the name of the TeamSpeak channel? (0 for none)";
-            if(TheGaffer.isTS()){
+            if(TheGaffer.isTSenabled()){
                 try {
                     String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
                     Scanner s;
@@ -227,12 +236,13 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
+                String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
                 for(String channel : Lobbies){
                     returner += channel + ", ";
                 }
+                return returner;
             }
-            return returner;
+            return "What is the name of the TeamSpeak channel? (0 for none)";
         }
 
     }

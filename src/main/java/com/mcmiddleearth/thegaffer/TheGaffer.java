@@ -26,7 +26,7 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
-import com.mcmiddleearth.thegaffer.storage.TSfetcher;
+import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +63,8 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static Configuration pluginConfig;
     @Getter
+    static boolean TSenabled;
+    @Getter
     static int servletPort;
     GafferServer server;
     @Getter
@@ -77,6 +79,11 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         debug = getConfig().getBoolean("general.debug");
         jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+        if(this.getConfig().contains("TS")){
+            TSenabled = this.getConfig().getBoolean("TS");
+        }else{
+            TSenabled = false;
+        }
         new TSfetcher().runTaskTimer(this, 20, 1200);
         setupConfig();
         try {

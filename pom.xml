@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>co.mcme</groupId>
+    <groupId>com.mcmiddleearth</groupId>
     <artifactId>TheGaffer</artifactId>
-    <version>2.2.9</version>
+    <version>2.3.0</version>
     <packaging>jar</packaging>
 
     <properties>

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.mcmiddleearth.thegaffer.storage;
+package com.mcmiddleearth.thegaffer.TeamSpeak;
 
 /**
  *
@@ -17,6 +17,8 @@ package com.mcmiddleearth.thegaffer.storage;
 //import java.nio.file.WatchKey;
 //import java.nio.file.WatchService;
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import java.util.ArrayList;
 //import java.util.List;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,8 +36,8 @@ public class TSfetcher extends BukkitRunnable {
         }
     }
     //!curr.getTSchannel().equalsIgnoreCase("0") || 
-    if(ShouldGo && TheGaffer.isTS()){
-        JobDatabase.TSfetch();
+    if(ShouldGo && TheGaffer.isTSenabled()){
+        TSupdate.TSjobFetch();
     }
   }
 }

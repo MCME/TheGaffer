@@ -330,13 +330,11 @@ public class ProtectionListener implements Listener {
         }
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
-        Block b =event.getClickedBlock();
-        Location b_loc = b.getLocation();
-        b_loc.add(0, 1, 0);
-        Block f = b_loc.getBlock();
-        Material f_mat = f.getType();
         Material halfSlab = Material.getMaterial(44);
-        Material fullSlab = Material.getMaterial(43);
+        final Block block = event.getClickedBlock();
+        final BlockFace blockFace = event.getBlockFace();
+        final Block relativeBlock = block.getRelative(blockFace);
+        final Material fireMaterial = Material.FIRE;
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
             jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
@@ -376,20 +374,9 @@ public class ProtectionListener implements Listener {
             if(event.getItem().getType().getId() == halfSlab.getId()){
                 restricted = true;
             }
-//            if (f_mat.equals(Material.FIRE)){
-//                player.sendMessage("enter2");
-//                b_loc.getBlock().getRelative(BlockFace.UP).setType(Material.FIRE);
-//                f.setType(Material.FIRE);
-//                event.setCancelled(true);
-//            }
-            if(event.getAction() == Action.LEFT_CLICK_BLOCK){
-            if (player.getTargetBlock(null, 5).getType() == Material.FIRE){
-                event.setCancelled(true);
-                restricted = true;
-            }
-        }
-        } else if (event.hasBlock() && f_mat.equals(Material.FIRE)) {
-            b_loc.getBlock().getRelative(BlockFace.UP).setType(Material.FIRE);
+        } else if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
+            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
+            event.setCancelled(true);
             restricted = true;
         }
         if (restricted) {

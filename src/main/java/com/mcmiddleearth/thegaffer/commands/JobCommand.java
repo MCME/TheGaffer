@@ -16,6 +16,7 @@
 package com.mcmiddleearth.thegaffer.commands;
 
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
+import com.mcmiddleearth.thegaffer.TeamSpeak.TSupdate;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
@@ -145,6 +146,10 @@ public class JobCommand implements TabExecutor {
                 } else {
                     player.sendMessage(ChatColor.RED + "You don't have permission.");
                 }
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("aero")) {
+                player.sendMessage(Util.dino);
                 return true;
             }
             if (args[0].equalsIgnoreCase("debug")) {
@@ -279,10 +284,10 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if(args[0].equalsIgnoreCase("admit")){
-                if(TheGaffer.isTS()){
+                if(TheGaffer.isTSenabled()){
                     Job senderJob = JobDatabase.getJobWorking(player);
                     if(senderJob != null){
-                        JobDatabase.TSfetch();
+                        TSupdate.TSjobFetch();
                         //if dev
         //                    for(String name : senderJob.getAdmitedWorkers()){
         //                        player.sendMessage(ChatColor.AQUA + name);
@@ -292,11 +297,20 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage("You are not in TeamSpeak!");
                         }
                         return true;
-                    }
+                        }
+                    }else{
+                    player.sendMessage("Work in Progress");
                 }
-                else{
-                    player.sendMessage("Feature in progress");
                 }
+            if (args[0].equalsIgnoreCase("start")) {
+                JobCreationConversation jCC = new JobCreationConversation();
+                jCC.Start(sender, command, label, args);
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("admin")) {
+                JobAdminConversation jAC = new JobAdminConversation();
+                jAC.Start(sender, command, label, args);
+                return true;
             }
             return false;
         }
