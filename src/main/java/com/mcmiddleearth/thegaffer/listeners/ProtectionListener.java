@@ -328,6 +328,7 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
+        boolean isFlower = false;
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
         Material halfSlab = Material.getMaterial(44);
@@ -369,10 +370,17 @@ public class ProtectionListener implements Listener {
                         || event.getItem().getType() == Material.LONG_GRASS
                         || event.getItem().getType() == Material.DEAD_BUSH) {
                     restricted = true;
+                    isFlower=true;
+                    player.sendBlockChange(event.getClickedBlock().getLocation(), Material.STONE, (byte)0);
                 }
             }
             if(event.getItem().getType().getId() == halfSlab.getId()){
                 restricted = true;
+            }
+            if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
+            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
+            event.setCancelled(true);
+            restricted = true;
             }
         } else if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
             player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
