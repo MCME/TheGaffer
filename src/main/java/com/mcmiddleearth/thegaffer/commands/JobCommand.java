@@ -287,7 +287,7 @@ public class JobCommand implements TabExecutor {
                 if(TheGaffer.isTSenabled()){
                     Job senderJob = JobDatabase.getJobWorking(player);
                     if(senderJob != null){
-                        TSupdate.TSjobFetch();
+                        TSupdate.TSfetch();
                         //if dev
         //                    for(String name : senderJob.getAdmitedWorkers()){
         //                        player.sendMessage(ChatColor.AQUA + name);
