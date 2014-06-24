@@ -32,6 +32,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -261,6 +262,7 @@ public class ProtectionListener implements Listener {
             return;
         }
         Player player = (Player) event.getPlayer();
+        
         if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
@@ -374,11 +376,17 @@ public class ProtectionListener implements Listener {
             if(event.getItem().getType().getId() == halfSlab.getId()){
                 restricted = true;
             }
-        } else if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
+            if(event.getItem().getType().equals(Material.WATER_LILY)){
+                event.setCancelled(true);
+                restricted=true;
+            }
+        }
+        if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
             player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
             event.setCancelled(true);
             restricted = true;
         }
+
         if (restricted) {
             World world = event.getClickedBlock().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
