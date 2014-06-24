@@ -374,6 +374,15 @@ public class ProtectionListener implements Listener {
             if(event.getItem().getType().getId() == halfSlab.getId()){
                 restricted = true;
             }
+            if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
+            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
+            event.setCancelled(true);
+            restricted = true;
+            }
+            if(event.getItem().getType().equals(Material.WATER_LILY)){
+                event.setCancelled(true);
+                restricted=true;
+            }
         } else if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
             player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
             event.setCancelled(true);
