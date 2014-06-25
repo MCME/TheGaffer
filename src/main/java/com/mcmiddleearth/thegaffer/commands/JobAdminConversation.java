@@ -25,6 +25,7 @@ import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
@@ -382,13 +383,17 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         public Prompt acceptInput(ConversationContext context, String input) {
             Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.inviteWorker(TheGaffer.getServerInstance().getOfflinePlayer(input));
+            List<String> players = Arrays.asList(input.split(",\\s*"));
+            GafferResponse response = null;
+            for(String s : Arrays.asList(input.split(",\\s*"))){
+                response = job.inviteWorker(TheGaffer.getServerInstance().getOfflinePlayer(s));
+            }
             return new responsePrompt(response, this);
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to invite to the job?";
+            return "Who would you like to invite to the job? (You may add multiple names with player1, player2)";
         }
     }
 
