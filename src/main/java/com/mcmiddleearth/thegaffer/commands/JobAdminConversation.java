@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -386,7 +387,11 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             List<String> players = Arrays.asList(input.split(",\\s*"));
             GafferResponse response = null;
             for(String s : Arrays.asList(input.split(",\\s*"))){
-                response = job.inviteWorker(TheGaffer.getServerInstance().getOfflinePlayer(s));
+                OfflinePlayer op = TheGaffer.getServerInstance().getOfflinePlayer(s);
+                if(op.isOnline()){
+                    op.getPlayer().sendMessage(ChatColor.AQUA + job.getOwner() + ChatColor.GRAY + " has invited you to " + ChatColor.GREEN + job.getName());
+                }
+                response = job.inviteWorker(op);
             }
             return new responsePrompt(response, this);
         }
