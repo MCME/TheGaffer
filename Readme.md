@@ -40,6 +40,8 @@ The first argument is the action you would like to perform. The current actions 
 * info
 * archive
 * admit
+* start
+* create
 
 *Those in bold are only available to Staff*
 
