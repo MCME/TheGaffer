@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -302,14 +303,12 @@ public class JobCommand implements TabExecutor {
                     player.sendMessage("Work in Progress");
                 }
                 }
-            if (args[0].equalsIgnoreCase("start")) {
-                JobCreationConversation jCC = new JobCreationConversation();
-                jCC.Start(sender, command, label, args);
+            if (args[0].equalsIgnoreCase("start") || args[0].equalsIgnoreCase("create")) {
+                Bukkit.getServer().dispatchCommand(sender, "createjob");
                 return true;
             }
             if (args[0].equalsIgnoreCase("admin")) {
-                JobAdminConversation jAC = new JobAdminConversation();
-                jAC.Start(sender, command, label, args);
+                Bukkit.getServer().dispatchCommand(sender, "jobadmin");
                 return true;
             }
             return false;

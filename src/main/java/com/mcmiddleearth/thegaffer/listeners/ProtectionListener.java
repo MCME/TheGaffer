@@ -371,6 +371,7 @@ public class ProtectionListener implements Listener {
                         || event.getItem().getType() == Material.LONG_GRASS
                         || event.getItem().getType() == Material.DEAD_BUSH) {
                     restricted = true;
+                    player.sendBlockChange(event.getClickedBlock().getLocation(), Material.STONE, (byte)0);
                 }
             }
             if(event.getItem().getType().getId() == halfSlab.getId()){

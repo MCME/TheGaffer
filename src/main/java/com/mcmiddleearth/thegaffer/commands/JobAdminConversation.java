@@ -25,10 +25,12 @@ import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -382,13 +384,21 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         public Prompt acceptInput(ConversationContext context, String input) {
             Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.inviteWorker(TheGaffer.getServerInstance().getOfflinePlayer(input));
+            List<String> players = Arrays.asList(input.split(",\\s*"));
+            GafferResponse response = null;
+            for(String s : Arrays.asList(input.split(",\\s*"))){
+                OfflinePlayer op = TheGaffer.getServerInstance().getOfflinePlayer(s);
+                if(op.isOnline()){
+                    op.getPlayer().sendMessage(ChatColor.AQUA + job.getOwner() + ChatColor.GRAY + " has invited you to " + ChatColor.GREEN + job.getName());
+                }
+                response = job.inviteWorker(op);
+            }
             return new responsePrompt(response, this);
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to invite to the job?";
+            return "Who would you like to invite to the job? (You may add multiple names with player1, player2)";
         }
     }
 
