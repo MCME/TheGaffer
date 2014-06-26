@@ -7,7 +7,7 @@ description: Job API for MCME.
 author: meggawatts
 commands:
   createjob:
-    description: Launches a job creation conversation
+    description: Launches a job creation conversation can be done with /job start or /job create
     usage: |
            /createjob
   job:
@@ -20,8 +20,9 @@ commands:
             /job info <jobname>
             /job admit <player>
             /job create
+            /job start
             /job admin
   jobadmin:
-    description: Launches the jobadmin conversation
+    description: Launches the jobadmin conversation can also be done with /job admin
     usage: |
            /jobadmin
