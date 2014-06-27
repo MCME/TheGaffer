@@ -15,18 +15,19 @@
  */
 package com.mcmiddleearth.thegaffer;
 
+import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import com.mcmiddleearth.thegaffer.commands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
+import com.mcmiddleearth.thegaffer.listeners.CraftingListener;
 import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
 import com.mcmiddleearth.thegaffer.servlet.GafferServer;
 import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.utilities.Util;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
-import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
+import com.mcmiddleearth.thegaffer.utilities.Util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -98,6 +99,7 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
         serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
+        serverInstance.getPluginManager().registerEvents(new CraftingListener(), this);
         serverInstance.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
