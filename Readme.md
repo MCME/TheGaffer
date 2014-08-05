@@ -34,6 +34,8 @@ The job command takes 2 arguments.
 The first argument is the action you would like to perform. The current actions are:
 
 * __stop__
+* __pause__
+* __unpause__
 * check
 * join
 * warpto
@@ -54,6 +56,18 @@ This is the action that will stop a job. When a job is stopped, the world become
 
 ###### Example
 /job stop river *This will stop the job called river, but __not__ River*
+
+### Pause
+This is the action that will pause the job to be used at a later date.
+
+###### Example
+/job pause river *This will pause the job called road, but __not__ Road*
+
+### Unpause
+This is the action that will unpause a job that was paused, it will not restart a stoped job though.
+
+###### Example
+/job unpause river *This will unpause the job called road, but __not__ Road*
 
 ### Check
 This is the action that allows any player to see the list of currently running jobs.
