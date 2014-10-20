@@ -196,7 +196,7 @@ public class JobCommand implements TabExecutor {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
                                     if(!jobToJoin.getTSchannel().equalsIgnoreCase("0")){
                                         player.teleport(jobToJoin.getTsWarp().toBukkitLocation());
-                                        player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + TheGaffer.getServerInstance().getMotd());
+                                        player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + "beefburgers");
                                     }
                                 } else {
                                     player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
@@ -287,7 +287,7 @@ public class JobCommand implements TabExecutor {
                 if(TheGaffer.isTSenabled()){
                     Job senderJob = JobDatabase.getJobWorking(player);
                     if(senderJob != null){
-                        TSupdate.TSjobFetch();
+                        TSupdate.TSfetch();
                         //if dev
         //                    for(String name : senderJob.getAdmitedWorkers()){
         //                        player.sendMessage(ChatColor.AQUA + name);
@@ -298,7 +298,9 @@ public class JobCommand implements TabExecutor {
                         }
                         return true;
                         }
-                    }
+                    }else{
+                    player.sendMessage("Work in Progress");
+                }
                 }
             if (args[0].equalsIgnoreCase("start")) {
                 JobCreationConversation jCC = new JobCreationConversation();

@@ -216,6 +216,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                     return new finishedPrompt();
                 }
                 return new TSfailPrompt();
+            }else{
+                context.setSessionData("setTs", input);
             }
             return new finishedPrompt();
         }

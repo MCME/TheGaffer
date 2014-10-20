@@ -6,6 +6,9 @@
 
 package com.mcmiddleearth.thegaffer.TeamSpeak;
 
+import com.mcmiddleearth.thegaffer.TeamSpeak.JTS3ServerQuery;
+import com.mcmiddleearth.thegaffer.TeamSpeak.TeamspeakActionListener;
+import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import java.io.File;
@@ -16,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.bukkit.Bukkit.getPlayer;
 import org.bukkit.entity.Player;
+
 
 /**
  *
@@ -68,6 +72,10 @@ public class TSupdate {
         }
     }
     public static void TSchannelFetch(){
-        
+        JTS3ServerQuery query = new JTS3ServerQuery();
+        query.DEBUG=true;
+        TheGaffer.getPluginInstance().getLogger().info(String.valueOf(query.connectTS3Query("ts.mcmiddleearth.com", 9987)));;
+        TheGaffer.getPluginInstance().getLogger().info(String.valueOf(query.loginTS3("test_bot", "beefburgers")));
+        TheGaffer.getPluginInstance().getLogger().info(String.valueOf(query.isConnected()));
     }
 }

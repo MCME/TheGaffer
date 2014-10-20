@@ -27,6 +27,7 @@ import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -35,6 +36,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -320,15 +322,16 @@ public class ProtectionListener implements Listener {
             }
         }
     }
-
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         JobProtectionInteractEvent jobEvent;
         if (event.isCancelled()) {
             return;
         }
+        boolean isFlower = false;
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
+        Material halfSlab = Material.getMaterial(44);
         final Block block = event.getClickedBlock();
         final BlockFace blockFace = event.getBlockFace();
         final Block relativeBlock = block.getRelative(blockFace);
@@ -367,7 +370,17 @@ public class ProtectionListener implements Listener {
                         || event.getItem().getType() == Material.LONG_GRASS
                         || event.getItem().getType() == Material.DEAD_BUSH) {
                     restricted = true;
+                    isFlower=true;
+                    player.sendBlockChange(event.getClickedBlock().getLocation(), Material.STONE, (byte)0);
                 }
+            }
+            if(event.getItem().getType().getId() == halfSlab.getId()){
+                restricted = true;
+            }
+            if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
+            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
+            event.setCancelled(true);
+            restricted = true;
             }
         } else if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
             player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);

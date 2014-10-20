@@ -59,6 +59,8 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static boolean debug = false;
     @Getter
+    static boolean TS;
+    @Getter
     static Configuration pluginConfig;
     @Getter
     static boolean TSenabled;
@@ -77,7 +79,11 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         debug = getConfig().getBoolean("general.debug");
         jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
-        TSenabled = false;
+        if(this.getConfig().contains("TS")){
+            TSenabled = this.getConfig().getBoolean("TS");
+        }else{
+            TSenabled = false;
+        }
         new TSfetcher().runTaskTimer(this, 20, 1200);
         setupConfig();
         try {
