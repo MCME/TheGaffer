@@ -411,7 +411,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
             AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.setradius(input);
+            am.setradius(String.valueOf(input));
             return new responsePrompt(GenericResponse.SUCCESS, this);
         }
 
