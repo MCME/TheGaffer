@@ -15,7 +15,7 @@
  */
 package com.mcmiddleearth.thegaffer;
 
-import com.mcmiddleearth.thegaffer.commands.JobAdminConversation;
+import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
 import com.mcmiddleearth.thegaffer.listeners.JobEventListener;

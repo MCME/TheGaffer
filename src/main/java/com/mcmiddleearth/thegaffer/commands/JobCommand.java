@@ -15,6 +15,8 @@
  */
 package com.mcmiddleearth.thegaffer.commands;
 
+import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
+import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminCommands;
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.TeamSpeak.TSupdate;
 import com.mcmiddleearth.thegaffer.TheGaffer;
@@ -308,9 +310,8 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("admin")) {
-                JobAdminConversation jAC = new JobAdminConversation();
-                jAC.Start(sender, command, label, args);
-                return true;
+                JobAdminCommands jAC = new JobAdminCommands();
+                return jAC.onCommand(sender, command, label, args);
             }
             return false;
         }
