@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -357,69 +358,79 @@ public class Job implements Listener {
         return WorkerResponse.REMOVE_SUCCESS;
     }
 
-    public InviteResponse inviteWorker(OfflinePlayer p) {
-        if (invitedWorkers.contains(p.getName())) {
-            return InviteResponse.ALREADY_INVITED;
+    public InviteResponse inviteWorker(List<OfflinePlayer> ps) {
+        for(OfflinePlayer p : ps){
+            if (invitedWorkers.contains(p.getName())) {
+                return InviteResponse.ALREADY_INVITED;
+            }
+            if (bannedWorkers.contains(p.getName())) {
+                return InviteResponse.WORKER_BANNED;
+            }
+            if (!p.isOnline()) {
+                return InviteResponse.NOT_ONLINE;
+            }
+            if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
+                return InviteResponse.NO_PERMISSIONS;
+            }
+            invitedWorkers.add(p.getName());
         }
-        if (bannedWorkers.contains(p.getName())) {
-            return InviteResponse.WORKER_BANNED;
-        }
-        if (!p.isOnline()) {
-            return InviteResponse.NOT_ONLINE;
-        }
-        if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
-            return InviteResponse.NO_PERMISSIONS;
-        }
-        invitedWorkers.add(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
         return InviteResponse.ADD_SUCCESS;
     }
 
-    public InviteResponse uninviteWorker(OfflinePlayer p) {
-        if (!invitedWorkers.contains(p.getName())) {
-            return InviteResponse.NOT_INVITED;
+    public InviteResponse uninviteWorker(List<OfflinePlayer> ps){
+        for(OfflinePlayer p : ps){
+            if (!invitedWorkers.contains(p.getName())) {
+                return InviteResponse.NOT_INVITED;
+            }
+            if (workers.contains(p.getName())) {
+                workers.remove(p.getName());
+            }
+            invitedWorkers.remove(p.getName());
         }
-        if (workers.contains(p.getName())) {
-            workers.remove(p.getName());
-        }
-        invitedWorkers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
         return InviteResponse.REMOVE_SUCCESS;
     }
 
-    public BanWorkerResponse banWorker(OfflinePlayer p) {
-        if (workers.contains(p.getName())) {
-            workers.remove(p.getName());
+    public BanWorkerResponse banWorker(List<OfflinePlayer> ps) {
+        for(OfflinePlayer p : ps){
+            if (workers.contains(p.getName())) {
+                workers.remove(p.getName());
+            }
+            if (bannedWorkers.contains(p.getName())) {
+                return BanWorkerResponse.ALREADY_BANNED;
+            }
+            bannedWorkers.add(p.getName());
         }
-        if (bannedWorkers.contains(p.getName())) {
-            return BanWorkerResponse.ALREADY_BANNED;
-        }
-        bannedWorkers.add(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
         return BanWorkerResponse.BAN_SUCCESS;
     }
 
-    public BanWorkerResponse unbanWorker(OfflinePlayer p) {
-        if (bannedWorkers.contains(p.getName())) {
-            return BanWorkerResponse.ALREADY_UNBANNED;
+    public BanWorkerResponse unbanWorker(List<OfflinePlayer> ps) {
+        for(OfflinePlayer p : ps){
+            if (bannedWorkers.contains(p.getName())) {
+                return BanWorkerResponse.ALREADY_UNBANNED;
+            }
+            bannedWorkers.remove(p.getName());
         }
-        bannedWorkers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
         return BanWorkerResponse.UNBAN_SUCCESS;
     }
 
-    public KickWorkerResponse kickWorker(OfflinePlayer p, String reason) {
-        if (!workers.contains(p.getName())) {
-            return KickWorkerResponse.NOT_IN_JOB;
+    public KickWorkerResponse kickWorker(List<OfflinePlayer> ps, String reason) {
+        for(OfflinePlayer p : ps){
+            if (!workers.contains(p.getName())) {
+                return KickWorkerResponse.NOT_IN_JOB;
+            }
+            workers.remove(p.getName());
+            Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         }
-        workers.remove(p.getName());
         setDirty(true);
         JobDatabase.saveJobs();
-        Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         return KickWorkerResponse.KICK_SUCCESS;
     }
 

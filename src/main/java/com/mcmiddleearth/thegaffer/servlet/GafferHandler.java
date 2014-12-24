@@ -48,8 +48,7 @@ public class GafferHandler extends AbstractHandler {
             baseRequest.setHandled(true);
             response.getWriter().println("TheGaffer v" + TheGaffer.getPluginInstance().getDescription().getVersion());
             return;
-        }
-        if (targets.length >= 3) {
+        }else if (targets.length >= 3) {
             if (targets[1].equalsIgnoreCase("list")) {
                 Map data = null;
                 if (targets[2].equalsIgnoreCase("active")) {
