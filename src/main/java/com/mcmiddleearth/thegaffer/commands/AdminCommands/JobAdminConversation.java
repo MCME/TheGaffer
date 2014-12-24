@@ -13,7 +13,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with TheGaffer.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.mcmiddleearth.thegaffer.commands;
+package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.GafferResponses.GenericResponse;
@@ -201,6 +201,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, String input) {
             context.setSessionData("action", input);
+            context.setSessionData("am", new AdminMethods((Job) context.getSessionData("job"), (Player) context.getForWhom()));
             switch (input) {
                 case "addhelper": {
                     return new addHelperPrompt();
@@ -258,10 +259,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.addHelper(TheGaffer.getServerInstance().getOfflinePlayer(input));
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.addhelper(input), this);
         }
 
         @Override
@@ -274,10 +274,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.removeHelper(TheGaffer.getServerInstance().getOfflinePlayer(input), "adminremoved: " + ((Player) context.getForWhom()).getName());
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.removehelper(input), this);
         }
 
         @Override
@@ -290,10 +289,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.kickWorker(TheGaffer.getServerInstance().getOfflinePlayer(input), "adminkicked: " + ((Player) context.getForWhom()).getName());
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.kickworker(input), this);
         }
 
         @Override
@@ -306,10 +304,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.banWorker(TheGaffer.getServerInstance().getOfflinePlayer(input));
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.banworker(input), this);
         }
 
         @Override
@@ -322,10 +319,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.unbanWorker(TheGaffer.getServerInstance().getOfflinePlayer(input));
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.unbanworker(input), this);
         }
 
         @Override
@@ -338,8 +334,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
-            Job job = (Job) context.getSessionData("job");
-            job.updateLocation(((Player) context.getForWhom()).getLocation());
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            am.setwarp();
             return Prompt.END_OF_CONVERSATION;
         }
 
@@ -353,8 +349,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
-            Job job = (Job) context.getSessionData("job");
-            job.bringAllWorkers(((Player) context.getForWhom()).getLocation());
+             
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            am.bringall();
             return Prompt.END_OF_CONVERSATION;
         }
 
@@ -373,8 +370,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            Job job = (Job) context.getSessionData("job");
-            return StringUtils.join(job.getWorkers().toArray(new String[job.getWorkers().size()]), "\n");
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return am.listworkers();
         }
     }
 
@@ -382,18 +379,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            List<String> players = Arrays.asList(input.split(",\\s*"));
-            GafferResponse response = null;
-            for(String s : Arrays.asList(input.split(",\\s*"))){
-                OfflinePlayer op = TheGaffer.getServerInstance().getOfflinePlayer(s);
-                if(op.isOnline()){
-                    op.getPlayer().sendMessage(ChatColor.AQUA + job.getOwner() + ChatColor.GRAY + " has invited you to " + ChatColor.GREEN + job.getName());
-                }
-                response = job.inviteWorker(op);
-            }
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.inviteworker(input), this);
         }
 
         @Override
@@ -406,10 +394,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            Job job = (Job) context.getSessionData("job");
             context.setSessionData("inputname", input);
-            GafferResponse response = job.uninviteWorker(TheGaffer.getServerInstance().getOfflinePlayer(input));
-            return new responsePrompt(response, this);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.uninviteworker(input), this);
         }
 
         @Override
@@ -423,8 +410,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
-            Job job = (Job) context.getSessionData("job");
-            job.updateJobRadius(input.intValue());
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            am.setradius(input);
             return new responsePrompt(GenericResponse.SUCCESS, this);
         }
 
@@ -438,14 +425,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
-            Job job = (Job) context.getSessionData("job");
-            JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
-            job.setKit(kit);
-            for (String pname : job.getWorkers()) {
-                if (TheGaffer.getServerInstance().getOfflinePlayer(pname).isOnline()) {
-                    job.getKit().replaceInventory(TheGaffer.getServerInstance().getOfflinePlayer(pname).getPlayer());
-                }
-            }
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            am.setkit();
             return Prompt.END_OF_CONVERSATION;
         }
 
@@ -458,15 +439,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
-            PlayerInventory pinven;
-            Job job = (Job) context.getSessionData("job");
-            for (Player curr : job.getWorkersAsPlayersArray()) {
-                if (TheGaffer.getServerInstance().getOfflinePlayer(curr.getPlayerListName()).isOnline()) {
-//                    job.getKit().replaceInventory(TheGaffer.getServerInstance().getOfflinePlayer(pname).getPlayer());
-                    pinven = curr.getInventory();
-                    pinven.clear();
-                }
-            }
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            am.clearworkerinvens();
             return Prompt.END_OF_CONVERSATION;
         }
 
@@ -479,11 +453,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
-            Job job = (Job) context.getSessionData("job");
-            JobWarp tswarp = new JobWarp(((Player) context.getForWhom()).getLocation());
-            job.setTsWarp(tswarp);
-            job.setDirty(true);
-            JobDatabase.saveJobs();
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            am.setteamspeakwarp();
             return Prompt.END_OF_CONVERSATION;
         }
 
@@ -495,11 +466,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
     private class setTSchannel extends StringPrompt {
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            if(TheGaffer.isTSenabled()){
-            Job job = (Job) context.getSessionData("job");
-            context.setSessionData("setTs", input);
-            job.setTs(String.valueOf(input));
-            }
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
             return new responsePrompt(GenericResponse.SUCCESS, this);
         }
 

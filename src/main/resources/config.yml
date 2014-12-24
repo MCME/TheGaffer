@@ -4,3 +4,4 @@ servlet:
     port: 8080
 unprotectedworlds:
     - plotworld
+TS: false

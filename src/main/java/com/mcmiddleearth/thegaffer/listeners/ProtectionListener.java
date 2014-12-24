@@ -330,6 +330,7 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
+        boolean isFlower = false;
         boolean restricted = false;
         Player player = (Player) event.getPlayer();
         Material halfSlab = Material.getMaterial(44);
