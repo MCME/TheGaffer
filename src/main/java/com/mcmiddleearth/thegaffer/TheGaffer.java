@@ -16,7 +16,7 @@
 package com.mcmiddleearth.thegaffer;
 
 import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
-import com.mcmiddleearth.thegaffer.commands.JobAdminConversation;
+import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
 import com.mcmiddleearth.thegaffer.listeners.CraftingListener;
@@ -60,7 +60,7 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static boolean debug = false;
     @Getter
-    static boolean TS = false;
+    static boolean TS;
     @Getter
     static Configuration pluginConfig;
     @Getter
