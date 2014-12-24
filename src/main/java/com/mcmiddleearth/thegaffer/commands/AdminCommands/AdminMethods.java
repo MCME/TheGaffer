@@ -134,8 +134,8 @@ public class AdminMethods {
         return job.uninviteWorker(ls);
     }
     
-    public Object setradius(Number arg){
-        job.updateJobRadius(arg.intValue());
+    public Object setradius(String arg){
+        job.updateJobRadius(Integer.parseInt(arg));
         return true;
     }
     

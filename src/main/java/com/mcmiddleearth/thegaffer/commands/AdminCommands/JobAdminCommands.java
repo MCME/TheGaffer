@@ -92,10 +92,10 @@ public class JobAdminCommands implements TabExecutor{
                             }
                         }
                         return true;
-                    }else if(Methods.get(args[1]) == 1){
+                    }else if(Methods.get(args[2]) == 1){
                         boolean success = true;
                         try {
-                            Method m = am.getClass().getMethod(args[1].toLowerCase(), Object.class);
+                            Method m = am.getClass().getMethod(args[2].toLowerCase(), String.class);
                             m.invoke(am, args[3]);
                         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
                             success = false;
