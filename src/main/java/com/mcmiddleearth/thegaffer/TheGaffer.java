@@ -19,6 +19,7 @@ import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
+import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
 import com.mcmiddleearth.thegaffer.listeners.CraftingListener;
 import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
@@ -32,11 +33,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -72,6 +75,8 @@ public class TheGaffer extends JavaPlugin {
     static List<String> unprotectedWorlds = new ArrayList();
     @Getter
     static ArrayList<Player> listening = new ArrayList();
+    @Getter
+    static List<ExternalProtectionHandler> externalProtectionHandlers = new ArrayList();
 
     @Override
     public synchronized void onEnable() {
@@ -127,11 +132,18 @@ public class TheGaffer extends JavaPlugin {
 
     public void setupConfig() {
         pluginConfig = getConfig();
-        getConfig().options().copyDefaults(true);
         debug = pluginConfig.getBoolean("general.debug");
         servletPort = pluginConfig.getInt("servlet.port");
         unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
-        saveConfig();
+        if(pluginConfig.contains("externalProtectionHandlers")) {
+            ConfigurationSection section = pluginConfig.getConfigurationSection("externalProtectionHandlers");
+            Set<String> handlers = section.getKeys(false);
+            for(String pname : handlers) {
+                ConfigurationSection pluginSection = section.getConfigurationSection(pname);
+                externalProtectionHandlers.add(new ExternalProtectionHandler(pname, pluginSection.getString("method")));
+            }
+        }
+        saveDefaultConfig();
     }
 
     public static void scheduleOwnerTimeout(Job job) {

@@ -24,6 +24,7 @@ import com.mcmiddleearth.thegaffer.events.JobProtectionInteractEvent;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import org.bukkit.ChatColor;
@@ -52,7 +53,8 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName())) {
+        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName()) ||
+                ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
         } else {
@@ -120,7 +122,8 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName())) {
+        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName()) ||
+                ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
         } else {
@@ -190,7 +193,8 @@ public class ProtectionListener implements Listener {
         }
         if (event.getRemover() instanceof Player) {
             Player player = (Player) event.getRemover();
-            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
+            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName()) ||
+                    ProtectionUtil.isAllowedToBuild(player, event.getEntity().getLocation())) {
                 event.setCancelled(false);
                 jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
             } else {
@@ -263,7 +267,8 @@ public class ProtectionListener implements Listener {
         }
         Player player = (Player) event.getPlayer();
         
-        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName())) {
+        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName()) ||
+                ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getEntity().getLocation())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
             TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
@@ -338,7 +343,8 @@ public class ProtectionListener implements Listener {
         final BlockFace blockFace = event.getBlockFace();
         final Block relativeBlock = block.getRelative(blockFace);
         final Material fireMaterial = Material.FIRE;
-        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName())) {
+        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName()) ||
+                ProtectionUtil.isAllowedToBuild(event.getPlayer(), relativeBlock.getLocation())) {
             jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
             TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);

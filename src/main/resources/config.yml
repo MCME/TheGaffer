@@ -1,7 +1,29 @@
+# General options
 general:
-  debug: true
+    debug: true
+# Servlet configuration
 servlet:
     port: 8080
+# Worlds configuration
 unprotectedworlds:
     - plotworld
+# TeamSpeak configuration
 TS: false
+# Protection configuration
+#
+# Allow other plugins to let players build in protected worlds.
+#
+# You need to specify plugin and method names.
+#
+# Method signature should look like this:
+#   someMethod(org.bukkit.entity.Player, org.bukkit.Location);
+# Method should be declared static and return boolean - true if player should be
+#   allowed to build, false otherwise (if it returns false, TheGaffer will
+#   handle protection).
+#
+# externalProtectionHandlers:
+#     Plugin1Name:
+#         method: methodNameInPlugin1
+#     Plugin2Name:
+#         method: methodNameInPlugin2
+#
