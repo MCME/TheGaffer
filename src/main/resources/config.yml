@@ -17,13 +17,19 @@ TS: false
 #
 # Method signature should look like this:
 #   someMethod(org.bukkit.entity.Player, org.bukkit.Location);
-# Method should be declared static and return boolean - true if player should be
-#   allowed to build, false otherwise (if it returns false, TheGaffer will
-#   handle protection).
+#
+# Allow method should be declared static and return boolean - true if player
+#   should be allowed to build, false otherwise (if it returns false, TheGaffer
+#   will handle protection).
+#
+# Deny method should be declared static and return boolean - true if player
+#   shouldn't be allowed to build, false otherwise (if it returns false,
+#   TheGaffer will handle protection).
 #
 # externalProtectionHandlers:
 #     Plugin1Name:
-#         method: methodNameInPlugin1
+#         allow: allowMethodNameInPlugin1
+#         deny: denyMethodNameInPlugin1
 #     Plugin2Name:
-#         method: methodNameInPlugin2
+#         allow: methodNameInPlugin2
 #

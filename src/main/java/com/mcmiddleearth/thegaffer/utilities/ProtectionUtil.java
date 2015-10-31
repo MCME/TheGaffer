@@ -28,7 +28,15 @@ public class ProtectionUtil {
     
     public static boolean isAllowedToBuild(Player player, Location location) {
         boolean ret = false;
-        for(ExternalProtectionHandler handler : TheGaffer.getExternalProtectionHandlers()) {
+        for(ExternalProtectionHandler handler : TheGaffer.getExternalProtectionAllowHandlers()) {
+            ret = ret || handler.handle(player, location);
+        }
+        return ret;
+    }
+    
+    public static boolean isDeniedToBuild(Player player, Location location) {
+        boolean ret = false;
+        for(ExternalProtectionHandler handler : TheGaffer.getExternalProtectionDenyHandlers()) {
             ret = ret || handler.handle(player, location);
         }
         return ret;

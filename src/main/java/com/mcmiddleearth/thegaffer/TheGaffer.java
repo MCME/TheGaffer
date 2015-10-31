@@ -76,7 +76,9 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static ArrayList<Player> listening = new ArrayList();
     @Getter
-    static List<ExternalProtectionHandler> externalProtectionHandlers = new ArrayList();
+    static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList();
+    @Getter
+    static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList();
 
     @Override
     public synchronized void onEnable() {
@@ -140,7 +142,12 @@ public class TheGaffer extends JavaPlugin {
             Set<String> handlers = section.getKeys(false);
             for(String pname : handlers) {
                 ConfigurationSection pluginSection = section.getConfigurationSection(pname);
-                externalProtectionHandlers.add(new ExternalProtectionHandler(pname, pluginSection.getString("method")));
+                if(pluginSection.contains("allow")) {
+                    externalProtectionAllowHandlers.add(new ExternalProtectionHandler(pname, pluginSection.getString("allow")));
+                }
+                if(pluginSection.contains("deny")) {
+                    externalProtectionDenyHandlers.add(new ExternalProtectionHandler(pname, pluginSection.getString("deny")));
+                }
             }
         }
         saveDefaultConfig();
