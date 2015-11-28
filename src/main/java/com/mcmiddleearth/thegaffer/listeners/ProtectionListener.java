@@ -53,11 +53,15 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName()) ||
+        if (ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
+            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
+            jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
+            event.setBuild(false);
+        } else if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName()) ||
                 ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
-        } else if (!ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
+        } else {
             World world = event.getBlock().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
                 HashMap<Job, World> workingworlds = new HashMap();
@@ -112,10 +116,6 @@ public class ProtectionListener implements Listener {
                 jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                 event.setBuild(false);
             }
-        } else {
-            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
-            jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
-            event.setBuild(false);
         }
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -126,11 +126,15 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName()) ||
+        if (ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
+            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
+            jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
+            event.setCancelled(true);
+        } else if (event.getPlayer().hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getBlock().getWorld().getName()) ||
                 ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), false);
-        } else if (!ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getBlock().getLocation())) {
+        } else {
             World world = event.getBlock().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
                 HashMap<Job, World> workingworlds = new HashMap();
@@ -185,10 +189,6 @@ public class ProtectionListener implements Listener {
                 jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
                 event.setCancelled(true);
             }
-        } else {
-            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
-            jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
-            event.setCancelled(true);
         }
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -201,11 +201,15 @@ public class ProtectionListener implements Listener {
         }
         if (event.getRemover() instanceof Player) {
             Player player = (Player) event.getRemover();
-            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName()) ||
+            if (ProtectionUtil.isDeniedToBuild(player, event.getEntity().getLocation())) {
+                player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
+                jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
+                event.setCancelled(true);
+            } else if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName()) ||
                     ProtectionUtil.isAllowedToBuild(player, event.getEntity().getLocation())) {
                 event.setCancelled(false);
                 jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
-            } else if (!ProtectionUtil.isDeniedToBuild(player, event.getEntity().getLocation())) {
+            } else {
                 World world = event.getEntity().getWorld();
                 if (!JobDatabase.getActiveJobs().isEmpty()) {
                     HashMap<Job, World> workingworlds = new HashMap();
@@ -260,10 +264,6 @@ public class ProtectionListener implements Listener {
                     jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                     event.setCancelled(true);
                 }
-            } else {
-                player.sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
-                jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
-                event.setCancelled(true);
             }
         } else {
             return;
@@ -279,12 +279,16 @@ public class ProtectionListener implements Listener {
         }
         Player player = (Player) event.getPlayer();
         
-        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName()) ||
+        if (ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getEntity().getLocation())) {
+            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
+            jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
+            event.setCancelled(true);
+        } else if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getEntity().getWorld().getName()) ||
                 ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getEntity().getLocation())) {
             event.setCancelled(false);
             jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), false);
             TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
-        } else if (!ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getEntity().getLocation())) {
+        } else {
             World world = event.getEntity().getWorld();
             if (!JobDatabase.getActiveJobs().isEmpty()) {
                 HashMap<Job, World> workingworlds = new HashMap();
@@ -339,10 +343,6 @@ public class ProtectionListener implements Listener {
                 jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
                 event.setCancelled(true);
             }
-        } else {
-            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
-            jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
-            event.setCancelled(true);
         }
     }
     @EventHandler
@@ -359,7 +359,11 @@ public class ProtectionListener implements Listener {
         final BlockFace blockFace = event.getBlockFace();
         final Block relativeBlock = block.getRelative(blockFace);
         final Material fireMaterial = Material.FIRE;
-        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName()) ||
+        if (ProtectionUtil.isDeniedToBuild(event.getPlayer(), event.getClickedBlock().getLocation())) {
+            event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
+            jobEvent = new JobProtectionInteractEvent(player, event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
+            event.setCancelled(true);
+        } else if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(event.getPlayer().getWorld().getName()) ||
                 ProtectionUtil.isAllowedToBuild(event.getPlayer(), event.getClickedBlock().getLocation())) {
             jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), false);
             event.setCancelled(false);
@@ -470,9 +474,7 @@ public class ProtectionListener implements Listener {
                 jobEvent = new JobProtectionInteractEvent(event.getPlayer(), event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
                 event.setCancelled(true);
             } else {
-                event.getPlayer().sendMessage(ChatColor.DARK_RED + "You are not allowed to build here.");
                 jobEvent = new JobProtectionInteractEvent(player, event.getPlayer().getLocation(), event.getClickedBlock(), event.getItem(), true);
-                event.setCancelled(true);
             }
         } else {
             return;
