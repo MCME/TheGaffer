@@ -17,12 +17,17 @@ package com.mcmiddleearth.thegaffer.utilities;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
+import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
+import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 /**
  *
- * @author Ivan1pl
+ * @author Ivan1pl, Eriol_Eandur
  */
 public class ProtectionUtil {
     
@@ -40,6 +45,57 @@ public class ProtectionUtil {
             ret = ret || handler.handle(player, location);
         }
         return ret;
+    }
+    
+    public static BuildProtection getBuildProtection(Player player, Location location) {
+        if (ProtectionUtil.isDeniedToBuild(player,location)) {
+            return BuildProtection.LOC_DENIED;
+        } else if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection()) || TheGaffer.getUnprotectedWorlds().contains(location.getWorld().getName()) ||
+                ProtectionUtil.isAllowedToBuild(player, location)) {
+            return BuildProtection.ALLOWED;
+        } else {
+            World world = location.getWorld();
+            if (JobDatabase.getActiveJobs().isEmpty()) {
+                return BuildProtection.NO_JOB;
+            } else {
+                HashMap<Job, World> workingworlds = new HashMap();
+                HashMap<Job, Rectangle2D> areas = new HashMap();
+                for (Job job : JobDatabase.getActiveJobs().values()) {
+                    workingworlds.put(job, job.getBukkitWorld());
+                    areas.put(job, job.getBounds());
+                }
+                if (!workingworlds.containsValue(world)) {
+                    return BuildProtection.WORLD_DENIED;
+                } else {
+                    boolean playerisworking = false;
+                    for (Job job : workingworlds.keySet()) {
+                        if (job.isPlayerWorking(player)) {
+                            playerisworking = true;
+                        }
+                    }
+                    if (!playerisworking) {
+                        return BuildProtection.NOT_IN_JOB;
+                    } else {
+                        boolean isinjobarea = false;
+                        int x = location.getBlockX();
+                        int z = location.getBlockZ();
+                        for (Job job : JobDatabase.getActiveJobs().values()) {
+                            if (job.isPlayerWorking(player) && job.getBounds().contains(x, z)) {
+                                isinjobarea = true;
+                                if (job.isPaused()) {
+                                    return BuildProtection.JOB_PAUSED;
+                                }
+                            }
+                        }
+                        if (isinjobarea) {
+                            return BuildProtection.ALLOWED;
+                        } else {
+                            return BuildProtection.OUT_OF_BOUNDS;
+                        }
+                    }
+                }
+            }
+        }
     }
     
 }
