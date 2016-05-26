@@ -23,8 +23,10 @@ public class PermissionsUtil {
 
     @Getter
     private static final Permission joinPermission = new Permission("thegaffer.join", PermissionDefault.TRUE);
+    
     @Getter
     private static final Permission createPermission = new Permission("thegaffer.create", PermissionDefault.OP);
+    
     @Getter
     private static final Permission ignoreWorldProtection = new Permission("thegaffer.ignoreprotection", PermissionDefault.OP);
 }

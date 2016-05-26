@@ -274,7 +274,7 @@ public class Job implements Listener {
         this.paused = true;
         sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has paused the job.");
         for (Player p : getAllAsPlayersArray()) {
-            p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 0.2f);
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_LAND, 1, 0.2f);
         }
     }
 
@@ -282,7 +282,7 @@ public class Job implements Listener {
         this.paused = false;
         sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has unpaused the job.");
         for (Player p : getAllAsPlayersArray()) {
-            p.playSound(p.getLocation(), Sound.ANVIL_LAND, 1, 2f);
+            p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_LAND, 1, 2f);
         }
     }
 
