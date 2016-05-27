@@ -116,11 +116,11 @@ public class JobCommand implements TabExecutor {
                     if (TheGaffer.getListening().contains(player)) {
                         TheGaffer.getListening().remove(player);
                         player.sendMessage(ChatColor.GREEN + "Removed from protection listening.");
-                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 2f);
+                        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
                     } else {
                         TheGaffer.getListening().add(player);
                         player.sendMessage(ChatColor.GREEN + "Added to protection listening, you will now be notified when someone tries to edit the map outside of a job.");
-                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 0.5f);
+                        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.5f);
                     }
                 } else {
                     player.sendMessage(ChatColor.RED + "You don't have permission.");
@@ -136,14 +136,14 @@ public class JobCommand implements TabExecutor {
                         player.getInventory().setContents(holder.getContents());
                         player.sendMessage(ChatColor.GREEN + "Recovered previous inventory.");
                         invs.remove(player);
-                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 2f);
+                        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
                         player.updateInventory();
                     } else {
                         invs.put(player, new InvHolder(player.getInventory()));
                         player.getInventory().clear();
                         player.sendMessage(ChatColor.GREEN + "Stored your inventory.");
                         player.sendMessage(ChatColor.GREEN + "When ready, run this command again to get your inventory back.");
-                        player.playSound(player.getLocation(), Sound.ANVIL_LAND, 0.5f, 0.5f);
+                        player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.5f);
                         player.updateInventory();
                     }
                 } else {

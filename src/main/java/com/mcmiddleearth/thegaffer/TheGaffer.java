@@ -27,7 +27,9 @@ import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
 import com.mcmiddleearth.thegaffer.servlet.GafferServer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
+import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
+import static com.mcmiddleearth.thegaffer.utilities.ProtectionUtil.getBuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +39,12 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 
@@ -156,5 +158,13 @@ public class TheGaffer extends JavaPlugin {
     public static void scheduleOwnerTimeout(Job job) {
         Long time = System.currentTimeMillis();
         CleanupUtil.getWaiting().put(job, time);
+    }
+    
+    public static boolean hasBuildPermission(Player player, Location location) {
+        return getBuildProtection(player, location).equals(BuildProtection.ALLOWED);
+    }
+    
+    public static String getBuildProtectionMessage(Player player, Location location) {
+        return getBuildProtection(player, location).getMessage();
     }
 }

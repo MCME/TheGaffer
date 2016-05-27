@@ -38,7 +38,7 @@ public class JobEventListener implements Listener {
         Job job = event.getJob();
         job.sendToAll(ChatColor.GRAY + "The " + job.getName() + " job has ended.");
         for (Player p : job.getWorkersAsPlayersArray()) {
-            p.playSound(p.getLocation(), Sound.ENDERDRAGON_WINGS, 0.8f, 1f);
+            p.playSound(p.getLocation(), Sound.ENTITY_ENDERDRAGON_FLAP, 0.8f, 1f);
         }
     }
 
@@ -47,7 +47,7 @@ public class JobEventListener implements Listener {
         Job job = event.getJob();
         TheGaffer.getServerInstance().broadcastMessage(ChatColor.AQUA + job.getOwner() + ChatColor.GRAY + " has started a job called \"" + job.getName() + ChatColor.GRAY + "\"");
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
-            p.playSound(p.getLocation(), Sound.WITHER_DEATH, 0.8f, 2f);
+            p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.8f, 2f);
         }
     }
 
