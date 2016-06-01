@@ -21,6 +21,7 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 
@@ -30,6 +31,7 @@ public class CleanupUtil {
     private static HashMap<Job, Long> waiting = new HashMap();
     
     public static void scheduledCleanup() {
+        List<Job> removeList = new ArrayList();
         for (Job job : waiting.keySet()) {
             if (!job.getOwnerAsOfflinePlayer().isOnline()) {
                 Long since = waiting.get(job);
@@ -43,31 +45,39 @@ public class CleanupUtil {
                 }
             } else {
                 Util.debug("Job: " + job.getName() + " owner was online, removed from cleanup queue");
-                waiting.remove(job);
+                removeList.add(job);
             }
+        }
+        for(Job job: removeList) {
+            waiting.remove(job);
         }
         Util.debug("Finished running job cleanup.");
     }
     
     public static void scheduledAbandonersCleanup() {
         Long max = 300000L;
+        List<OfflinePlayer> removeList = new ArrayList<>();
         Util.debug("Starting to clean up abandoners");
         for (Job job : JobDatabase.getActiveJobs().values()) {
             if (job.getLeft().size() > 0) {
                 for (OfflinePlayer p : job.getLeft().keySet()) {
                     if (p.isOnline()) {
                         Util.debug("Player: " + p.getName() + " was scheduled for abandonment, but is now online and was removed from abandoners list.");
-                        job.getLeft().remove(p);
-                    }
-                    Long since = job.getLeft().get(p);
-                    Long For = System.currentTimeMillis() - since;
-                    if (For >= max) {
-                        Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job.");
-                        job.removeWorker(p, "worker abandoned");
-                        job.getLeft().remove(p);
+                        removeList.add(p);
                     } else {
-                        Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job in " + (max - For) / 1000 + " seconds.");
+                        Long since = job.getLeft().get(p);
+                        Long For = System.currentTimeMillis() - since;
+                        if (For >= max) {
+                            Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job.");
+                            job.removeWorker(p, "worker abandoned");
+                            removeList.add(p);
+                        } else {
+                            Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job in " + (max - For) / 1000 + " seconds.");
+                        }
                     }
+                }
+                for(OfflinePlayer player: removeList) {
+                    job.getLeft().remove(player);
                 }
             }
         }
