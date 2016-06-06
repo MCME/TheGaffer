@@ -140,10 +140,19 @@ public class ProtectionListener implements Listener {
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
     
+    private boolean existsMethodGetHand(PlayerInteractEvent event) {
+        try {
+            event.getClass().getMethod("getHand");
+            return true;
+        } catch(NoSuchMethodException e) {
+            return false;
+        }
+    }
+    
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         JobProtectionInteractEvent jobEvent;
-        if(!event.getHand().equals(EquipmentSlot.HAND)) {
+        if(existsMethodGetHand(event) && !event.getHand().equals(EquipmentSlot.HAND)) {
             return;
         }
         if (event.isCancelled()) {
