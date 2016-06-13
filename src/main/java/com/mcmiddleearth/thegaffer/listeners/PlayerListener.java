@@ -49,6 +49,10 @@ public class PlayerListener implements Listener {
     public void playerMove(PlayerMoveEvent event) {
         if(event.getFrom().getBlock()!=event.getTo().getBlock()) {
             Player player = event.getPlayer();
+            if(player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+                playersSwitchedToCreative.remove(player.getUniqueId());
+                return;
+            }
             if(ProtectionUtil.getBuildProtection(player, player.getLocation()).equals(BuildProtection.ALLOWED)) {
                 if(player.getGameMode()==GameMode.SURVIVAL) {
                     if(!playersSwitchedToCreative.contains(player.getUniqueId())) {
