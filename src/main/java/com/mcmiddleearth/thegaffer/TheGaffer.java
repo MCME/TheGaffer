@@ -31,6 +31,8 @@ import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import static com.mcmiddleearth.thegaffer.utilities.ProtectionUtil.getBuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.Util;
+import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
+import github.scarsz.discordsrv.util.DiscordUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,6 +83,8 @@ public class TheGaffer extends JavaPlugin {
     static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList();
     @Getter
     static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList();
+    @Getter
+    static String discordChannel;
 
     @Override
     public synchronized void onEnable() {
@@ -94,6 +98,8 @@ public class TheGaffer extends JavaPlugin {
         }else{
             TSenabled = false;
         }
+        String channelName = this.getConfig().getString("discord.channel");
+        discordChannel = channelName;
         new TSfetcher().runTaskTimer(this, 20, 1200);
         setupConfig();
         try {

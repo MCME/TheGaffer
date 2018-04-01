@@ -24,7 +24,16 @@ import com.mcmiddleearth.thegaffer.events.JobProtectionHangingPlaceEvent;
 import com.mcmiddleearth.thegaffer.events.JobProtectionInteractEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
 import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.utilities.Util;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
+import github.scarsz.discordsrv.util.DiscordUtil;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -40,6 +49,10 @@ public class JobEventListener implements Listener {
         for (Player p : job.getWorkersAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.ENTITY_ENDERDRAGON_FLAP, 0.8f, 1f);
         }
+        TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
+//Logger.getGlobal().info(""+channel);
+        sendDiscord(":ring1: The job " + job.getName() + " has ended at " + getLondonTime() + ".");
+        //sendDiscord(":ring1 The job "+job.getName()+" has ended at "+getLondonTime()+".");
     }
 
     @EventHandler
@@ -49,8 +62,51 @@ public class JobEventListener implements Listener {
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.8f, 2f);
         }
+        TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
+//Logger.getGlobal().info(""+channel);
+       sendDiscord(":ring1: ***@everyone, there is a new job!!!*** :ring1:\n        __**Leader:**__        " + job.getOwner() 
+               + "\n        __**Title:**__            " + job.getName() 
+               + "\n        __**Time Start:**__ " +getLondonTime() 
+               + "\nTo join the job type in game chat: ```css\n/job join " + job.getName() + "```");
+        /*sendDiscord(":ring1 @everyone, there is a new job!!! :ring1"
+                                +"\n         __**Leader:**__      "+job.getOwner()
+                                +"\n         __**Title:**__          "+job.getName()
+                                +"\n         __**Time Start:**__ "+getLondonTime()
+                                +"\n         To join the job typ in game chat: ```css\n/job join "+job.getName());*/
     }
 
+    private String getLondonTime() {
+        Calendar calendar = new GregorianCalendar();
+        TimeZone zone = calendar.getTimeZone();
+        zone.setID("Europe/London");
+        zone.setRawOffset(0);
+        calendar.setTimeZone(zone);
+        SimpleDateFormat format = (SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.SHORT,Locale.UK);
+        format.setCalendar(calendar);
+        format.applyPattern("HH:mm z");
+        return format.format(calendar.getTime());
+     }
+
+    private void sendDiscord(String message) {
+        if ((TheGaffer.getDiscordChannel() != null) && (!TheGaffer.getDiscordChannel().equals("")))
+        {
+          DiscordSRV discordPlugin = DiscordSRV.getPlugin();
+          if (discordPlugin != null)
+          {
+            TextChannel channel = discordPlugin.getDestinationTextChannelForGameChannelName(TheGaffer.getDiscordChannel());
+            if (channel != null) {
+              DiscordUtil.sendMessage(channel, message, 0, false);
+            } else {
+              Logger.getLogger("TheGaffer").warning("Discord channel not found.");
+            }
+          }
+          else
+          {
+            Logger.getLogger("TheGaffer").warning("DiscordSRV plugin not found.");
+          }
+        }
+    }
+    
     @EventHandler
     public void onJobProtection(JobProtectionInteractEvent event) {
        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());

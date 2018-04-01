@@ -4,6 +4,7 @@ version: ${project.version}
 website: ${project.url}
 authors: [meggawatts, DonoA]
 description: Job API for MCME.
+softdepend: [DiscordSRV]
 author: meggawatts
 commands:
   createjob:
