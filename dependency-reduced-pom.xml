@@ -4,7 +4,7 @@
   <groupId>com.mcmiddleearth</groupId>
   <artifactId>TheGaffer</artifactId>
   <name>TheGaffer</name>
-  <version>2.5.1-SNAPSHOT</version>
+  <version>2.5.2</version>
   <url>http://www.mcmiddleearth.com/</url>
   <build>
     <resources>
@@ -47,6 +47,12 @@
                 <excludes>
                   <exclude>org.projectlombok:lombok</exclude>
                   <exclude>org.bukkit:bukkit</exclude>
+                  <exclude>github.scarsz.discordsrv:DiscordSRV</exclude>
+                  <exclude>com.googlecode.json-simple:json-simple</exclude>
+                  <exclude>commons-lang:commons-lang</exclude>
+                  <exclude>junit:junit</exclude>
+                  <exclude>org.hamcrest:hamcrest-core</exclude>
+                  <exclude>org.yaml:snakeyaml</exclude>
                 </excludes>
               </artifactSet>
             </configuration>

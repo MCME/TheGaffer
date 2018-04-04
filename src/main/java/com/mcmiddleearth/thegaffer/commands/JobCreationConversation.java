@@ -69,8 +69,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return false;
         }
     }
-    
-    public boolean Start(CommandSender sender, Command command, String label, String[] args){
+
+    public boolean Start(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;
@@ -78,7 +78,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return false;
         }
     }
-            
 
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
@@ -121,10 +120,30 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             }
             if (!JobDatabase.getActiveJobs().containsKey(input)) {
                 context.setSessionData("jobname", input);
-                return new privatePrompt();
+                if (TheGaffer.isJobDescription()) {
+                    return new descriptionPrompt();
+                } else {
+                    context.setSessionData("description", "");
+                    return new privatePrompt();
+                }
             } else {
                 return new jobAlreadyRunningPrompt();
             }
+        }
+
+    }
+
+    private class descriptionPrompt extends StringPrompt {
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Please give a short job description.";
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            context.setSessionData("description", input);
+            return new privatePrompt();
         }
 
     }
@@ -172,64 +191,123 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     }
 
-    private class kitPrompt extends BooleanPrompt {
-
-        
-        
-        @Override
-        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
-            context.setSessionData("setkit", input);
-            return new tsPrompt();
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            
-            return "Set the kit of the job now? (true or false)";
-        }
-
-    }
-
     private class howBigPrompt extends NumericPrompt {
 
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
-            return new kitPrompt();
+            if (TheGaffer.isJobKitsEnabled()) {
+                return new kitPrompt();
+            } else {
+                context.setSessionData("setkit", false);
+                return newTeamspeakOrDiscordOrFinishPrompt();
+            }
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
             return "How big should the job area be? (radius 0 - 1000)";
         }
+
     }
 
-    private class tsPrompt extends StringPrompt {
-        
-        public ArrayList<String> Lobbies = new ArrayList<String>();
+    public Prompt newTeamspeakOrDiscordOrFinishPrompt() {
+        if (TheGaffer.isTSenabled()) {
+            return new tsPrompt();
+        }
+        if (TheGaffer.isDiscordEnabled()) {
+            return new discordAnnouncePrompt();
+        }
+        return new finishedPrompt();
+    }
+
+    private class kitPrompt extends BooleanPrompt {
 
         @Override
-        public Prompt acceptInput(ConversationContext context, String input) {
-            if(TheGaffer.isTSenabled()){
-                if(Lobbies.contains(input) || input.equalsIgnoreCase("0")){
-                    context.setSessionData("setTs", input);
-                    return new finishedPrompt();
-                }
-                return new TSfailPrompt();
-            }else{
-                context.setSessionData("setTs", input);
-            }
-            return new finishedPrompt();
+        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
+            context.setSessionData("setkit", input);
+            //return new tsPrompt();
+            return newTeamspeakOrDiscordOrFinishPrompt();//new discordAnnouncePrompt();
         }
 
         @Override
         public String getPromptText(ConversationContext context) {
-            if(TheGaffer.isTSenabled()){
+
+            return "Set the kit of the job now? (true or false)";
+        }
+
+    }
+
+    private class discordAnnouncePrompt extends BooleanPrompt {
+
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
+            context.setSessionData("discordSend", input);
+            if (input) {
+                return new discordTagPrompt();
+            } else {
+                return new finishedPrompt();
+            }
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Should this job be announced on Discord? (true or false)";
+        }
+
+    }
+
+    private class discordTagPrompt extends StringPrompt {
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "who should be notified at discord about the job?"
+                    + "\n" + "(player names separated by ',' or roles like 'Commoner' or 'everyone'";
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            input = input.replace(" ", "");
+            context.setSessionData("discordTag", input);
+            return new finishedPrompt();
+        }
+
+    }
+
+    private class tsPrompt extends StringPrompt {
+
+        public ArrayList<String> Lobbies = new ArrayList<String>();
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            if (TheGaffer.isTSenabled()) {
+                if (Lobbies.contains(input) || input.equalsIgnoreCase("0")) {
+                    context.setSessionData("setTs", input);
+                    return newDiscordOrFinishedPrompt();
+                }
+                return new TSfailPrompt();
+            } else {
+                context.setSessionData("setTs", input);
+            }
+            return newDiscordOrFinishedPrompt();
+        }
+
+        private Prompt newDiscordOrFinishedPrompt() {
+            if (TheGaffer.isDiscordEnabled()) {
+                return new discordAnnouncePrompt();
+            } else {
+                return new finishedPrompt();
+            }
+        }
+        
+        @Override
+        public String getPromptText(ConversationContext context) {
+            if (TheGaffer.isTSenabled()) {
                 try {
                     String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
                     Scanner s;
                     s = new Scanner(new File(dbPath + "/lobbies.txt"));
-                    while (s.hasNext()){
+                    while (s.hasNext()) {
                         Lobbies.add(s.nextLine());
                     }
                     s.close();
@@ -237,7 +315,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                     Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
-                for(String channel : Lobbies){
+                for (String channel : Lobbies) {
                     returner += channel + ", ";
                 }
                 return returner;
@@ -246,9 +324,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         }
 
     }
-    
-    private class TSfailPrompt extends MessagePrompt{
-        
+
+    private class TSfailPrompt extends MessagePrompt {
+
         @Override
         protected Prompt getNextPrompt(ConversationContext context) {
             return new tsPrompt();
@@ -258,7 +336,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public String getPromptText(ConversationContext context) {
             return "That TeamSpeak channel doesn't exist!";
         }
-        
+
     }
 
     private class finishedPrompt extends MessagePrompt {
@@ -270,15 +348,19 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            String ts= (String) context.getSessionData("setTs");
+            String ts = (context.getSessionData("setTS")!=null?(String) context.getSessionData("setTs"):"");
             String jobname = (String) context.getSessionData("jobname");
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
             JobWarp tsWarp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
+            boolean discordSend = (context.getSessionData("discordSend")!=null?(boolean) context.getSessionData("discordSend"):false);
+            String[] discordTags = (context.getSessionData("discordTag")!=null?((String) context.getSessionData("discordTag")).split(","):new String[0]);
+            String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
-            Job jerb = new Job(jobname, owner, true, warp, warp.getWorld(), Private, radius, ts, tsWarp);
+            Job jerb = new Job(jobname, description, owner, true, warp, warp.getWorld(), Private, radius,
+                    discordSend, discordTags, ts, tsWarp);
             if (setKit) {
                 JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
                 jerb.setKit(kit);

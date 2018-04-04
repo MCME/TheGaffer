@@ -15,7 +15,6 @@
  */
 package com.mcmiddleearth.thegaffer.commands;
 
-import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminCommands;
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.TeamSpeak.TSupdate;
@@ -33,10 +32,10 @@ import java.util.List;
 import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
@@ -47,6 +46,12 @@ public class JobCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if(sender instanceof ConsoleCommandSender && args.length>0 && args[0].equalsIgnoreCase("reloadConfig")) {
+            TheGaffer.getPluginInstance().reloadConfig();
+            TheGaffer.setupConfig();
+            sender.sendMessage("Configuration reloaded from config.yml");
+            return true;
+        }
         if (!(sender instanceof Player)) {
             sender.sendMessage("You are not a player");
             return true;

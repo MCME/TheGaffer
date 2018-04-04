@@ -72,6 +72,15 @@ public class Job implements Listener {
     private String ts;
     @Getter
     @Setter
+    private boolean discordSend;
+    @Getter
+    @Setter
+    private String[] discordTags;
+    @Getter
+    @Setter
+    private String description;
+    @Getter
+    @Setter
     private ArrayList<String> helpers = new ArrayList();
     @Getter
     @Setter
@@ -118,14 +127,18 @@ public class Job implements Listener {
     @Getter
     @JsonIgnore
     private HashMap<OfflinePlayer, Long> left = new HashMap();
-    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts, JobWarp tswarp) {
+    public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, 
+               boolean discordSend, String[] discordTags, String ts, JobWarp tswarp) {
         this.name = name;
+        this.description = description;
         this.owner = owner;
         this.running = running;
         this.warp = warp;
         this.world = world;
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
+        this.discordSend = discordSend;
+        this.discordTags = discordTags;
         this.ts = ts;
         this.tsWarp = tswarp;
         admitedWorkers.add(this.owner);
