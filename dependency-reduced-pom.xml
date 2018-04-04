@@ -73,6 +73,17 @@
       <id>Scarsz-Jenkins</id>
       <url>http://ci.scarsz.me/plugin/repository/everything/</url>
     </repository>
+    <repository>
+      <id>scarsz-bintray</id>
+      <url>https://dl.bintray.com/scarsz/maven</url>
+    </repository>
+    <repository>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <id>scarsz-github</id>
+      <url>https://raw.githubusercontent.com/Scarsz/Maven/master/</url>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>
@@ -136,6 +147,12 @@
           <groupId>org.reflections</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.scarsz</groupId>
+      <artifactId>VentureChat</artifactId>
+      <version>2.9.8</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>

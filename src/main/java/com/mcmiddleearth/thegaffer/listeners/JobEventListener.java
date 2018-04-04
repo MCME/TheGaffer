@@ -24,6 +24,7 @@ import com.mcmiddleearth.thegaffer.events.JobProtectionHangingPlaceEvent;
 import com.mcmiddleearth.thegaffer.events.JobProtectionInteractEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.core.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
@@ -47,8 +48,9 @@ public class JobEventListener implements Listener {
     public void onJobEnd(JobEndEvent event) {
         Job job = event.getJob();
         job.sendToAll(ChatColor.GRAY + "The " + job.getName() + " job has ended.");
-        for (Player p : job.getWorkersAsPlayersArray()) {
+        for (Player p : job.getAllAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.ENTITY_ENDERDRAGON_FLAP, 0.8f, 1f);
+            VentureChatUtil.leaveJobChannel(p);
         }
         if(job.isDiscordSend()) {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());

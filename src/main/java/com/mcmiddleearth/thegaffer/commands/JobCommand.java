@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import mineverse.Aust1n46.chat.api.MineverseChatAPI;
+import mineverse.Aust1n46.chat.api.MineverseChatPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -202,7 +204,7 @@ public class JobCommand implements TabExecutor {
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
-                                    if(!jobToJoin.getTSchannel().equalsIgnoreCase("0")){
+                                    if(TheGaffer.isTSenabled() && !jobToJoin.getTSchannel().equalsIgnoreCase("0")){
                                         player.teleport(jobToJoin.getTsWarp().toBukkitLocation());
                                         player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + "beefburgers");
                                     }
