@@ -31,6 +31,8 @@ import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import static com.mcmiddleearth.thegaffer.utilities.ProtectionUtil.getBuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.Util;
+import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
+import github.scarsz.discordsrv.util.DiscordUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,8 +66,8 @@ public class TheGaffer extends JavaPlugin {
     static String fileExtension = ".job";
     @Getter
     static boolean debug = false;
-    @Getter
-    static boolean TS;
+    //@Getter
+    //static boolean TS;
     @Getter
     static Configuration pluginConfig;
     @Getter
@@ -81,21 +83,25 @@ public class TheGaffer extends JavaPlugin {
     static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList();
     @Getter
     static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList();
+    @Getter
+    static String discordChannel;
+    @Getter
+    static String discordJobEmoji;
+    @Getter
+    static boolean discordEnabled;
+    @Getter
+    static boolean jobKitsEnabled;
+    @Getter 
+    static boolean jobDescription;
 
     @Override
     public synchronized void onEnable() {
         serverInstance = getServer();
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
-        debug = getConfig().getBoolean("general.debug");
-        jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
-        if(this.getConfig().contains("TS")){
-            TSenabled = this.getConfig().getBoolean("TS");
-        }else{
-            TSenabled = false;
-        }
-        new TSfetcher().runTaskTimer(this, 20, 1200);
         setupConfig();
+        jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+        new TSfetcher().runTaskTimer(this, 20, 1200);
         try {
             int jobsLoaded = JobDatabase.loadJobs();
             Util.info("Loaded " + jobsLoaded + " jobs.");
@@ -134,8 +140,18 @@ public class TheGaffer extends JavaPlugin {
         }
     }
 
-    public void setupConfig() {
-        pluginConfig = getConfig();
+    public static void setupConfig() {
+        pluginConfig = TheGaffer.getPluginInstance().getConfig();
+        if(pluginConfig.contains("TS")){
+            TSenabled = pluginConfig.getBoolean("TS",false);
+        }else{
+            TSenabled = false;
+        }
+        jobDescription = pluginConfig.getBoolean("jobDescription",false);
+        jobKitsEnabled = pluginConfig.getBoolean("jobKits",false);
+        discordEnabled = pluginConfig.contains("discord");
+        discordChannel = pluginConfig.getString("discord.channel",null);
+        discordJobEmoji = pluginConfig.getString("discord.emoji","");
         debug = pluginConfig.getBoolean("general.debug");
         servletPort = pluginConfig.getInt("servlet.port");
         unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
@@ -152,7 +168,7 @@ public class TheGaffer extends JavaPlugin {
                 }
             }
         }
-        saveDefaultConfig();
+        TheGaffer.getPluginInstance().saveDefaultConfig();
     }
 
     public static void scheduleOwnerTimeout(Job job) {

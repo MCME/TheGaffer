@@ -23,6 +23,7 @@ import com.mcmiddleearth.thegaffer.GafferResponses.WorkerResponse;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
+import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import java.awt.Polygon;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -72,6 +73,15 @@ public class Job implements Listener {
     private String ts;
     @Getter
     @Setter
+    private boolean discordSend;
+    @Getter
+    @Setter
+    private String[] discordTags;
+    @Getter
+    @Setter
+    private String description;
+    @Getter
+    @Setter
     private ArrayList<String> helpers = new ArrayList();
     @Getter
     @Setter
@@ -118,17 +128,22 @@ public class Job implements Listener {
     @Getter
     @JsonIgnore
     private HashMap<OfflinePlayer, Long> left = new HashMap();
-    public Job(String name, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, String ts, JobWarp tswarp) {
+    public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, 
+               boolean discordSend, String[] discordTags, String ts, JobWarp tswarp) {
         this.name = name;
+        this.description = description;
         this.owner = owner;
         this.running = running;
         this.warp = warp;
         this.world = world;
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
+        this.discordSend = discordSend;
+        this.discordTags = discordTags;
         this.ts = ts;
         this.tsWarp = tswarp;
         admitedWorkers.add(this.owner);
+        VentureChatUtil.joinJobChannel(owner);
         if (jr > 1000) {
             jr = 1000;
         }
@@ -138,6 +153,7 @@ public class Job implements Listener {
         int xbounds[] = {bukkitLoc.getBlockX() - jobRadius, bukkitLoc.getBlockX() + jobRadius};
         this.area = new Polygon(xbounds, zbounds, xbounds.length);
         this.bounds = area.getBounds2D();
+        
     }
 
     public Job() {
@@ -297,6 +313,7 @@ public class Job implements Listener {
             return HelperResponse.NO_PERMISSIONS;
         }
         helpers.add(p.getName());
+        VentureChatUtil.joinJobChannel(p.getUniqueId());
         setDirty(true);
         JobDatabase.saveJobs();
         sendToHelpers(ChatColor.AQUA + p.getName() + " has been added as a helper to the job.");
@@ -308,6 +325,7 @@ public class Job implements Listener {
             return HelperResponse.NOT_HELPER;
         }
         helpers.remove(p.getName());
+        VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
         JobDatabase.saveJobs();
         Util.debug(p.getName() + " was helper kicked from " + name + " with reason: " + reason);
@@ -331,6 +349,7 @@ public class Job implements Listener {
             return WorkerResponse.NOT_INVITED;
         }
         workers.add(p.getName());
+        VentureChatUtil.joinJobChannel(p.getUniqueId());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
             if (kit != null) {
@@ -351,6 +370,7 @@ public class Job implements Listener {
             p.getPlayer().getInventory().clear();
         }
         workers.remove(p.getName());
+        VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
         JobDatabase.saveJobs();
         sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
@@ -386,6 +406,7 @@ public class Job implements Listener {
             }
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
+                VentureChatUtil.leaveJobChannel(p);
             }
             invitedWorkers.remove(p.getName());
         }
@@ -398,6 +419,7 @@ public class Job implements Listener {
         for(OfflinePlayer p : ps){
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
+                VentureChatUtil.leaveJobChannel(p);
             }
             if (bannedWorkers.contains(p.getName())) {
                 return BanWorkerResponse.ALREADY_BANNED;
@@ -427,6 +449,7 @@ public class Job implements Listener {
                 return KickWorkerResponse.NOT_IN_JOB;
             }
             workers.remove(p.getName());
+            VentureChatUtil.leaveJobChannel(p);
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         }
         setDirty(true);

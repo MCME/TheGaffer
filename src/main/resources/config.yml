@@ -33,3 +33,16 @@ TS: false
 #     Plugin2Name:
 #         allow: methodNameInPlugin2
 #
+# Should jobs have a description that is shown in the job start messages.
+# Job leaders need to type in the Description during job start conversation
+jobDescription: true
+#Should job leaders be able to define a job kit during job start conversation
+jobKits: false
+#Should Teamspeak integration activated
+TS: false
+#Discord integration
+#name of the job channel where the job start message should appear
+#name of an emoji to decorate the job messages, remove for no emoji
+discord:
+  channel: job-general
+  emoji: ringmcme
