@@ -42,6 +42,7 @@ public class ExternalProtectionHandler {
     }
     
     public boolean handle(Player player, Location location) {
+//Logger.getGlobal().info("Ext Prot hand: "+pluginName+" "+methodName);
         if(plugin == null || checkPermsMethod == null) {
             load(pluginName, methodName);
         }
@@ -51,7 +52,7 @@ public class ExternalProtectionHandler {
         try {
             return (boolean) checkPermsMethod.invoke(null, player, location);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(ExternalProtectionHandler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ExternalProtectionHandler.class.getName()).log(Level.SEVERE, "External protection handler not found: "+pluginName+" "+methodName, ex);
             return false;
         }
     }
@@ -62,7 +63,7 @@ public class ExternalProtectionHandler {
             try {
                 checkPermsMethod = plugin.getClass().getMethod(methodName, Player.class, Location.class);
             } catch (NoSuchMethodException | SecurityException ex) {
-                Logger.getLogger(ExternalProtectionHandler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ExternalProtectionHandler.class.getName()).log(Level.SEVERE, "External protection handler not found while loading: "+pluginName+" "+methodName, ex);
             }
         }
     }
