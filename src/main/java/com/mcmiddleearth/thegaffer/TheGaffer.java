@@ -136,7 +136,9 @@ public class TheGaffer extends JavaPlugin {
     @Override
     public synchronized void onDisable() {
         try {
-            server.stopServer();
+            if(server!=null) {
+                server.stopServer();
+            }
         } catch (Exception ex) {
             Logger.getLogger(TheGaffer.class.getName()).log(Level.SEVERE, null, ex);
         }
