@@ -3,6 +3,7 @@ general:
     debug: true
 # Servlet configuration
 servlet:
+    enabled: false
     port: 8080
 # Worlds configuration
 unprotectedworlds:

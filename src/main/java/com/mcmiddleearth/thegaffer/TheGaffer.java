@@ -123,11 +123,13 @@ public class TheGaffer extends JavaPlugin {
                 CleanupUtil.scheduledAbandonersCleanup();
             }
         }, 0, (5 * 60) * 20);
-        server = new GafferServer(servletPort);
-        try {
-            server.startServer();
-        } catch (Exception ex) {
-            Util.severe(ex.toString());
+        if(getConfig().getBoolean("servlet.enabled",false)) {
+            server = new GafferServer(servletPort);
+            try {
+                server.startServer();
+            } catch (Exception ex) {
+                Util.severe(ex.toString());
+            }
         }
     }
 
