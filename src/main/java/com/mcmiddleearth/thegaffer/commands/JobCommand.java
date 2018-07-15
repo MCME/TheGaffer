@@ -30,8 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import mineverse.Aust1n46.chat.api.MineverseChatAPI;
-import mineverse.Aust1n46.chat.api.MineverseChatPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -166,7 +164,6 @@ public class JobCommand implements TabExecutor {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                     StringBuilder out = new StringBuilder();
                     out.append(ChatColor.DARK_PURPLE).append(ChatColor.BOLD).append("TheGaffer Debug").append("\n");
-                    out.append(ChatColor.GRAY).append("Servlet port: ").append(ChatColor.AQUA).append(TheGaffer.getServletPort()).append("\n");
                     out.append(ChatColor.GRAY).append("Number of active jobs: ").append(ChatColor.AQUA).append(JobDatabase.getActiveJobs().size()).append("\n");
                     out.append(ChatColor.GRAY).append("Number of inactive jobs: ").append(ChatColor.AQUA).append(JobDatabase.getInactiveJobs().size()).append("\n");
                     out.append(ChatColor.GRAY).append("Number of jobs timing out: ").append(ChatColor.AQUA).append(CleanupUtil.getWaiting().size()).append("\n");
