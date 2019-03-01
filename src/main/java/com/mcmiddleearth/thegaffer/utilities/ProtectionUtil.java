@@ -58,8 +58,8 @@ public class ProtectionUtil {
             if (JobDatabase.getActiveJobs().isEmpty()) {
                 return BuildProtection.NO_JOB;
             } else {
-                HashMap<Job, World> workingworlds = new HashMap();
-                HashMap<Job, Rectangle2D> areas = new HashMap();
+                HashMap<Job, World> workingworlds = new HashMap<>();
+                HashMap<Job, Rectangle2D> areas = new HashMap<>();
                 for (Job job : JobDatabase.getActiveJobs().values()) {
                     workingworlds.put(job, job.getBukkitWorld());
                     areas.put(job, job.getBounds());

@@ -53,7 +53,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
     private final ConversationFactory conversationFactory;
 
-    private final List<String> actions = new ArrayList();
+    private final List<String> actions = new ArrayList<>();
 
     public JobAdminConversation() {
         conversationFactory = new ConversationFactory(TheGaffer.getPluginInstance())

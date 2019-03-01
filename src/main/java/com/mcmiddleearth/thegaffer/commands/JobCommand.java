@@ -42,7 +42,7 @@ import org.bukkit.util.ChatPaginator;
 
 public class JobCommand implements TabExecutor {
 
-    private HashMap<Player, InvHolder> invs = new HashMap();
+    private HashMap<Player, InvHolder> invs = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -56,7 +56,7 @@ public class JobCommand implements TabExecutor {
             sender.sendMessage("You are not a player");
             return true;
         }
-        if ((args.length > 0) && ((sender instanceof Player))) {
+        if (args.length > 0) {
             Player player = (Player) sender;
             if (args.length >= 2) {
                 if (args[0].equalsIgnoreCase("stop")) {
@@ -331,7 +331,7 @@ public class JobCommand implements TabExecutor {
             return null;
         }
         if (args[0].equalsIgnoreCase("info")) {
-            List<String> jobs = new ArrayList();
+            List<String> jobs = new ArrayList<>();
             if (args[1] == null) {
                 jobs.addAll(JobDatabase.getActiveJobs().keySet());
                 jobs.addAll(JobDatabase.getInactiveJobs().keySet());
@@ -350,7 +350,7 @@ public class JobCommand implements TabExecutor {
                     return null;
                 }
             }
-            Set<String> jobsUnique = new HashSet(jobs);
+            Set<String> jobsUnique = new HashSet<>(jobs);
             jobs.removeAll(jobs);
             jobs.addAll(jobsUnique);
             return jobs;
@@ -358,25 +358,28 @@ public class JobCommand implements TabExecutor {
         if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")
                 || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")
                 || args[0].equalsIgnoreCase("warpto")) {
-            List<String> jobs = new ArrayList();
-            if (args[1] == null) {
-                jobs.addAll(JobDatabase.getActiveJobs().keySet());
-            } else {
-                for (String s : JobDatabase.getActiveJobs().keySet()) {
-                    if (s.startsWith(args[1])) {
-                        jobs.add(s);
+            List<String> jobs = new ArrayList<>();
+
+            if (args.length > 1) {
+                if (args[1] == null) {
+                    jobs.addAll(JobDatabase.getActiveJobs().keySet());
+                } else {
+                    for (String s : JobDatabase.getActiveJobs().keySet()) {
+                        if (s.startsWith(args[1])) {
+                            jobs.add(s);
+                        }
+                    }
+                    if (jobs.isEmpty()) {
+                        return null;
                     }
                 }
-                if (jobs.isEmpty()) {
-                    return null;
-                }
+                Set<String> jobsUnique = new HashSet<>(jobs);
+                jobs.removeAll(jobs);
+                jobs.addAll(jobsUnique);
+                return jobs;
             }
-            Set<String> jobsUnique = new HashSet(jobs);
-            jobs.removeAll(jobs);
-            jobs.addAll(jobsUnique);
-            return jobs;
         }
-        List<String> actions = new ArrayList();
+        List<String> actions = new ArrayList<>();
         actions.add("archive");
         actions.add("warpto");
         actions.add("info");

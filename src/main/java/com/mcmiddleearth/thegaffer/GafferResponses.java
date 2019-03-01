@@ -33,7 +33,7 @@ public class GafferResponses {
         @Getter
         private final boolean successful;
 
-        private HelperResponse(String message, boolean wasSuccessful) {
+        HelperResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
         }
@@ -55,7 +55,7 @@ public class GafferResponses {
         @Getter
         private final boolean successful;
 
-        private WorkerResponse(String message, boolean wasSuccessful) {
+        WorkerResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
         }
@@ -76,7 +76,7 @@ public class GafferResponses {
         @Getter
         private final boolean successful;
 
-        private InviteResponse(String message, boolean wasSuccessful) {
+        InviteResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
         }
@@ -94,7 +94,7 @@ public class GafferResponses {
         @Getter
         private final boolean successful;
 
-        private BanWorkerResponse(String message, boolean wasSuccessful) {
+        BanWorkerResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
         }
@@ -110,7 +110,7 @@ public class GafferResponses {
         @Getter
         private final boolean successful;
 
-        private KickWorkerResponse(String message, boolean wasSuccessful) {
+        KickWorkerResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
         }
@@ -125,7 +125,7 @@ public class GafferResponses {
         @Getter
         private final boolean successful;
 
-        private GenericResponse(String message, boolean wasSuccessful) {
+        GenericResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
         }
@@ -133,8 +133,8 @@ public class GafferResponses {
 
     public interface GafferResponse {
 
-        public abstract String getMessage();
+        String getMessage();
 
-        public abstract boolean isSuccessful();
+        boolean isSuccessful();
     }
 }
