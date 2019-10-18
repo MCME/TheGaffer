@@ -355,7 +355,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             JobWarp tsWarp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
-            boolean discordSend = (context.getSessionData("discordSend")!=null?(boolean) context.getSessionData("discordSend"):false);
+            boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
             String[] discordTags = (context.getSessionData("discordTag")!=null?((String) context.getSessionData("discordTag")).split(","):new String[0]);
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();

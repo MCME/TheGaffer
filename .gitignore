@@ -2,3 +2,7 @@
 /dist/
 /nbproject/private/
 /target/
+target
+.idea
+*.iml
+dependency-reduced-pom.xml

@@ -127,7 +127,7 @@ public class Job implements Listener {
     private JobKit kit;
     @Getter
     @JsonIgnore
-    private HashMap<OfflinePlayer, Long> left = new HashMap();
+    private HashMap<OfflinePlayer, Long> left = new HashMap<>();
     public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, 
                boolean discordSend, String[] discordTags, String ts, JobWarp tswarp) {
         this.name = name;
@@ -233,7 +233,7 @@ public class Job implements Listener {
 
     @JsonIgnore
     public Player[] getAllAsPlayersArray() {
-        ArrayList<Player> players = new ArrayList();
+        ArrayList<Player> players = new ArrayList<>();
         for (String pName : workers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
             if (p.isOnline()) {
@@ -257,7 +257,7 @@ public class Job implements Listener {
 
     @JsonIgnore
     public ArrayList<Player> getWorkersAsPlayersList() {
-        ArrayList<Player> players = new ArrayList();
+        ArrayList<Player> players = new ArrayList<>();
         for (String pName : workers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
             if (p.isOnline()) {

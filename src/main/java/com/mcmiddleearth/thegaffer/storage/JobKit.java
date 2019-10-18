@@ -62,7 +62,7 @@ public class JobKit {
         chestplate = new JobItem(inv.getChestplate());
         pants = new JobItem(inv.getLeggings());
         boots = new JobItem(inv.getBoots());
-        List<JobItem> contentS = new ArrayList();
+        List<JobItem> contentS = new ArrayList<>();
         for (ItemStack i : inv.getContents()) {
             contentS.add(new JobItem(i));
         }

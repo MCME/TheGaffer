@@ -32,9 +32,9 @@ import org.bukkit.event.HandlerList;
 public class JobDatabase {
 
     @Getter
-    private static final TreeMap<String, Job> activeJobs = new TreeMap();
+    private static final TreeMap<String, Job> activeJobs = new TreeMap<>();
     @Getter
-    private static final TreeMap<String, Job> inactiveJobs = new TreeMap();
+    private static final TreeMap<String, Job> inactiveJobs = new TreeMap<>();
 
     public static int loadJobs() throws IOException {
         int count = 0;
@@ -42,13 +42,10 @@ public class JobDatabase {
         if (!activeJobFolder.exists()) {
             activeJobFolder.mkdirs();
         }
-        String[] aJ = activeJobFolder.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(TheGaffer.getFileExtension());
-            }
-        });
-        ArrayList<Job> tjobs = new ArrayList();
+
+        String[] aJ = activeJobFolder.list((dir, name) -> name.endsWith(TheGaffer.getFileExtension()));
+
+        ArrayList<Job> tjobs = new ArrayList<>();
         for (String fName : aJ) {
             File jFile = new File(activeJobFolder, fName);
             if (!jFile.isDirectory()) {

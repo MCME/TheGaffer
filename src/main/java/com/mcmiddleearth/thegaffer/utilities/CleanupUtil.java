@@ -28,10 +28,10 @@ import org.bukkit.OfflinePlayer;
 public class CleanupUtil {
 
     @Getter
-    private static HashMap<Job, Long> waiting = new HashMap();
+    private static HashMap<Job, Long> waiting = new HashMap<>();
     
     public static void scheduledCleanup() {
-        List<Job> removeList = new ArrayList();
+        List<Job> removeList = new ArrayList<>();
         for (Job job : waiting.keySet()) {
             if (!job.getOwnerAsOfflinePlayer().isOnline()) {
                 Long since = waiting.get(job);
@@ -85,7 +85,7 @@ public class CleanupUtil {
     }
     
     public static void selectNewOwner(Job job) {
-        ArrayList<OfflinePlayer> possibles = new ArrayList();
+        ArrayList<OfflinePlayer> possibles = new ArrayList<>();
         for (String name : job.getHelpers()) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(name);
             if (p.isOnline()) {
