@@ -24,7 +24,7 @@ public enum BuildProtection {
     @Getter
     private final String message;
 
-    private BuildProtection(String message) {
+    BuildProtection(String message) {
         this.message = message;
     }
 }

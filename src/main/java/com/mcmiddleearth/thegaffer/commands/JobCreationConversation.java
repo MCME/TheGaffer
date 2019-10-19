@@ -20,7 +20,6 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
-import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -312,7 +311,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                     }
                     s.close();
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(TSfetcher.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(JobCreationConversation.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
                 for (String channel : Lobbies) {
@@ -355,7 +354,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             JobWarp tsWarp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
-            boolean discordSend = (context.getSessionData("discordSend")!=null?(boolean) context.getSessionData("discordSend"):false);
+            boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
             String[] discordTags = (context.getSessionData("discordTag")!=null?((String) context.getSessionData("discordTag")).split(","):new String[0]);
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();

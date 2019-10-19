@@ -15,7 +15,6 @@
  */
 package com.mcmiddleearth.thegaffer;
 
-import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
@@ -42,6 +41,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 
@@ -68,13 +68,13 @@ public class TheGaffer extends JavaPlugin {
     @Getter
     static boolean TSenabled;
     @Getter
-    static List<String> unprotectedWorlds = new ArrayList();
+    static List<String> unprotectedWorlds = new ArrayList<>();
     @Getter
-    static ArrayList<Player> listening = new ArrayList();
+    static ArrayList<Player> listening = new ArrayList<>();
     @Getter
-    static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList();
+    static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList<>();
     @Getter
-    static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList();
+    static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList<>();
     @Getter
     static String discordChannel;
     @Getter
@@ -93,7 +93,7 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         setupConfig();
         jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
-        new TSfetcher().runTaskTimer(this, 20, 1200);
+        //new TSfetcher().runTaskTimer(this, 20, 1200);
         try {
             int jobsLoaded = JobDatabase.loadJobs();
             Util.info("Loaded " + jobsLoaded + " jobs.");
@@ -107,14 +107,16 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
         serverInstance.getPluginManager().registerEvents(new CraftingListener(), this);
-        serverInstance.getScheduler().scheduleAsyncRepeatingTask(this, new Runnable() {
+
+        new BukkitRunnable() {
+
             @Override
             public void run() {
                 Util.debug("Starting running job cleanup.");
                 CleanupUtil.scheduledCleanup();
                 CleanupUtil.scheduledAbandonersCleanup();
             }
-        }, 0, (5 * 60) * 20);
+        }.runTaskTimerAsynchronously(this, 0, (5 * 60) * 20);
     }
 
     public static void setupConfig() {

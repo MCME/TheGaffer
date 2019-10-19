@@ -30,12 +30,14 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public class ProtectionListener implements Listener {
 
@@ -122,7 +124,7 @@ public class ProtectionListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        Player player = (Player) event.getPlayer();
+        Player player = event.getPlayer();
         BuildProtection buildProtection = ProtectionUtil.getBuildProtection(player,
                                                                     event.getEntity().getLocation());
         switch(buildProtection) {
@@ -152,25 +154,33 @@ public class ProtectionListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         JobProtectionInteractEvent jobEvent;
-        if(existsMethodGetHand(event) && !event.getHand().equals(EquipmentSlot.HAND)) {
+        if(existsMethodGetHand(event) 
+                && !event.getAction().equals(Action.PHYSICAL)
+                && !event.getHand().equals(EquipmentSlot.HAND)) {
             return;
         }
         if (event.isCancelled()) {
             return;
         }
         boolean restricted = false;
-        Player player = (Player) event.getPlayer();
-        Material halfSlab = Material.getMaterial(44);
+        Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        Material halfSlab = Material.STONE_SLAB;
         final Block block = event.getClickedBlock();
         final BlockFace blockFace = event.getBlockFace();
         final Block relativeBlock = (event.hasBlock()?block.getRelative(blockFace):null);
         final Material fireMaterial = Material.FIRE;
-        if (event.hasItem() && event.hasBlock()) {
-            if (event.getItem().getType().equals(Material.INK_SACK)) {
-                if (event.getItem().getData().getData() == 15
-                        && (event.getClickedBlock().getType() == Material.GRASS
-                        || event.getClickedBlock().getType() == Material.SAPLING
-                        || event.getClickedBlock().getType() == Material.CROPS
+
+        if (item != null && event.hasBlock()) {
+            if (item.getType().equals(Material.BONE_MEAL)) {
+                if (event.getClickedBlock().getType() == Material.GRASS
+                        || event.getClickedBlock().getType() == Material.SPRUCE_SAPLING
+                        || event.getClickedBlock().getType() == Material.ACACIA_SAPLING
+                        || event.getClickedBlock().getType() == Material.BIRCH_SAPLING
+                        || event.getClickedBlock().getType() == Material.DARK_OAK_SAPLING
+                        || event.getClickedBlock().getType() == Material.JUNGLE_SAPLING
+                        || event.getClickedBlock().getType() == Material.OAK_SAPLING
+                        || event.getClickedBlock().getType() == Material.WHEAT
                         || event.getClickedBlock().getType() == Material.BROWN_MUSHROOM
                         || event.getClickedBlock().getType() == Material.RED_MUSHROOM
                         || event.getClickedBlock().getType() == Material.PUMPKIN_STEM
@@ -178,42 +188,53 @@ public class ProtectionListener implements Listener {
                         || event.getClickedBlock().getType() == Material.POTATO
                         || event.getClickedBlock().getType() == Material.CARROT
                         || event.getClickedBlock().getType() == Material.COCOA
-                        || event.getClickedBlock().getType() == Material.LONG_GRASS)) {
+                        || event.getClickedBlock().getType() == Material.TALL_GRASS) {
                     restricted = true;
-                } else if (event.getItem().getData().getData() == 3) {
+                } else if (event.getItem().getType().equals(Material.COCOA_BEANS)) {
                     restricted = true;
                 }
             }
+
             if (event.getClickedBlock().getType().equals(Material.FLOWER_POT)) {
                 //cancelling this currently does nothing.
-                if (event.getItem().getType() == Material.RED_ROSE
-                        || event.getItem().getType() == Material.YELLOW_FLOWER
-                        || event.getItem().getType() == Material.SAPLING
-                        || event.getItem().getType() == Material.RED_MUSHROOM
-                        || event.getItem().getType() == Material.BROWN_MUSHROOM
-                        || event.getItem().getType() == Material.CACTUS
-                        || event.getItem().getType() == Material.LONG_GRASS
-                        || event.getItem().getType() == Material.DEAD_BUSH) {
+                if (item.getType() == Material.POPPY
+                        || item.getType() == Material.DANDELION_YELLOW
+                        || item.getType() == Material.SPRUCE_SAPLING
+                        || item.getType() == Material.ACACIA_SAPLING
+                        || item.getType() == Material.BIRCH_SAPLING
+                        || item.getType() == Material.DARK_OAK_SAPLING
+                        || item.getType() == Material.JUNGLE_SAPLING
+                        || item.getType() == Material.OAK_SAPLING
+                        || item.getType() == Material.RED_MUSHROOM
+                        || item.getType() == Material.BROWN_MUSHROOM
+                        || item.getType() == Material.CACTUS
+                        || item.getType() == Material.TALL_GRASS
+                        || item.getType() == Material.DEAD_BUSH) {
                     restricted = true;
                     player.sendBlockChange(event.getClickedBlock().getLocation(), Material.STONE, (byte)0);
                 }
             }
-            if(event.getItem().getType().getId() == halfSlab.getId()){
+
+            if(item.getType() == halfSlab){
                 restricted = true;
             }
-            if(event.getItem().getType().equals(Material.WATER_LILY)){
+
+            if(item.getType().equals(Material.LILY_PAD)){
                 event.setCancelled(true);
                 restricted=true;
             }
         }
+
         if (event.hasBlock() && relativeBlock.getType() == fireMaterial) {
-            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte)0);
+            player.sendBlockChange(relativeBlock.getLocation(), fireMaterial, (byte) 0);
             event.setCancelled(true);
             restricted = true;
         }
+
         if(!restricted) {
             return;
         }
+
         BuildProtection buildProtection = ProtectionUtil.getBuildProtection(player,
                                                                     event.getClickedBlock().getLocation());
         switch(buildProtection) {
