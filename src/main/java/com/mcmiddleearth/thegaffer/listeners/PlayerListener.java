@@ -48,6 +48,9 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void playerMove(PlayerMoveEvent event) {
         if(event.getFrom().getBlock()!=event.getTo().getBlock()) {
+            if(JobDatabase.getJobWorking(event.getPlayer())==null) {
+                return;
+            }
             Player player = event.getPlayer();
             if(player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
                 playersSwitchedToCreative.remove(player.getUniqueId());

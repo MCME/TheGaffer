@@ -17,7 +17,6 @@ package com.mcmiddleearth.thegaffer.commands;
 
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminCommands;
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
-import com.mcmiddleearth.thegaffer.TeamSpeak.TSupdate;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
@@ -290,25 +289,6 @@ public class JobCommand implements TabExecutor {
                 }
                 return true;
             }
-            if(args[0].equalsIgnoreCase("admit")){
-                if(TheGaffer.isTSenabled()){
-                    Job senderJob = JobDatabase.getJobWorking(player);
-                    if(senderJob != null){
-                        TSupdate.TSfetch();
-                        //if dev
-        //                    for(String name : senderJob.getAdmitedWorkers()){
-        //                        player.sendMessage(ChatColor.AQUA + name);
-        //                    }
-                        player.sendMessage("TS forced update!");
-                        if(!senderJob.getAdmitedWorkers().contains(player.getName())){
-                            player.sendMessage("You are not in TeamSpeak!");
-                        }
-                        return true;
-                        }
-                    }else{
-                    player.sendMessage("Work in Progress");
-                }
-                }
             if (args[0].equalsIgnoreCase("start") || args[0].equalsIgnoreCase("create")) {
                 Bukkit.getServer().dispatchCommand(sender, "createjob");
                 return true;

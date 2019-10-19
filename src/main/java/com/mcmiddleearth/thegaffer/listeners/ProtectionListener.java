@@ -23,7 +23,6 @@ import com.mcmiddleearth.thegaffer.events.JobProtectionHangingPlaceEvent;
 import com.mcmiddleearth.thegaffer.events.JobProtectionInteractEvent;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -31,6 +30,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -154,7 +154,9 @@ public class ProtectionListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
         JobProtectionInteractEvent jobEvent;
-        if(existsMethodGetHand(event) && !event.getHand().equals(EquipmentSlot.HAND)) {
+        if(existsMethodGetHand(event) 
+                && !event.getAction().equals(Action.PHYSICAL)
+                && !event.getHand().equals(EquipmentSlot.HAND)) {
             return;
         }
         if (event.isCancelled()) {

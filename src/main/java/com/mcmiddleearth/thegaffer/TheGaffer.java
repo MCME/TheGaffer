@@ -15,7 +15,6 @@
  */
 package com.mcmiddleearth.thegaffer;
 
-import com.mcmiddleearth.thegaffer.TeamSpeak.TSfetcher;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
@@ -94,7 +93,7 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         setupConfig();
         jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
-        new TSfetcher().runTaskTimer(this, 20, 1200);
+        //new TSfetcher().runTaskTimer(this, 20, 1200);
         try {
             int jobsLoaded = JobDatabase.loadJobs();
             Util.info("Loaded " + jobsLoaded + " jobs.");
