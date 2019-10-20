@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 public class CleanupUtil {
@@ -60,12 +62,13 @@ public class CleanupUtil {
         Util.debug("Starting to clean up abandoners");
         for (Job job : JobDatabase.getActiveJobs().values()) {
             if (job.getLeft().size() > 0) {
-                for (OfflinePlayer p : job.getLeft().keySet()) {
+                for (UUID uuid : job.getLeft().keySet()) {
+                    OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
                     if (p.isOnline()) {
                         Util.debug("Player: " + p.getName() + " was scheduled for abandonment, but is now online and was removed from abandoners list.");
                         removeList.add(p);
                     } else {
-                        Long since = job.getLeft().get(p);
+                        Long since = job.getLeft().get(p.getUniqueId());
                         Long For = System.currentTimeMillis() - since;
                         if (For >= max) {
                             Util.debug("Player: " + p.getName() + " has been offfline for " + For / 1000 + " seconds. Removing from job.");
@@ -77,7 +80,7 @@ public class CleanupUtil {
                     }
                 }
                 for(OfflinePlayer player: removeList) {
-                    job.getLeft().remove(player);
+                    job.getLeft().remove(player.getUniqueId());
                 }
             }
         }

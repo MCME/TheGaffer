@@ -47,3 +47,7 @@ TS: false
 discord:
   channel: job-general
   emoji: ringmcme
+glowing:
+  enabled: true
+  workerColor: DARK_PURPLE
+  helperColor: AQUA
