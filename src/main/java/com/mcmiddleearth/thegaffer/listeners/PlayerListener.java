@@ -37,6 +37,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        event.getPlayer().setGlowing(false);
         if (JobDatabase.getActiveJobs().size() > 0 && event.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
             event.getPlayer().sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "There is a job running! Use /job check to find out what it is!");
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);

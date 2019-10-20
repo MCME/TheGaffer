@@ -42,6 +42,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Team;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 
@@ -85,6 +86,12 @@ public class TheGaffer extends JavaPlugin {
     static boolean jobKitsEnabled;
     @Getter 
     static boolean jobDescription;
+    @Getter
+    static boolean glowing;
+    @Getter
+    static String helperColor;
+    @Getter
+    static String workerColor;
 
     @Override
     public synchronized void onEnable() {
@@ -131,6 +138,9 @@ public class TheGaffer extends JavaPlugin {
         discordEnabled = pluginConfig.contains("discord");
         discordChannel = pluginConfig.getString("discord.channel",null);
         discordJobEmoji = pluginConfig.getString("discord.emoji","");
+        glowing = pluginConfig.getBoolean("glowing.enabled", true);
+        helperColor = pluginConfig.getString("glowing.helperColor", "AQUA");
+        workerColor = pluginConfig.getString("glowing.workerColor", "LIGHT_PURPLE");
         debug = pluginConfig.getBoolean("general.debug");
         unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
         if(pluginConfig.contains("externalProtectionHandlers")) {
