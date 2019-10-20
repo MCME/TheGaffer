@@ -547,22 +547,17 @@ public class Job implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onLeave(PlayerQuitEvent event) {
-Logger.getGlobal().info("left: "+event.getPlayer().getName());
         if (event.getPlayer().getName().equals(owner)) {
-Logger.getGlobal().info("owner");
             TheGaffer.scheduleOwnerTimeout(this);
         }
         if (workers.contains(event.getPlayer().getName())) {
-Logger.getGlobal().info("worker");
             left.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
-Logger.getGlobal().info("join: "+event.getPlayer().getName());
         if (left.containsKey(event.getPlayer().getUniqueId())) {
-Logger.getGlobal().info("worker");
             left.remove(event.getPlayer().getUniqueId());
             if(TheGaffer.isGlowing()) {
                 event.getPlayer().setGlowing(true);
@@ -570,7 +565,6 @@ Logger.getGlobal().info("worker");
             }
         } else if(event.getPlayer().getName().equals(owner) 
                 || helpers.contains(event.getPlayer().getName())) {
-Logger.getGlobal().info("owner/helper");
             if(TheGaffer.isGlowing()) {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
