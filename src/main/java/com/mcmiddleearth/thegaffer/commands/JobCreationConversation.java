@@ -217,6 +217,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         if (TheGaffer.isDiscordEnabled()) {
             return new discordAnnouncePrompt();
         }
+        if (TheGaffer.isGlowing()) {
+            return new GlowEffectPrompt();
+        }
         return new finishedPrompt();
     }
 
@@ -244,9 +247,11 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             context.setSessionData("discordSend", input);
             if (input) {
                 return new discordTagPrompt();
-            } else {
-                return new finishedPrompt();
             }
+            if (TheGaffer.isGlowing()) {
+                return new GlowEffectPrompt();
+            }
+            return new finishedPrompt();
         }
 
         @Override
@@ -268,6 +273,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public Prompt acceptInput(ConversationContext context, String input) {
             input = input.replace(" ", "");
             context.setSessionData("discordTag", input);
+            if (TheGaffer.isGlowing()) {
+                return new GlowEffectPrompt();
+            }
             return new finishedPrompt();
         }
 
@@ -294,9 +302,11 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         private Prompt newDiscordOrFinishedPrompt() {
             if (TheGaffer.isDiscordEnabled()) {
                 return new discordAnnouncePrompt();
-            } else {
-                return new finishedPrompt();
             }
+            if (TheGaffer.isGlowing()) {
+                return new GlowEffectPrompt();
+            }
+            return new finishedPrompt();
         }
         
         @Override
@@ -338,6 +348,21 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     }
 
+    private class GlowEffectPrompt extends BooleanPrompt {
+
+        @Override
+        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
+            context.setSessionData("glowEffect", input);
+            return new finishedPrompt();
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Should people in this job get a glow effect? (true or false)";
+        }
+
+    }
+    
     private class finishedPrompt extends MessagePrompt {
 
         @Override
@@ -358,8 +383,16 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             String[] discordTags = (context.getSessionData("discordTag")!=null?((String) context.getSessionData("discordTag")).split(","):new String[0]);
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
+            boolean glowing = false;
+            Object temp = context.getSessionData("glowEffect");
+            if(temp!=null) {
+                glowing = (boolean) temp;
+            }
             Job jerb = new Job(jobname, description, owner, true, warp, warp.getWorld(), Private, radius,
                     discordSend, discordTags, ts, tsWarp);
+            if(glowing) {
+                jerb.setGlowing();
+            }
             if (setKit) {
                 JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
                 jerb.setKit(kit);
