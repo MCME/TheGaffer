@@ -130,6 +130,8 @@ public class Job implements Listener {
     @Setter
     private JobKit kit;
     
+    private boolean glowing;
+    
     private Team helperTeam;
     private String helperTeamName;
     private Team workerTeam;
@@ -165,19 +167,22 @@ public class Job implements Listener {
         this.area = new Polygon(xbounds, zbounds, xbounds.length);
         this.bounds = area.getBounds2D();
         
-        if(TheGaffer.isGlowing()) {
-            scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            helperTeamName = name+"Helper";
-            helperTeam = scoreboard.registerNewTeam(name+"Helper");
-            helperTeam.setColor(ChatColor.valueOf(TheGaffer.getHelperColor()));
-            //helperTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-            workerTeamName = name+"Worker";
-            workerTeam = scoreboard.registerNewTeam(name+"Worker");
-            workerTeam.setColor(ChatColor.valueOf(TheGaffer.getWorkerColor()));
-            //workerTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+    }
+    
+    public void setGlowing() {
+        scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        helperTeamName = name+"Helper";
+        helperTeam = scoreboard.registerNewTeam(name+"Helper");
+        helperTeam.setColor(ChatColor.valueOf(TheGaffer.getHelperColor()));
+        //helperTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+        workerTeamName = name+"Worker";
+        workerTeam = scoreboard.registerNewTeam(name+"Worker");
+        workerTeam.setColor(ChatColor.valueOf(TheGaffer.getWorkerColor()));
+        //workerTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
-            addHelperTeam(owner);
-        }
+        glowing = true;
+
+        addHelperTeam(owner);
     }
 
     public Job() {
@@ -559,13 +564,13 @@ public class Job implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         if (left.containsKey(event.getPlayer().getUniqueId())) {
             left.remove(event.getPlayer().getUniqueId());
-            if(TheGaffer.isGlowing()) {
+            if(glowing) {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
             }
         } else if(event.getPlayer().getName().equals(owner) 
                 || helpers.contains(event.getPlayer().getName())) {
-            if(TheGaffer.isGlowing()) {
+            if(glowing) {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
             }
@@ -589,7 +594,7 @@ public class Job implements Listener {
     
     public void setRunning(boolean running) {
         this.running = running;
-        if(TheGaffer.isGlowing() && !running) {
+        if(glowing && !running) {
             helpers.forEach(helper -> removeHelperTeam(helper));
             workers.forEach(worker -> removeWorkerTeam(worker));
             removeHelperTeam(owner);
@@ -599,25 +604,29 @@ public class Job implements Listener {
     }
     
     private void addHelperTeam(String playerName) {
-        if(TheGaffer.isGlowing()) {
+        if(glowing) {
+Logger.getGlobal().info("add helper: "+playerName);
             helperTeam.addEntry(playerName);
             setGlow(playerName,true);
         }
     }
     private void addWorkerTeam(String playerName) {
-        if(TheGaffer.isGlowing()) {
+        if(glowing) {
+Logger.getGlobal().info("add worker: "+playerName);
             workerTeam.addEntry(playerName);
             setGlow(playerName,true);
         }
     }
     private void removeHelperTeam(String playerName) {
-        if(TheGaffer.isGlowing()) {
+        if(glowing) {
+Logger.getGlobal().info("remove helper: "+playerName);
             helperTeam.removeEntry(playerName);
             setGlow(playerName,false);
         }
     }
     private void removeWorkerTeam(String playerName) {
-        if(TheGaffer.isGlowing()) {
+        if(glowing) {
+Logger.getGlobal().info("remove Worker: "+playerName);
             workerTeam.removeEntry(playerName);
             setGlow(playerName,false);
         }
@@ -625,7 +634,7 @@ public class Job implements Listener {
     
     private void setGlow(String playerName, boolean flag) {
         Player player = Bukkit.getPlayer(playerName);
-        if(player!=null && TheGaffer.isGlowing()) {
+        if(player!=null && glowing) {
             player.setGlowing(flag);
             if(flag) {
                 player.setScoreboard(scoreboard);
