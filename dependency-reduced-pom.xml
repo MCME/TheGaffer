@@ -69,6 +69,26 @@
   </repositories>
   <dependencies>
     <dependency>
+      <groupId>com.mcme</groupId>
+      <artifactId>McMeProject</artifactId>
+      <version>2.6</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>dynmap-api</artifactId>
+          <groupId>us.dynmap</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bukkit</artifactId>
+          <groupId>org.bukkit</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>fawe-api</artifactId>
+          <groupId>com.boydti</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
       <version>1.13.2-R0.1-SNAPSHOT</version>
@@ -103,21 +123,14 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.16.12</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.discordsrv</groupId>
-      <artifactId>discordsrv</artifactId>
-      <version>1.16.6</version>
+      <version>1.18.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.venturechat</groupId>
       <artifactId>venturechat</artifactId>
       <version>2.14.2</version>
-      <scope>system</scope>
-      <systemPath>D:/MCME/dev/jars/VentureChat.jar</systemPath>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>

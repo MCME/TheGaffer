@@ -15,6 +15,7 @@
  */
 package com.mcmiddleearth.thegaffer;
 
+import com.mcme.mcmeproject.Mcproject;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
@@ -35,11 +36,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
@@ -84,7 +87,7 @@ public class TheGaffer extends JavaPlugin {
     static boolean discordEnabled;
     @Getter
     static boolean jobKitsEnabled;
-    @Getter 
+    @Getter
     static boolean jobDescription;
     @Getter
     static boolean glowing;
@@ -128,30 +131,30 @@ public class TheGaffer extends JavaPlugin {
 
     public static void setupConfig() {
         pluginConfig = TheGaffer.getPluginInstance().getConfig();
-        if(pluginConfig.contains("TS")){
-            TSenabled = pluginConfig.getBoolean("TS",false);
-        }else{
+        if (pluginConfig.contains("TS")) {
+            TSenabled = pluginConfig.getBoolean("TS", false);
+        } else {
             TSenabled = false;
         }
-        jobDescription = pluginConfig.getBoolean("jobDescription",false);
-        jobKitsEnabled = pluginConfig.getBoolean("jobKits",false);
+        jobDescription = pluginConfig.getBoolean("jobDescription", false);
+        jobKitsEnabled = pluginConfig.getBoolean("jobKits", false);
         discordEnabled = pluginConfig.contains("discord");
-        discordChannel = pluginConfig.getString("discord.channel",null);
-        discordJobEmoji = pluginConfig.getString("discord.emoji","");
+        discordChannel = pluginConfig.getString("discord.channel", null);
+        discordJobEmoji = pluginConfig.getString("discord.emoji", "");
         glowing = pluginConfig.getBoolean("glowing.enabled", true);
         helperColor = pluginConfig.getString("glowing.helperColor", "AQUA");
         workerColor = pluginConfig.getString("glowing.workerColor", "LIGHT_PURPLE");
         debug = pluginConfig.getBoolean("general.debug");
         unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
-        if(pluginConfig.contains("externalProtectionHandlers")) {
+        if (pluginConfig.contains("externalProtectionHandlers")) {
             ConfigurationSection section = pluginConfig.getConfigurationSection("externalProtectionHandlers");
             Set<String> handlers = section.getKeys(false);
-            for(String pname : handlers) {
+            for (String pname : handlers) {
                 ConfigurationSection pluginSection = section.getConfigurationSection(pname);
-                if(pluginSection.contains("allow")) {
+                if (pluginSection.contains("allow")) {
                     externalProtectionAllowHandlers.add(new ExternalProtectionHandler(pname, pluginSection.getString("allow")));
                 }
-                if(pluginSection.contains("deny")) {
+                if (pluginSection.contains("deny")) {
                     externalProtectionDenyHandlers.add(new ExternalProtectionHandler(pname, pluginSection.getString("deny")));
                 }
             }
@@ -159,15 +162,27 @@ public class TheGaffer extends JavaPlugin {
         TheGaffer.getPluginInstance().saveDefaultConfig();
     }
 
+    public static boolean isApi() {
+
+        Plugin pl = Bukkit.getServer().getPluginManager().getPlugin("McMeProject");
+
+        if (pl instanceof Mcproject) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     public static void scheduleOwnerTimeout(Job job) {
         Long time = System.currentTimeMillis();
         CleanupUtil.getWaiting().put(job, time);
     }
-    
+
     public static boolean hasBuildPermission(Player player, Location location) {
         return getBuildProtection(player, location).equals(BuildProtection.ALLOWED);
     }
-    
+
     public static String getBuildProtectionMessage(Player player, Location location) {
         return getBuildProtection(player, location).getMessage();
     }

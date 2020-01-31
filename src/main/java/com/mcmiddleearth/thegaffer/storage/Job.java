@@ -128,6 +128,9 @@ public class Job implements Listener {
     private boolean dirty;
     @Getter
     @Setter
+    private String projectname;
+    @Getter
+    @Setter
     private JobKit kit;
     
     private boolean glowing;
@@ -142,7 +145,7 @@ public class Job implements Listener {
     @JsonIgnore
     private HashMap<UUID, Long> left = new HashMap<>();
     public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, 
-               boolean discordSend, String[] discordTags, String ts, JobWarp tswarp) {
+               boolean discordSend, String[] discordTags, String ts, JobWarp tswarp, String project) {
         this.name = name;
         this.description = description;
         this.owner = owner;
@@ -155,6 +158,7 @@ public class Job implements Listener {
         this.discordTags = discordTags;
         this.ts = ts;
         this.tsWarp = tswarp;
+        this.projectname = project;
         admitedWorkers.add(this.owner);
         VentureChatUtil.joinJobChannel(owner);
         if (jr > 1000) {

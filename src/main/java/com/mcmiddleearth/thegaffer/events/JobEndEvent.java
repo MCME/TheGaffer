@@ -35,6 +35,8 @@ public class JobEndEvent extends JobEvent {
     @Getter
     private final JobWarp jobWarp;
     @Getter
+    private final String jobProject;
+    @Getter
     private final boolean open;
 
     public JobEndEvent(Job job) {
@@ -43,6 +45,7 @@ public class JobEndEvent extends JobEvent {
         this.jobName = job.getName();
         this.jobWarp = job.getWarp();
         open = false;
+        this.jobProject = job.getProjectname();
     }
 
     @Override

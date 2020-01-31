@@ -26,5 +26,6 @@ public abstract class JobEvent extends Event {
     public abstract OfflinePlayer getJobRunner();
     public abstract String getJobName();
     public abstract JobWarp getJobWarp();
+    public abstract String getJobProject();
     public abstract boolean isOpen();
 }

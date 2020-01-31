@@ -36,6 +36,8 @@ public class JobStartEvent extends JobEvent {
     private final JobWarp jobWarp;
     @Getter
     private final boolean open;
+     @Getter
+    private final String jobProject;
 
     public JobStartEvent(Job job) {
         this.job = job;
@@ -43,6 +45,7 @@ public class JobStartEvent extends JobEvent {
         this.jobName = job.getName();
         this.jobWarp = job.getWarp();
         this.open = true;
+        this.jobProject = job.getProjectname();
     }
 
     @Override
