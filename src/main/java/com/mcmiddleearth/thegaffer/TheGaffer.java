@@ -1,3 +1,4 @@
+
 /*  This file is part of TheGaffer.
  * 
  *  TheGaffer is free software: you can redistribute it and/or modify
@@ -162,7 +163,7 @@ public class TheGaffer extends JavaPlugin {
         TheGaffer.getPluginInstance().saveDefaultConfig();
     }
 
-    public static boolean isApi() {
+    public static boolean isProjectsEnabled() {
 
         Plugin pl = Bukkit.getServer().getPluginManager().getPlugin("McMeProject");
 

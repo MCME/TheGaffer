@@ -233,9 +233,10 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         if (TheGaffer.isDiscordEnabled()) {
             return new discordAnnouncePrompt();
         }
-        if (TheGaffer.isApi() == true) {
+        if (TheGaffer.isProjectsEnabled() == true) {
             return new projectPrompt();
-        } else if (TheGaffer.isGlowing()) {
+        } 
+        if (TheGaffer.isGlowing()) {
             return new GlowEffectPrompt();
         }
         return new finishedPrompt();
@@ -266,9 +267,10 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             if (input) {
                 return new discordTagPrompt();
             }
-            if (TheGaffer.isApi() == true) {
+            if (TheGaffer.isProjectsEnabled() == true) {
                 return new projectPrompt();
-            } else if (TheGaffer.isGlowing()) {
+            } 
+            if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
             return new finishedPrompt();
@@ -293,9 +295,10 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public Prompt acceptInput(ConversationContext context, String input) {
             input = input.replace(" ", "");
             context.setSessionData("discordTag", input);
-            if (TheGaffer.isApi() == true) {
+            if (TheGaffer.isProjectsEnabled() == true) {
                 return new projectPrompt();
-            } else if (TheGaffer.isGlowing()) {
+            } 
+            if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
             return new finishedPrompt();
@@ -324,9 +327,11 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         private Prompt newDiscordOrFinishedPrompt() {
             if (TheGaffer.isDiscordEnabled()) {
                 return new discordAnnouncePrompt();
-            } else if (TheGaffer.isApi()) {
+            } 
+            if (TheGaffer.isProjectsEnabled()) {
                 return new projectPrompt();
-            } else if (TheGaffer.isGlowing()) {
+            } 
+            if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
             return new finishedPrompt();
