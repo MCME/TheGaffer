@@ -20,7 +20,6 @@ import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class JobStartEvent extends JobEvent {
 
@@ -28,7 +27,6 @@ public class JobStartEvent extends JobEvent {
     @Getter
     private final Job job;
     @Getter
-    @JsonIgnore
     private final OfflinePlayer jobRunner;
     @Getter
     private final String jobName;

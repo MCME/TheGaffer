@@ -51,7 +51,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class Job implements Listener {
 
@@ -116,15 +115,12 @@ public class Job implements Listener {
     private int jobRadius;
     @Getter
     @Setter
-    @JsonIgnore
     private Polygon area;
     @Getter
     @Setter
-    @JsonIgnore
     private Rectangle2D bounds;
     @Getter
     @Setter
-    @JsonIgnore
     private boolean dirty;
     @Getter
     @Setter
@@ -132,9 +128,9 @@ public class Job implements Listener {
     @Getter
     @Setter
     private JobKit kit;
-    
+
     private boolean glowing;
-    
+
     private Team helperTeam;
     private String helperTeamName;
     private Team workerTeam;
@@ -142,10 +138,10 @@ public class Job implements Listener {
     private Scoreboard scoreboard;
 
     @Getter
-    @JsonIgnore
     private HashMap<UUID, Long> left = new HashMap<>();
-    public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr, 
-               boolean discordSend, String[] discordTags, String ts, JobWarp tswarp, String project) {
+
+    public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr,
+            boolean discordSend, String[] discordTags, String ts, JobWarp tswarp, String project) {
         this.name = name;
         this.description = description;
         this.owner = owner;
@@ -170,17 +166,17 @@ public class Job implements Listener {
         int xbounds[] = {bukkitLoc.getBlockX() - jobRadius, bukkitLoc.getBlockX() + jobRadius};
         this.area = new Polygon(xbounds, zbounds, xbounds.length);
         this.bounds = area.getBounds2D();
-        
+
     }
-    
+
     public void setGlowing() {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        helperTeamName = name+"Helper";
-        helperTeam = scoreboard.registerNewTeam(name+"Helper");
+        helperTeamName = name + "Helper";
+        helperTeam = scoreboard.registerNewTeam(name + "Helper");
         helperTeam.setColor(ChatColor.valueOf(TheGaffer.getHelperColor()));
         //helperTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        workerTeamName = name+"Worker";
-        workerTeam = scoreboard.registerNewTeam(name+"Worker");
+        workerTeamName = name + "Worker";
+        workerTeam = scoreboard.registerNewTeam(name + "Worker");
         workerTeam.setColor(ChatColor.valueOf(TheGaffer.getWorkerColor()));
         //workerTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
@@ -192,14 +188,12 @@ public class Job implements Listener {
     public Job() {
     }
 
-    @JsonIgnore
     public File getFile() {
         return new File(TheGaffer.getPluginDataFolder(),
                 TheGaffer.getFileSeperator() + "jobs" + TheGaffer.getFileSeperator()
                 + name + TheGaffer.getFileExtension());
     }
 
-    @JsonIgnore
     public void generateBounds() {
         if (jobRadius > 1000) {
             jobRadius = 1000;
@@ -211,40 +205,33 @@ public class Job implements Listener {
         this.bounds = area.getBounds2D();
     }
 
-    @JsonIgnore
     public OfflinePlayer getOwnerAsOfflinePlayer() {
         return TheGaffer.getServerInstance().getOfflinePlayer(owner);
     }
 
-    @JsonIgnore
     public boolean isPlayerHelper(OfflinePlayer p) {
         return helpers.contains(p.getName());
     }
 
-    @JsonIgnore
     public boolean isPlayerWorking(OfflinePlayer p) {
         return workers.contains(p.getName());
     }
 
-    @JsonIgnore
     public World getBukkitWorld() {
         return TheGaffer.getServerInstance().getWorld(world);
     }
 
-    @JsonIgnore
     public String getTSchannel() {
         return this.ts;
     }
-    
-    @JsonIgnore
+
     public void clearTS() {
         admitedWorkers.removeAll(admitedWorkers);
         admitedWorkers.clear();
         admitedWorkers.add(owner);
     }
-    
-    @JsonIgnore
-    public void addAdmitedWorker(String worker){
+
+    public void addAdmitedWorker(String worker) {
         admitedWorkers.add(worker);
     }
 //    @JsonIgnore
@@ -252,7 +239,6 @@ public class Job implements Listener {
 //        return this.tsWarp;
 //    }
 
-    @JsonIgnore
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
         for (String pName : workers) {
@@ -264,7 +250,6 @@ public class Job implements Listener {
         return players.toArray(new Player[players.size()]);
     }
 
-    @JsonIgnore
     public Player[] getAllAsPlayersArray() {
         ArrayList<Player> players = new ArrayList<>();
         for (String pName : workers) {
@@ -288,7 +273,6 @@ public class Job implements Listener {
         return players.toArray(new Player[players.size()]);
     }
 
-    @JsonIgnore
     public ArrayList<Player> getWorkersAsPlayersList() {
         ArrayList<Player> players = new ArrayList<>();
         for (String pName : workers) {
@@ -303,7 +287,6 @@ public class Job implements Listener {
         return players;
     }
 
-    @JsonIgnore
     public String getInfo() {
         StringBuilder out = new StringBuilder();
         String inviteOnly = (Private) ? ChatColor.RED + "Private" : ChatColor.GREEN + "Public";
@@ -349,7 +332,7 @@ public class Job implements Listener {
         addHelperTeam(p.getName());
         VentureChatUtil.joinJobChannel(p.getUniqueId());
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         sendToHelpers(ChatColor.AQUA + p.getName() + " has been added as a helper to the job.");
         return HelperResponse.ADD_SUCCESS;
     }
@@ -362,7 +345,7 @@ public class Job implements Listener {
         removeHelperTeam(p.getName());
         VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         Util.debug(p.getName() + " was helper kicked from " + name + " with reason: " + reason);
         return HelperResponse.REMOVE_SUCCESS;
     }
@@ -393,7 +376,7 @@ public class Job implements Listener {
             }
         }
         setDirty(true);
-        JobDatabase.saveJobs();
+        //  JobDatabase.saveJobs();
         sendToAll(ChatColor.AQUA + p.getName() + " has joined the job.");
         return WorkerResponse.ADD_SUCCESS;
     }
@@ -409,14 +392,14 @@ public class Job implements Listener {
         removeWorkerTeam(p.getName());
         VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
         Util.debug(p.getName() + " was worker removed from " + name + " with reason: " + reason);
         return WorkerResponse.REMOVE_SUCCESS;
     }
 
     public InviteResponse inviteWorker(List<OfflinePlayer> ps) {
-        for(OfflinePlayer p : ps){
+        for (OfflinePlayer p : ps) {
             if (invitedWorkers.contains(p.getName())) {
                 return InviteResponse.ALREADY_INVITED;
             }
@@ -432,12 +415,12 @@ public class Job implements Listener {
             invitedWorkers.add(p.getName());
         }
         setDirty(true);
-        JobDatabase.saveJobs();
+        //  JobDatabase.saveJobs();
         return InviteResponse.ADD_SUCCESS;
     }
 
-    public InviteResponse uninviteWorker(List<OfflinePlayer> ps){
-        for(OfflinePlayer p : ps){
+    public InviteResponse uninviteWorker(List<OfflinePlayer> ps) {
+        for (OfflinePlayer p : ps) {
             if (!invitedWorkers.contains(p.getName())) {
                 return InviteResponse.NOT_INVITED;
             }
@@ -449,12 +432,12 @@ public class Job implements Listener {
             invitedWorkers.remove(p.getName());
         }
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         return InviteResponse.REMOVE_SUCCESS;
     }
 
     public BanWorkerResponse banWorker(List<OfflinePlayer> ps) {
-        for(OfflinePlayer p : ps){
+        for (OfflinePlayer p : ps) {
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
                 removeWorkerTeam(p.getName());
@@ -466,24 +449,24 @@ public class Job implements Listener {
             bannedWorkers.add(p.getName());
         }
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         return BanWorkerResponse.BAN_SUCCESS;
     }
 
     public BanWorkerResponse unbanWorker(List<OfflinePlayer> ps) {
-        for(OfflinePlayer p : ps){
+        for (OfflinePlayer p : ps) {
             if (bannedWorkers.contains(p.getName())) {
                 return BanWorkerResponse.ALREADY_UNBANNED;
             }
             bannedWorkers.remove(p.getName());
         }
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         return BanWorkerResponse.UNBAN_SUCCESS;
     }
 
     public KickWorkerResponse kickWorker(List<OfflinePlayer> ps, String reason) {
-        for(OfflinePlayer p : ps){
+        for (OfflinePlayer p : ps) {
             if (!workers.contains(p.getName())) {
                 return KickWorkerResponse.NOT_IN_JOB;
             }
@@ -493,7 +476,7 @@ public class Job implements Listener {
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         }
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
         return KickWorkerResponse.KICK_SUCCESS;
     }
 
@@ -506,14 +489,14 @@ public class Job implements Listener {
         getWarp().setWorld(loc.getWorld().getName());
         generateBounds();
         setDirty(true);
-        JobDatabase.saveJobs();
+        // JobDatabase.saveJobs();
     }
 
     public void updateJobRadius(int newRadius) {
         setJobRadius(newRadius);
         generateBounds();
         setDirty(true);
-        JobDatabase.saveJobs();
+        //  JobDatabase.saveJobs();
     }
 
     public void bringAllWorkers(Location to) {
@@ -568,13 +551,13 @@ public class Job implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         if (left.containsKey(event.getPlayer().getUniqueId())) {
             left.remove(event.getPlayer().getUniqueId());
-            if(glowing) {
+            if (glowing) {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
             }
-        } else if(event.getPlayer().getName().equals(owner) 
+        } else if (event.getPlayer().getName().equals(owner)
                 || helpers.contains(event.getPlayer().getName())) {
-            if(glowing) {
+            if (glowing) {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
             }
@@ -595,10 +578,10 @@ public class Job implements Listener {
             player.sendMessage(chat[0] + prefix + message);
         }
     }
-    
+
     public void setRunning(boolean running) {
         this.running = running;
-        if(glowing && !running) {
+        if (glowing && !running) {
             helpers.forEach(helper -> removeHelperTeam(helper));
             workers.forEach(worker -> removeWorkerTeam(worker));
             removeHelperTeam(owner);
@@ -606,41 +589,44 @@ public class Job implements Listener {
             workerTeam.unregister();
         }
     }
-    
+
     private void addHelperTeam(String playerName) {
-        if(glowing) {
-Logger.getGlobal().info("add helper: "+playerName);
+        if (glowing) {
+            Logger.getGlobal().info("add helper: " + playerName);
             helperTeam.addEntry(playerName);
-            setGlow(playerName,true);
+            setGlow(playerName, true);
         }
     }
+
     private void addWorkerTeam(String playerName) {
-        if(glowing) {
-Logger.getGlobal().info("add worker: "+playerName);
+        if (glowing) {
+            Logger.getGlobal().info("add worker: " + playerName);
             workerTeam.addEntry(playerName);
-            setGlow(playerName,true);
+            setGlow(playerName, true);
         }
     }
+
     private void removeHelperTeam(String playerName) {
-        if(glowing) {
-Logger.getGlobal().info("remove helper: "+playerName);
+        if (glowing) {
+            Logger.getGlobal().info("remove helper: " + playerName);
             helperTeam.removeEntry(playerName);
-            setGlow(playerName,false);
+            setGlow(playerName, false);
         }
     }
+
     private void removeWorkerTeam(String playerName) {
-        if(glowing) {
-Logger.getGlobal().info("remove Worker: "+playerName);
+        if (glowing) {
+            Logger.getGlobal().info("remove Worker: " + playerName);
             workerTeam.removeEntry(playerName);
-            setGlow(playerName,false);
+            setGlow(playerName, false);
         }
     }
-    
+
     private void setGlow(String playerName, boolean flag) {
         Player player = Bukkit.getPlayer(playerName);
-        if(player!=null && glowing) {
+        if (player != null && glowing) {
             player.setGlowing(flag);
-            if(flag) {
+            if (flag) {
                 player.setScoreboard(scoreboard);
             } else {
                 player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());

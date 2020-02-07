@@ -15,8 +15,8 @@
  */
 package com.mcmiddleearth.thegaffer.commands;
 
-import com.mcme.mcmeproject.Mcproject;
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.ext.ExternalProjectHandler;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
@@ -378,7 +378,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     private class projectPrompt extends StringPrompt {
 
-        Mcproject mcproject = (Mcproject) Bukkit.getPluginManager().getPlugin("McMeProject");
+        ExternalProjectHandler mcproject = (ExternalProjectHandler) Bukkit.getPluginManager().getPlugin("McMeProject");
 
         @Override
         public String getPromptText(ConversationContext context) {
@@ -389,7 +389,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
 
-            if (mcproject.getProjects().containsKey(input)) {
+            if (mcproject.getProjectNames().contains(input)) {
 
                 context.setSessionData("project", input);
                 String jobname = (String) context.getSessionData("jobname");

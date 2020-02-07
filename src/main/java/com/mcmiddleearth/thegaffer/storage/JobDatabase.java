@@ -36,6 +36,7 @@ public class JobDatabase {
     @Getter
     private static final TreeMap<String, Job> inactiveJobs = new TreeMap<>();
 
+    /*
     public static int loadJobs() throws IOException {
         int count = 0;
         File activeJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs");
@@ -115,7 +116,7 @@ public class JobDatabase {
             }
         }
     }
-
+     */
     public static boolean activateJob(Job j) {
         if (activeJobs.containsKey(j.getName())) {
             return false;
@@ -124,7 +125,7 @@ public class JobDatabase {
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         j.setDirty(true);
-        saveJobs();
+        // saveJobs();
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
         return true;
     }
@@ -139,7 +140,7 @@ public class JobDatabase {
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
-        saveJobs();
+        // saveJobs();
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobEndEvent(j));
         return true;
     }
@@ -152,4 +153,5 @@ public class JobDatabase {
         }
         return null;
     }
+
 }

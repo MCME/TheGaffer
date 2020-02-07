@@ -69,26 +69,6 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>com.mcme</groupId>
-      <artifactId>McMeProject</artifactId>
-      <version>2.6</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>dynmap-api</artifactId>
-          <groupId>us.dynmap</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>bukkit</artifactId>
-          <groupId>org.bukkit</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>fawe-api</artifactId>
-          <groupId>com.boydti</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
       <version>1.13.2-R0.1-SNAPSHOT</version>

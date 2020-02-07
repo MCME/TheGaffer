@@ -16,7 +16,6 @@
  */
 package com.mcmiddleearth.thegaffer;
 
-import com.mcme.mcmeproject.Mcproject;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
@@ -47,8 +46,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 
 public class TheGaffer extends JavaPlugin {
 
@@ -60,8 +57,7 @@ public class TheGaffer extends JavaPlugin {
     static File pluginDataFolder;
     @Getter
     static String fileSeperator = System.getProperty("file.separator");
-    @Getter
-    static ObjectMapper jsonMapper;
+
     @Getter
     static String fileExtension = ".job";
     @Getter
@@ -103,14 +99,18 @@ public class TheGaffer extends JavaPlugin {
         pluginInstance = this;
         pluginDataFolder = pluginInstance.getDataFolder();
         setupConfig();
-        jsonMapper = new ObjectMapper().configure(SerializationConfig.Feature.INDENT_OUTPUT, false);
+
         //new TSfetcher().runTaskTimer(this, 20, 1200);
+
+        /*
         try {
             int jobsLoaded = JobDatabase.loadJobs();
             Util.info("Loaded " + jobsLoaded + " jobs.");
         } catch (IOException ex) {
             Util.severe(ex.getMessage());
         }
+        
+         */
         getCommand("createjob").setExecutor(new JobCreationConversation());
         getCommand("job").setExecutor(new JobCommand());
         getCommand("jobadmin").setExecutor(new JobAdminConversation());
@@ -165,9 +165,7 @@ public class TheGaffer extends JavaPlugin {
 
     public static boolean isProjectsEnabled() {
 
-        Plugin pl = Bukkit.getServer().getPluginManager().getPlugin("McMeProject");
-
-        if (pl instanceof Mcproject) {
+        if (Bukkit.getServer().getPluginManager().getPlugin("McMeProject") != null) {
             return true;
         } else {
             return false;
