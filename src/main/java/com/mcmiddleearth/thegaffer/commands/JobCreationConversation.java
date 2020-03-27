@@ -382,7 +382,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Please give the name of the project linked to this job(if not type <nothing>)";
+            return "Please give the name of the project linked to this job(if not type 'nothing')";
 
         }
 
@@ -394,12 +394,12 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 context.setSessionData("project", input);
                 String jobname = (String) context.getSessionData("jobname");
 
-                return new finishedPrompt();
+                return new GlowEffectPrompt();
             } else if (input.equalsIgnoreCase("nothing")) {
 
                 context.setSessionData("project", "nothing");
 
-                return new finishedPrompt();
+                return new GlowEffectPrompt();
             } else {
                 return new projectNotExistsPrompt();
             }
