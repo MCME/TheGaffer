@@ -22,6 +22,7 @@ import org.bukkit.event.Event;
 
 public abstract class JobEvent extends Event {
 
+    
     public abstract Job getJob();
     public abstract OfflinePlayer getJobRunner();
     public abstract String getJobName();
