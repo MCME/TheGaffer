@@ -198,7 +198,7 @@ public class ProtectionListener implements Listener {
             if (event.getClickedBlock().getType().equals(Material.FLOWER_POT)) {
                 //cancelling this currently does nothing.
                 if (item.getType() == Material.POPPY
-                        || item.getType() == Material.DANDELION_YELLOW
+                        || item.getType() == Material.DANDELION
                         || item.getType() == Material.SPRUCE_SAPLING
                         || item.getType() == Material.ACACIA_SAPLING
                         || item.getType() == Material.BIRCH_SAPLING
