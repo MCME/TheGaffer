@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class JobDatabase {
 
@@ -141,7 +142,12 @@ public class JobDatabase {
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
         // saveJobs();
-        TheGaffer.getServerInstance().getPluginManager().callEvent(new JobEndEvent(j));
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                TheGaffer.getServerInstance().getPluginManager().callEvent(new JobEndEvent(j));
+            }
+        }.runTask(TheGaffer.getPluginInstance());
         return true;
     }
 
