@@ -20,7 +20,7 @@ import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
-import org.codehaus.jackson.annotate.JsonIgnore;
+
 
 public class JobEndEvent extends JobEvent {
 
@@ -28,12 +28,13 @@ public class JobEndEvent extends JobEvent {
     @Getter
     private final Job job;
     @Getter
-    @JsonIgnore
     private final OfflinePlayer jobRunner;
     @Getter
     private final String jobName;
     @Getter
     private final JobWarp jobWarp;
+    @Getter
+    private final String jobProject;
     @Getter
     private final boolean open;
 
@@ -43,6 +44,7 @@ public class JobEndEvent extends JobEvent {
         this.jobName = job.getName();
         this.jobWarp = job.getWarp();
         open = false;
+        this.jobProject = job.getProjectname();
     }
 
     @Override

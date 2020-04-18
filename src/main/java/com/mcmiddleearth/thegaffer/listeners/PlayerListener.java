@@ -43,36 +43,37 @@ public class PlayerListener implements Listener {
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
         }
     }
-    
+
     private List<UUID> playersSwitchedToCreative = new ArrayList<>();
-    
+
     @EventHandler(priority = EventPriority.LOW)
     public void playerMove(PlayerMoveEvent event) {
-        if(event.getFrom().getBlock()!=event.getTo().getBlock()) {
-            if(JobDatabase.getJobWorking(event.getPlayer())==null) {
+        if (event.getFrom().getBlock() != event.getTo().getBlock()) {
+
+            if (JobDatabase.getJobWorking(event.getPlayer()) == null) {
                 return;
             }
+
             Player player = event.getPlayer();
-            if(player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
                 playersSwitchedToCreative.remove(player.getUniqueId());
                 return;
             }
-            if(ProtectionUtil.getBuildProtection(player, player.getLocation()).equals(BuildProtection.ALLOWED)) {
-                if(player.getGameMode()==GameMode.SURVIVAL) {
-                    if(!playersSwitchedToCreative.contains(player.getUniqueId())) {
+            if (ProtectionUtil.getBuildProtection(player, player.getLocation()).equals(BuildProtection.ALLOWED)) {
+                if (player.getGameMode() == GameMode.SURVIVAL) {
+                    if (!playersSwitchedToCreative.contains(player.getUniqueId())) {
                         playersSwitchedToCreative.add(player.getUniqueId());
                     }
                     player.setGameMode(GameMode.CREATIVE);
                 }
-            }
-            else {
-                if(playersSwitchedToCreative.contains(player.getUniqueId())) {
+            } else {
+                if (playersSwitchedToCreative.contains(player.getUniqueId())) {
                     boolean flying = false;
-                    if(player.isFlying()) {
-                        flying = true;  
+                    if (player.isFlying()) {
+                        flying = true;
                     }
                     player.setGameMode(GameMode.SURVIVAL);
-                    if(TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight",true)) {
+                    if (TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight", true)) {
                         player.setAllowFlight(true);
                         player.setFlying(flying);
                     }
@@ -81,6 +82,5 @@ public class PlayerListener implements Listener {
             }
         }
     }
-    
-    
+
 }

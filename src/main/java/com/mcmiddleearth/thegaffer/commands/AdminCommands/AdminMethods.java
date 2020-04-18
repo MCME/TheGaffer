@@ -16,7 +16,6 @@
  * 
  * 
  */
-
 package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 
 import com.mcmiddleearth.thegaffer.GafferResponses;
@@ -40,14 +39,14 @@ import org.bukkit.inventory.PlayerInventory;
  * @author Donovan
  */
 public class AdminMethods {
-    
+
     private Job job;
-    
+
     private Player p;
-    
+
     private HashMap<String, Integer> Methods = new HashMap<>();
-    
-    public AdminMethods(Job job, Player p){
+
+    public AdminMethods(Job job, Player p) {
         this.job = job;
         this.p = p;
         Methods.put("addhelper", 1);
@@ -66,80 +65,80 @@ public class AdminMethods {
         Methods.put("setTeamSpeakwarp", 0);
         Methods.put("setTeamSpeakchannel", 1);
     }
-    
-    public GafferResponses.GafferResponse addhelper(String arg){
+
+    public GafferResponses.GafferResponse addhelper(String arg) {
         GafferResponses.GafferResponse response = job.addHelper(TheGaffer.getServerInstance().getOfflinePlayer(arg));
         return response;
     }
-    
-    public GafferResponses.GafferResponse removehelper(String arg){
+
+    public GafferResponses.GafferResponse removehelper(String arg) {
         GafferResponses.GafferResponse response = job.removeHelper(TheGaffer.getServerInstance().getOfflinePlayer(arg), "adminremoved: " + (p.getName()));
         return response;
     }
-    
-    public GafferResponses.GafferResponse kickworker(String arg){
+
+    public GafferResponses.GafferResponse kickworker(String arg) {
         List<OfflinePlayer> ls = new ArrayList<>();
-        for(String pname : arg.split(",")){
+        for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
         }
         return job.kickWorker(ls, "adminkicked: " + (p).getName());
     }
-    
-    public GafferResponses.GafferResponse banworker(String arg){
+
+    public GafferResponses.GafferResponse banworker(String arg) {
         List<OfflinePlayer> ls = new ArrayList<>();
-        for(String pname : arg.split(",")){
+        for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
         }
         return job.banWorker(ls);
     }
-    
-    public GafferResponses.GafferResponse unbanworker(String arg){
+
+    public GafferResponses.GafferResponse unbanworker(String arg) {
         List<OfflinePlayer> ls = new ArrayList<>();
-        for(String pname : arg.split(",")){
+        for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
         }
         return job.unbanWorker(ls);
     }
-    
-    public Object setwarp(){
+
+    public Object setwarp() {
         job.updateLocation((p).getLocation());
         return true;
     }
-    
-    public Object bringall(){
+
+    public Object bringall() {
         job.bringAllWorkers((p.getLocation()));
         return true;
     }
-    
-    public String listworkers(){
+
+    public String listworkers() {
         return StringUtils.join(job.getWorkers().toArray(new String[job.getWorkers().size()]), "\n");
     }
-    
-    public GafferResponses.GafferResponse inviteworker(String arg){
+
+    public GafferResponses.GafferResponse inviteworker(String arg) {
         List<OfflinePlayer> ls = new ArrayList<>();
-        for(String pname : arg.split(",")){
+        for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
-            if(Bukkit.getOfflinePlayer(pname).isOnline()){
+            if (Bukkit.getOfflinePlayer(pname).isOnline()) {
                 Bukkit.getOfflinePlayer(pname).getPlayer().sendMessage(ChatColor.AQUA + job.getOwner() + ChatColor.GRAY + " has invited you to " + ChatColor.GREEN + job.getName());
             }
         }
         return job.inviteWorker(ls);
     }
-    
-    public GafferResponses.GafferResponse uninviteworker(String arg){
+
+    public GafferResponses.GafferResponse uninviteworker(String arg) {
         List<OfflinePlayer> ls = new ArrayList<>();
-        for(String pname : arg.split(",")){
+        for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
         }
         return job.uninviteWorker(ls);
     }
-    
-    public Object setradius(String arg){
+
+    public Object setradius(String arg) {
         job.updateJobRadius(Integer.parseInt(arg));
         return true;
     }
-    
-    public Object setkit(){
+
+    public Object setkit() {
         JobKit kit = new JobKit(p.getInventory());
         job.setKit(kit);
         for (String pname : job.getWorkers()) {
@@ -149,30 +148,30 @@ public class AdminMethods {
         }
         return true;
     }
-    
-    public Object clearworkerinvens(){
+
+    public Object clearworkerinvens() {
         PlayerInventory pinven;
         for (Player curr : job.getWorkersAsPlayersArray()) {
-                if (TheGaffer.getServerInstance().getOfflinePlayer(curr.getPlayerListName()).isOnline()) {
-                    pinven = curr.getInventory();
-                    pinven.clear();
-                }
+            if (TheGaffer.getServerInstance().getOfflinePlayer(curr.getPlayerListName()).isOnline()) {
+                pinven = curr.getInventory();
+                pinven.clear();
             }
+        }
         return true;
     }
-    
-    public Object setteamspeakwarp(){
+
+    public Object setteamspeakwarp() {
         JobWarp tswarp = new JobWarp((p.getLocation()));
-            job.setTsWarp(tswarp);
-            job.setDirty(true);
-            JobDatabase.saveJobs();
+        job.setTsWarp(tswarp);
+        job.setDirty(true);
+        //JobDatabase.saveJobs();
         return true;
     }
-    
-    public Object setteamspeakchannel(String arg){
-        if(TheGaffer.isTSenabled()){
+
+    public Object setteamspeakchannel(String arg) {
+        if (TheGaffer.isTSenabled()) {
             job.setTs(String.valueOf(arg));
-            }
+        }
         return true;
     }
 }

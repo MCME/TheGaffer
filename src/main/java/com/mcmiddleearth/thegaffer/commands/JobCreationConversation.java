@@ -16,6 +16,7 @@
 package com.mcmiddleearth.thegaffer.commands;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.ext.ExternalProjectHandler;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -210,6 +212,20 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     }
 
+    private class projectNotExistsPrompt extends MessagePrompt {
+
+        @Override
+        protected Prompt getNextPrompt(ConversationContext context) {
+            return new projectPrompt();
+        }
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "A project with that name doesn't exists";
+        }
+
+    }
+
     public Prompt newTeamspeakOrDiscordOrFinishPrompt() {
         if (TheGaffer.isTSenabled()) {
             return new tsPrompt();
@@ -217,6 +233,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         if (TheGaffer.isDiscordEnabled()) {
             return new discordAnnouncePrompt();
         }
+        if (TheGaffer.isProjectsEnabled() == true) {
+            return new projectPrompt();
+        } 
         if (TheGaffer.isGlowing()) {
             return new GlowEffectPrompt();
         }
@@ -248,6 +267,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             if (input) {
                 return new discordTagPrompt();
             }
+            if (TheGaffer.isProjectsEnabled() == true) {
+                return new projectPrompt();
+            } 
             if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
@@ -273,6 +295,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public Prompt acceptInput(ConversationContext context, String input) {
             input = input.replace(" ", "");
             context.setSessionData("discordTag", input);
+            if (TheGaffer.isProjectsEnabled() == true) {
+                return new projectPrompt();
+            } 
             if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
@@ -302,13 +327,16 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         private Prompt newDiscordOrFinishedPrompt() {
             if (TheGaffer.isDiscordEnabled()) {
                 return new discordAnnouncePrompt();
-            }
+            } 
+            if (TheGaffer.isProjectsEnabled()) {
+                return new projectPrompt();
+            } 
             if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
             return new finishedPrompt();
         }
-        
+
         @Override
         public String getPromptText(ConversationContext context) {
             if (TheGaffer.isTSenabled()) {
@@ -348,6 +376,38 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     }
 
+    private class projectPrompt extends StringPrompt {
+
+        ExternalProjectHandler mcproject = (ExternalProjectHandler) Bukkit.getPluginManager().getPlugin("McMeProject");
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return "Please give the name of the project linked to this job(if not type 'nothing')";
+
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+
+            if (mcproject.getProjectNames().contains(input)) {
+
+                context.setSessionData("project", input);
+                String jobname = (String) context.getSessionData("jobname");
+
+                return new GlowEffectPrompt();
+            } else if (input.equalsIgnoreCase("nothing")) {
+
+                context.setSessionData("project", "nothing");
+
+                return new GlowEffectPrompt();
+            } else {
+                return new projectNotExistsPrompt();
+            }
+
+        }
+
+    }
+
     private class GlowEffectPrompt extends BooleanPrompt {
 
         @Override
@@ -362,7 +422,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         }
 
     }
-    
+
     private class finishedPrompt extends MessagePrompt {
 
         @Override
@@ -372,7 +432,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            String ts = (context.getSessionData("setTS")!=null?(String) context.getSessionData("setTs"):"");
+            String ts = (context.getSessionData("setTS") != null ? (String) context.getSessionData("setTs") : "");
             String jobname = (String) context.getSessionData("jobname");
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
@@ -380,17 +440,18 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
-            String[] discordTags = (context.getSessionData("discordTag")!=null?((String) context.getSessionData("discordTag")).split(","):new String[0]);
+            String[] discordTags = (context.getSessionData("discordTag") != null ? ((String) context.getSessionData("discordTag")).split(",") : new String[0]);
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
             boolean glowing = false;
             Object temp = context.getSessionData("glowEffect");
-            if(temp!=null) {
+            String project = (String) context.getSessionData("project");
+            if (temp != null) {
                 glowing = (boolean) temp;
             }
             Job jerb = new Job(jobname, description, owner, true, warp, warp.getWorld(), Private, radius,
-                    discordSend, discordTags, ts, tsWarp);
-            if(glowing) {
+                    discordSend, discordTags, ts, tsWarp, project);
+            if (glowing) {
                 jerb.setGlowing();
             }
             if (setKit) {

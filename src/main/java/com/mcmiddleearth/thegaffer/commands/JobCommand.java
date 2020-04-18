@@ -45,7 +45,7 @@ public class JobCommand implements TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(sender instanceof ConsoleCommandSender && args.length>0 && args[0].equalsIgnoreCase("reloadConfig")) {
+        if (sender instanceof ConsoleCommandSender && args.length > 0 && args[0].equalsIgnoreCase("reloadConfig")) {
             TheGaffer.getPluginInstance().reloadConfig();
             TheGaffer.setupConfig();
             sender.sendMessage("Configuration reloaded from config.yml");
@@ -63,6 +63,7 @@ public class JobCommand implements TabExecutor {
                         if (args[1] != null) {
                             String jobname = args[1];
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
+
                                 JobDatabase.deactivateJob(JobDatabase.getActiveJobs().get(jobname));
                                 player.sendMessage(ChatColor.GRAY + "Successfully closed the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
                             } else {
@@ -200,7 +201,7 @@ public class JobCommand implements TabExecutor {
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
-                                    if(TheGaffer.isTSenabled() && !jobToJoin.getTSchannel().equalsIgnoreCase("0")){
+                                    if (TheGaffer.isTSenabled() && !jobToJoin.getTSchannel().equalsIgnoreCase("0")) {
                                         player.teleport(jobToJoin.getTsWarp().toBukkitLocation());
                                         player.sendMessage(ChatColor.GRAY + "The TeamSpeak channel is " + ChatColor.GREEN + jobToJoin.getTSchannel() + ChatColor.GRAY + " the password is " + ChatColor.RED + "beefburgers");
                                     }
