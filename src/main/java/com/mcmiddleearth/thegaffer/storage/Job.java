@@ -171,12 +171,12 @@ public class Job implements Listener {
 
     public void setGlowing() {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        helperTeamName = name + "Helper";
-        helperTeam = scoreboard.registerNewTeam(name + "Helper");
+        helperTeamName = name.substring(0,14) + "H";
+        helperTeam = scoreboard.registerNewTeam(helperTeamName);
         helperTeam.setColor(ChatColor.valueOf(TheGaffer.getHelperColor()));
         //helperTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
-        workerTeamName = name + "Worker";
-        workerTeam = scoreboard.registerNewTeam(name + "Worker");
+        workerTeamName = name.substring(0, 14) + "W";
+        workerTeam = scoreboard.registerNewTeam(workerTeamName);
         workerTeam.setColor(ChatColor.valueOf(TheGaffer.getWorkerColor()));
         //workerTeam.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
 
