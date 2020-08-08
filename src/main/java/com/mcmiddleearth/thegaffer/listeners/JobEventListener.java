@@ -15,6 +15,10 @@
  */
 package com.mcmiddleearth.thegaffer.listeners;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.util.ConnectUtil;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobProtectionBlockBreakEvent;
@@ -29,6 +33,8 @@ import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import github.scarsz.discordsrv.util.DiscordUtil;
+
+import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,11 +42,14 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Logger;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 
 public class JobEventListener implements Listener {
 
@@ -64,12 +73,34 @@ public class JobEventListener implements Listener {
     @EventHandler
     public void onJobStart(JobStartEvent event) {
         Job job = event.getJob();
-        String message = ChatColor.AQUA + job.getOwner() + ChatColor.GRAY 
-                          + " has started a job called \"" + job.getName() + ChatColor.GRAY + "\"";
+        String message = "";
+        String first = "";
+        String second = "";
+        for(int i = 0; i<20; i++) {
+            net.md_5.bungee.api.ChatColor color = net.md_5.bungee.api.ChatColor.of(new Color(0,120+i * 6, 90+i*7));
+            first = first + color + "~";
+            second = color + "~" + second;
+        }
+        message = first + second +"\n"
+                          + ChatColor.AQUA + ChatColor.BOLD + job.getOwner() + ChatColor.GRAY + ChatColor.BOLD
+                          + " has started a job.\n"
+                          + ChatColor.GRAY + "Job Name: " + ChatColor.AQUA + job.getName();
         if(TheGaffer.isJobDescription()) {
             message = message +"\n"+ChatColor.GRAY+"Job Description: "+ChatColor.AQUA+job.getDescription();
         }
-        TheGaffer.getServerInstance().broadcastMessage(message);
+        message = message + "\n"+ first + second;
+        Plugin connectPlugin = Bukkit.getPluginManager().getPlugin("MCME-Connect");
+        Player player = Bukkit.getOnlinePlayers().stream().findFirst().orElse(null);
+        if(player !=null && connectPlugin != null && connectPlugin.isEnabled()) {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("Message");
+            out.writeUTF("ALL");
+            out.writeUTF(message);
+            player.sendPluginMessage(TheGaffer.getPluginInstance(), "BungeeCord", out.toByteArray());
+Logger.getGlobal().info("Bungee Broadcast sent! "+message);
+        } else {
+            TheGaffer.getServerInstance().broadcastMessage(message);
+        }
         
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.8f, 2f);
