@@ -28,14 +28,22 @@ public class GafferResponses {
         ADD_SUCCESS("%name% added as helper to %job%", true),
         REMOVE_SUCCESS("%name% removed as helper from %job%", true);
 
-        @Getter
         private final String message;
-        @Getter
         private final boolean successful;
 
         HelperResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
         }
     }
 
@@ -115,9 +123,9 @@ public class GafferResponses {
             this.successful = wasSuccessful;
         }
     }
-    
+
     public enum GenericResponse implements GafferResponse {
-        
+
         FAILURE("Generic Failure", false),
         SUCCESS("Generic Success", true);
         @Getter
@@ -137,4 +145,6 @@ public class GafferResponses {
 
         boolean isSuccessful();
     }
+
 }
+

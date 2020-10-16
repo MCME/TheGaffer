@@ -49,48 +49,29 @@ import org.bukkit.scoreboard.Team;
 
 public class TheGaffer extends JavaPlugin {
 
-    @Getter
     static Server serverInstance;
-    @Getter
+
     static TheGaffer pluginInstance;
-    @Getter
     static File pluginDataFolder;
-    @Getter
     static String fileSeperator = System.getProperty("file.separator");
 
-    @Getter
     static String fileExtension = ".job";
-    @Getter
     static boolean debug = false;
     //@Getter
     //static boolean TS;
-    @Getter
     static Configuration pluginConfig;
-    @Getter
     static boolean TSenabled;
-    @Getter
     static List<String> unprotectedWorlds = new ArrayList<>();
-    @Getter
     static ArrayList<Player> listening = new ArrayList<>();
-    @Getter
     static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList<>();
-    @Getter
     static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList<>();
-    @Getter
     static String discordChannel;
-    @Getter
     static String discordJobEmoji;
-    @Getter
     static boolean discordEnabled;
-    @Getter
     static boolean jobKitsEnabled;
-    @Getter
     static boolean jobDescription;
-    @Getter
     static boolean glowing;
-    @Getter
     static String helperColor;
-    @Getter
     static String workerColor;
 
     @Override
@@ -118,6 +99,8 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
         serverInstance.getPluginManager().registerEvents(new CraftingListener(), this);
+
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         new BukkitRunnable() {
 
@@ -184,5 +167,85 @@ public class TheGaffer extends JavaPlugin {
 
     public static String getBuildProtectionMessage(Player player, Location location) {
         return getBuildProtection(player, location).getMessage();
+    }
+
+    public static Server getServerInstance() {
+        return serverInstance;
+    }
+
+    public static TheGaffer getPluginInstance() {
+        return pluginInstance;
+    }
+
+    public static File getPluginDataFolder() {
+        return pluginDataFolder;
+    }
+
+    public static String getFileSeperator() {
+        return fileSeperator;
+    }
+
+    public static String getFileExtension() {
+        return fileExtension;
+    }
+
+    public static boolean isDebug() {
+        return debug;
+    }
+
+    public static Configuration getPluginConfig() {
+        return pluginConfig;
+    }
+
+    public static boolean isTSenabled() {
+        return TSenabled;
+    }
+
+    public static List<String> getUnprotectedWorlds() {
+        return unprotectedWorlds;
+    }
+
+    public static ArrayList<Player> getListening() {
+        return listening;
+    }
+
+    public static List<ExternalProtectionHandler> getExternalProtectionAllowHandlers() {
+        return externalProtectionAllowHandlers;
+    }
+
+    public static List<ExternalProtectionHandler> getExternalProtectionDenyHandlers() {
+        return externalProtectionDenyHandlers;
+    }
+
+    public static String getDiscordChannel() {
+        return discordChannel;
+    }
+
+    public static String getDiscordJobEmoji() {
+        return discordJobEmoji;
+    }
+
+    public static boolean isDiscordEnabled() {
+        return discordEnabled;
+    }
+
+    public static boolean isJobKitsEnabled() {
+        return jobKitsEnabled;
+    }
+
+    public static boolean isJobDescription() {
+        return jobDescription;
+    }
+
+    public static boolean isGlowing() {
+        return glowing;
+    }
+
+    public static String getHelperColor() {
+        return helperColor;
+    }
+
+    public static String getWorkerColor() {
+        return workerColor;
     }
 }

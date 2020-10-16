@@ -195,9 +195,12 @@ public class JobCommand implements TabExecutor {
             if (args[0].equalsIgnoreCase("join")) {
                 if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
                     if (JobDatabase.getActiveJobs().size() > 0) {
-                        if (args.length > 1) {
-                            if (JobDatabase.getActiveJobs().containsKey(args[1])) {
-                                Job jobToJoin = JobDatabase.getActiveJobs().get(args[1]);
+                        if (args.length > 1 || JobDatabase.getActiveJobs().size()==1) {
+                            if ((args.length == 1 && JobDatabase.getActiveJobs().size()==1)
+                                    || (args.length > 1 && JobDatabase.getActiveJobs().containsKey(args[1]))) {
+                                Job jobToJoin = (args.length>1?
+                                                 JobDatabase.getActiveJobs().get(args[1]):
+                                                 JobDatabase.getActiveJobs().firstEntry().getValue());
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
