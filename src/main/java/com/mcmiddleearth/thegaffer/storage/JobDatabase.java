@@ -18,23 +18,15 @@ package com.mcmiddleearth.thegaffer.storage;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
-import com.mcmiddleearth.thegaffer.utilities.Util;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.TreeMap;
-import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.TreeMap;
+
 public class JobDatabase {
 
-    @Getter
     private static final TreeMap<String, Job> activeJobs = new TreeMap<>();
-    @Getter
     private static final TreeMap<String, Job> inactiveJobs = new TreeMap<>();
 
     /*
@@ -160,4 +152,11 @@ public class JobDatabase {
         return null;
     }
 
+    public static TreeMap<String, Job> getActiveJobs() {
+        return activeJobs;
+    }
+
+    public static TreeMap<String, Job> getInactiveJobs() {
+        return inactiveJobs;
+    }
 }

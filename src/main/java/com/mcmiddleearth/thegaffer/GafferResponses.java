@@ -15,8 +15,6 @@
  */
 package com.mcmiddleearth.thegaffer;
 
-import lombok.Getter;
-
 public class GafferResponses {
 
     public enum HelperResponse implements GafferResponse {
@@ -58,14 +56,22 @@ public class GafferResponses {
         REMOVE_SUCCESS("%name% removed from job.", true),
         WORKER_BANNED("%name is banned from %job%", false);
 
-        @Getter
         private final String message;
-        @Getter
         private final boolean successful;
 
         WorkerResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
         }
     }
 
@@ -79,14 +85,22 @@ public class GafferResponses {
         REMOVE_SUCCESS("%name% uninvited from %job%.", true),
         WORKER_BANNED("%name% is banned from %job%", false);
 
-        @Getter
         private final String message;
-        @Getter
         private final boolean successful;
 
         InviteResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
         }
     }
 
@@ -97,14 +111,22 @@ public class GafferResponses {
         BAN_SUCCESS("Successfully banned %name%.", true),
         UNBAN_SUCCESS("Successfully unbanned %name%.", true);
 
-        @Getter
         private final String message;
-        @Getter
         private final boolean successful;
 
         BanWorkerResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
         }
     }
 
@@ -113,14 +135,22 @@ public class GafferResponses {
         NOT_IN_JOB("%name% is not part of %job%.", false),
         KICK_SUCCESS("Successfully kicked %name%.", true);
 
-        @Getter
         private final String message;
-        @Getter
         private final boolean successful;
 
         KickWorkerResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
         }
     }
 
@@ -128,14 +158,22 @@ public class GafferResponses {
 
         FAILURE("Generic Failure", false),
         SUCCESS("Generic Success", true);
-        @Getter
         private final String message;
-        @Getter
         private final boolean successful;
 
         GenericResponse(String message, boolean wasSuccessful) {
             this.message = message;
             this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
         }
     }
 

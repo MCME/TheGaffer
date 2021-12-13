@@ -15,18 +15,26 @@
  */
 package com.mcmiddleearth.thegaffer.utilities;
 
-import lombok.Getter;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
 public class PermissionsUtil {
 
-    @Getter
     private static final Permission joinPermission = new Permission("thegaffer.join", PermissionDefault.TRUE);
     
-    @Getter
     private static final Permission createPermission = new Permission("thegaffer.create", PermissionDefault.OP);
     
-    @Getter
     private static final Permission ignoreWorldProtection = new Permission("thegaffer.ignoreprotection", PermissionDefault.OP);
+
+    public static Permission getJoinPermission() {
+        return joinPermission;
+    }
+
+    public static Permission getCreatePermission() {
+        return createPermission;
+    }
+
+    public static Permission getIgnoreWorldProtection() {
+        return ignoreWorldProtection;
+    }
 }

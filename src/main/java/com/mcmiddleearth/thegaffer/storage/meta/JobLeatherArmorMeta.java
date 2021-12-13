@@ -15,21 +15,14 @@
  */
 package com.mcmiddleearth.thegaffer.storage.meta;
 
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+
+import java.util.List;
 
 public class JobLeatherArmorMeta {
 
-    @Getter
-    @Setter
     private int rgb;
-    @Getter
-    @Setter
     private String displayName;
-    @Getter
-    @Setter
     private List<String> lore;
 
     public JobLeatherArmorMeta(LeatherArmorMeta meta) {
@@ -44,5 +37,29 @@ public class JobLeatherArmorMeta {
 
     public JobLeatherArmorMeta() {
 
+    }
+
+    public int getRgb() {
+        return rgb;
+    }
+
+    public void setRgb(int rgb) {
+        this.rgb = rgb;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public List<String> getLore() {
+        return lore;
+    }
+
+    public void setLore(List<String> lore) {
+        this.lore = lore;
     }
 }

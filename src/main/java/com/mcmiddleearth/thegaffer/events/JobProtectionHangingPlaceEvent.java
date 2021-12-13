@@ -16,7 +16,6 @@
 package com.mcmiddleearth.thegaffer.events;
 
 import com.mcmiddleearth.thegaffer.utilities.ProtectionType;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,16 +23,11 @@ import org.bukkit.event.HandlerList;
 
 public class JobProtectionHangingPlaceEvent extends JobProtectionEvent {
 
-    @Getter
     private final Player player;
-    @Getter
     private final Location location;
-    @Getter
     private final ProtectionType protectionType = ProtectionType.HANGING_PLACE;
-    @Getter
     private final Entity entityPlaced;
     private static final HandlerList handlers = new HandlerList();
-    @Getter
     private final boolean blocked;
 
     public JobProtectionHangingPlaceEvent(Player player, Location location, Entity entity, boolean blocked) {
@@ -50,5 +44,26 @@ public class JobProtectionHangingPlaceEvent extends JobProtectionEvent {
 
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public ProtectionType getProtectionType() {
+        return protectionType;
+    }
+
+    public Entity getEntityPlaced() {
+        return entityPlaced;
+    }
+
+    @Override
+    public boolean isBlocked() {
+        return blocked;
     }
 }

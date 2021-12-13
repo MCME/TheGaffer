@@ -5,8 +5,6 @@
  */
 package com.mcmiddleearth.thegaffer.utilities;
 
-import lombok.Getter;
-
 /**
  *
  * @author Eriol_Eandur
@@ -21,10 +19,13 @@ public enum BuildProtection {
     WORLD_DENIED    ("You are not allowed to build in this world."),
     NO_JOB          ("You are not allowed to build when there are no jobs.");
 
-    @Getter
     private final String message;
 
     BuildProtection(String message) {
         this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

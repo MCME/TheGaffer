@@ -16,7 +16,6 @@
 package com.mcmiddleearth.thegaffer.events;
 
 import com.mcmiddleearth.thegaffer.utilities.ProtectionType;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,16 +23,11 @@ import org.bukkit.event.HandlerList;
 
 public class JobProtectionHangingBreakEvent extends JobProtectionEvent {
 
-    @Getter
     private final Player player;
-    @Getter
     private final Location location;
-    @Getter
     private final ProtectionType protectionType = ProtectionType.HANGING_BREAK;
-    @Getter
     private final Entity entityBroken;
     private static final HandlerList handlers = new HandlerList();
-    @Getter
     private final boolean blocked;
 
     public JobProtectionHangingBreakEvent(Player player, Location location, Entity entity, boolean blocked) {
@@ -50,5 +44,26 @@ public class JobProtectionHangingBreakEvent extends JobProtectionEvent {
 
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public ProtectionType getProtectionType() {
+        return protectionType;
+    }
+
+    public Entity getEntityBroken() {
+        return entityBroken;
+    }
+
+    @Override
+    public boolean isBlocked() {
+        return blocked;
     }
 }

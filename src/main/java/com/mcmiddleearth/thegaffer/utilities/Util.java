@@ -1,14 +1,13 @@
 package com.mcmiddleearth.thegaffer.utilities;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
-import lombok.Getter;
 
 public class Util {
 
     private static final Logger log = TheGaffer.getServerInstance().getLogger();
-    @Getter
     private static ArrayList<String> logs = new ArrayList();
 
     public static void info(String msg) {
@@ -33,4 +32,8 @@ public class Util {
         logs.add("DEBUG: " + msg);
     }
     public static String dino = "§f███████████§8████████§f█\n§f██████████§8██████████\n§f██████████§8██§f█§8███████\n§f██████████§8██████████\n§f██████████§8██████████\n§f██████████§8██████████\n§f██████████§8█████§f█████\n§f██████████§8████████§f██\n§8█§f████████§8█████§f██████\n§8█§f██████§8███████§f██████\n§8██§f████§8██████████§f████\n§8███§f███§8████████§f█§8█§f████\n§8██████████████§f██████\n§8██████████████§f██████\n§f█§8████████████§f███████\n§f██§8███████████§f███████\n§f███§8█████████§f████████\n§f████§8███████§f█████████\n§f█████§8███§f█§8██§f█████████\n§f█████§8██§f███§8█§f█████████\n§f█████§8█§f████§8█§f█████████\n§f█████§8██§f███§8██§f████████\n";
+
+    public static Logger getLog() {
+        return log;
+    }
 }

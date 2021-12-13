@@ -18,18 +18,13 @@ package com.mcmiddleearth.thegaffer.utilities;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+import java.util.*;
+
 public class CleanupUtil {
 
-    @Getter
     private static HashMap<Job, Long> waiting = new HashMap<>();
     
     public static void scheduledCleanup() {
@@ -108,5 +103,9 @@ public class CleanupUtil {
             Util.debug("No new owner found for " + job.getName() + ". Disabling job.");
             JobDatabase.deactivateJob(job);
         }
+    }
+
+    public static HashMap<Job, Long> getWaiting() {
+        return waiting;
     }
 }

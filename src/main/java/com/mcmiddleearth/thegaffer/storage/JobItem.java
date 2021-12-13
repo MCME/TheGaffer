@@ -18,10 +18,6 @@ package com.mcmiddleearth.thegaffer.storage;
 import com.mcmiddleearth.thegaffer.storage.meta.JobBookMeta;
 import com.mcmiddleearth.thegaffer.storage.meta.JobEnchantmentMeta;
 import com.mcmiddleearth.thegaffer.storage.meta.JobLeatherArmorMeta;
-import java.util.List;
-import java.util.Map.Entry;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -30,31 +26,18 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
+import java.util.List;
+import java.util.Map.Entry;
+
 public class JobItem {
 
-    @Getter
-    @Setter
     private String material;
-    @Getter
-    @Setter
     private int amount;
-    @Getter
-    @Setter
     private String displayName;
-    @Getter
-    @Setter
     private short durability;
-    @Getter
-    @Setter
     private List<String> lore;
-    @Getter
-    @Setter
     private JobBookMeta bookMeta;
-    @Getter
-    @Setter
     private JobLeatherArmorMeta armorMeta;
-    @Getter
-    @Setter
     private JobEnchantmentMeta enchantmentMeta;
 
     public JobItem(ItemStack i) {
@@ -130,5 +113,69 @@ public class JobItem {
             }
         }
         return out;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public short getDurability() {
+        return durability;
+    }
+
+    public void setDurability(short durability) {
+        this.durability = durability;
+    }
+
+    public List<String> getLore() {
+        return lore;
+    }
+
+    public void setLore(List<String> lore) {
+        this.lore = lore;
+    }
+
+    public JobBookMeta getBookMeta() {
+        return bookMeta;
+    }
+
+    public void setBookMeta(JobBookMeta bookMeta) {
+        this.bookMeta = bookMeta;
+    }
+
+    public JobLeatherArmorMeta getArmorMeta() {
+        return armorMeta;
+    }
+
+    public void setArmorMeta(JobLeatherArmorMeta armorMeta) {
+        this.armorMeta = armorMeta;
+    }
+
+    public JobEnchantmentMeta getEnchantmentMeta() {
+        return enchantmentMeta;
+    }
+
+    public void setEnchantmentMeta(JobEnchantmentMeta enchantmentMeta) {
+        this.enchantmentMeta = enchantmentMeta;
     }
 }
