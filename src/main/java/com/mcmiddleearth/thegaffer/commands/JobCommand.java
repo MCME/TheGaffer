@@ -234,7 +234,7 @@ public class JobCommand implements TabExecutor {
                             if (resp.isSuccessful()) {
                                 player.sendMessage(ChatColor.GRAY + "You left the job " + ChatColor.AQUA + jobToLeave.getName());
                             } else {
-                                player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
+                                player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToLeave.getName()));
                             }
                         }else{
                             player.sendMessage(ChatColor.RED+"You are not part of a job.");
