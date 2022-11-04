@@ -121,7 +121,8 @@ public class JobEventListener implements Listener {
            }
            String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
                           +emoji+"\n        __**Leader:**__        " + job.getOwner() 
-                   + "\n        __**Title:**__            " + job.getName() 
+                   + "\n        __**Title:**__            " + job.getName()
+                   + "\n        __**World:**__            " + job.getBukkitWorld().getName()
                    + "\n        __**Time Start:**__ " +getLondonTime() 
                    + "\nTo join the job type in game chat: ```css\n/job join " + job.getName() + "```";
            if(TheGaffer.isJobDescription()) {
