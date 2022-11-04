@@ -225,6 +225,28 @@ public class JobCommand implements TabExecutor {
                 }
                 return true;
             }
+            if(args[0].equalsIgnoreCase("leave")){
+                if(player.hasPermission(PermissionsUtil.getJoinPermission())){
+                    if (JobDatabase.getActiveJobs().size() > 0){
+                        Job jobToLeave = JobDatabase.getJobWorking(player);
+                        if(jobToLeave != null) {
+                            GafferResponse resp = jobToLeave.leaveJob(player);
+                            if (resp.isSuccessful()) {
+                                player.sendMessage(ChatColor.GRAY + "You left the job " + ChatColor.AQUA + jobToLeave.getName());
+                            } else {
+                                player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
+                            }
+                        }else{
+                            player.sendMessage(ChatColor.RED+"You are not part of a job.");
+                        }
+                    }else {
+                        player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                    }
+                }else{
+                    player.sendMessage(ChatColor.RED+"You do not have permission.");
+                }
+                return true;
+            }
             if (args[0].equalsIgnoreCase("info")) {
                 if (args.length > 1) {
                     if (JobDatabase.getActiveJobs().containsKey(args[1])) {

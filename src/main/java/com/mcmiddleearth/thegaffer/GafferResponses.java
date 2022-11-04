@@ -54,7 +54,8 @@ public class GafferResponses {
         NOT_ONLINE("%name% is not online.", false),
         ADD_SUCCESS("Welcome to %job%.", true),
         REMOVE_SUCCESS("%name% removed from job.", true),
-        WORKER_BANNED("%name is banned from %job%", false);
+        WORKER_BANNED("%name is banned from %job%", false),
+        LEAVE_SUCCESS("You left %job%.",true);
 
         private final String message;
         private final boolean successful;
