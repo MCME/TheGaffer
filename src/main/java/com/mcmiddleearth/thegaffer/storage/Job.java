@@ -415,6 +415,19 @@ public class Job implements Listener {
         return KickWorkerResponse.KICK_SUCCESS;
     }
 
+    public WorkerResponse leaveJob(OfflinePlayer p){
+        if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
+            return WorkerResponse.NO_PERMISSIONS;
+        }
+        workers.remove(p.getName());
+        removeWorkerTeam(p.getName());
+        VentureChatUtil.leaveJobChannel(p);
+        setDirty(true);
+        sendToAll(ChatColor.AQUA + p.getName() + " has left the job.");
+        Util.debug(p.getName() + " was worker removed from " + name + " with reason: Left by themself");
+        return WorkerResponse.LEAVE_SUCCESS;
+    }
+
     public void updateLocation(Location loc) {
         getWarp().setX(loc.getX());
         getWarp().setY(loc.getY());

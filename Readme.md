@@ -38,6 +38,7 @@ The first argument is the action you would like to perform. The current actions 
 * __unpause__
 * check
 * join
+* leave
 * warpto
 * info
 * archive
@@ -77,6 +78,12 @@ This is the action that allows someone to join a job. Once a user joins a job, t
 
 ###### Example
 /job join river *This will join the job river but __not__ River or rIVer*
+
+### Leave
+This is the action that allows someone to leave the currently joined job.
+
+###### Example
+/job leave *This will let you leave the currently joined job*
 
 ### Warpto
 This is the action that will warp you to the jobs location.
