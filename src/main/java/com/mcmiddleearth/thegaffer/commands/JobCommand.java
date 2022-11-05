@@ -391,6 +391,7 @@ public class JobCommand implements TabExecutor {
         actions.add("info");
         actions.add("join");
         actions.add("check");
+        actions.add("leave");
         if (sender.hasPermission(PermissionsUtil.getCreatePermission())) {
             actions.add("stop");
             actions.add("debug");
