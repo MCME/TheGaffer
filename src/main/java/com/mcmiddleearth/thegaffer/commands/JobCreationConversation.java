@@ -288,7 +288,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public String getPromptText(ConversationContext context) {
             return "who should be notified at discord about the job?"
-                    + "\n" + "(player names separated by ',' or roles like 'Commoner' or 'everyone'";
+                    + "\n" + "May be player names separated by \",\" or roles like \"Commoner\" or \"everyone\""
+                    + "\n" + "Example: Eriol_Eandur, Commoner";
         }
 
         @Override

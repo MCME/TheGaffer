@@ -15,9 +15,9 @@ public enum BuildProtection {
     LOC_DENIED      ("You are not allowed to build here."),
     JOB_PAUSED      ("The job is currently paused."),
     OUT_OF_BOUNDS   ("You have gone out of bounds for the job."),
-    NOT_IN_JOB      ("You are not part of any job."),
+    NOT_IN_JOB      ("You are not part of any job (building event)."),
     WORLD_DENIED    ("You are not allowed to build in this world."),
-    NO_JOB          ("You are not allowed to build when there are no jobs.");
+    NO_JOB          ("You are not allowed to build when there are no jobs (building events).");
 
     private final String message;
 
