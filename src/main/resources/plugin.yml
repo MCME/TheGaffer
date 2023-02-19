@@ -1,7 +1,7 @@
 name: ${project.artifactId}
 main: com.mcmiddleearth.thegaffer.TheGaffer
 version: ${project.version}
-api-version: 1.18
+api-version: 1.19
 website: ${project.url}
 authors: [meggawatts, DonoA, Eriol_Eandur, Planetology, Fraspace5, Jubo]
 description: Job API for MCME.
@@ -21,10 +21,9 @@ commands:
             /job leave
             /job warpto <jobname>
             /job info <jobname>
-            /job admit <player>
             /job create
             /job start
-            /job admin
+            /jobadmin
   jobadmin:
     description: Launches the jobadmin conversation can also be done with /job admin
     usage: |
