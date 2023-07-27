@@ -15,17 +15,14 @@
  */
 package com.mcmiddleearth.thegaffer.storage.meta;
 
-import java.util.HashMap;
-import java.util.Map.Entry;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 public class JobEnchantmentMeta {
 
-    @Getter
-    @Setter
     private HashMap<String, Integer> enchants = new HashMap();
 
     public JobEnchantmentMeta(ItemMeta meta) {
@@ -36,5 +33,13 @@ public class JobEnchantmentMeta {
     
     public JobEnchantmentMeta() {
         
+    }
+
+    public HashMap<String, Integer> getEnchants() {
+        return enchants;
+    }
+
+    public void setEnchants(HashMap<String, Integer> enchants) {
+        this.enchants = enchants;
     }
 }

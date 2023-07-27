@@ -5,8 +5,6 @@
  */
 package com.mcmiddleearth.thegaffer.utilities;
 
-import lombok.Getter;
-
 /**
  *
  * @author Eriol_Eandur
@@ -17,14 +15,17 @@ public enum BuildProtection {
     LOC_DENIED      ("You are not allowed to build here."),
     JOB_PAUSED      ("The job is currently paused."),
     OUT_OF_BOUNDS   ("You have gone out of bounds for the job."),
-    NOT_IN_JOB      ("You are not part of any job."),
+    NOT_IN_JOB      ("You are not part of any job (building event)."),
     WORLD_DENIED    ("You are not allowed to build in this world."),
-    NO_JOB          ("You are not allowed to build when there are no jobs.");
+    NO_JOB          ("You are not allowed to build when there are no jobs (building events).");
 
-    @Getter
     private final String message;
 
     BuildProtection(String message) {
         this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

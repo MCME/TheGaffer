@@ -15,30 +15,19 @@
  */
 package com.mcmiddleearth.thegaffer.storage;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class JobKit {
 
-    @Getter
-    @Setter
     private JobItem[] contents;
-    @Getter
-    @Setter
     private JobItem helmet;
-    @Getter
-    @Setter
     private JobItem chestplate;
-    @Getter
-    @Setter
     private JobItem pants;
-    @Getter
-    @Setter
     private JobItem boots;
 
     public void replaceInventory(Player p) {
@@ -67,5 +56,45 @@ public class JobKit {
             contentS.add(new JobItem(i));
         }
         contents = contentS.toArray(new JobItem[contentS.size()]);
+    }
+
+    public JobItem[] getContents() {
+        return contents;
+    }
+
+    public void setContents(JobItem[] contents) {
+        this.contents = contents;
+    }
+
+    public JobItem getHelmet() {
+        return helmet;
+    }
+
+    public void setHelmet(JobItem helmet) {
+        this.helmet = helmet;
+    }
+
+    public JobItem getChestplate() {
+        return chestplate;
+    }
+
+    public void setChestplate(JobItem chestplate) {
+        this.chestplate = chestplate;
+    }
+
+    public JobItem getPants() {
+        return pants;
+    }
+
+    public void setPants(JobItem pants) {
+        this.pants = pants;
+    }
+
+    public JobItem getBoots() {
+        return boots;
+    }
+
+    public void setBoots(JobItem boots) {
+        this.boots = boots;
     }
 }

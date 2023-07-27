@@ -17,22 +17,21 @@ package com.mcmiddleearth.thegaffer.listeners;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.mcmiddleearth.connect.ConnectPlugin;
-import com.mcmiddleearth.connect.util.ConnectUtil;
 import com.mcmiddleearth.thegaffer.TheGaffer;
-import com.mcmiddleearth.thegaffer.events.JobEndEvent;
-import com.mcmiddleearth.thegaffer.events.JobProtectionBlockBreakEvent;
-import com.mcmiddleearth.thegaffer.events.JobProtectionBlockPlaceEvent;
-import com.mcmiddleearth.thegaffer.events.JobProtectionHangingBreakEvent;
-import com.mcmiddleearth.thegaffer.events.JobProtectionHangingPlaceEvent;
-import com.mcmiddleearth.thegaffer.events.JobProtectionInteractEvent;
-import com.mcmiddleearth.thegaffer.events.JobStartEvent;
+import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import github.scarsz.discordsrv.util.DiscordUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 
 import java.awt.*;
 import java.text.DateFormat;
@@ -42,14 +41,6 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 
 public class JobEventListener implements Listener {
 
@@ -121,7 +112,8 @@ public class JobEventListener implements Listener {
            }
            String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
                           +emoji+"\n        __**Leader:**__        " + job.getOwner() 
-                   + "\n        __**Title:**__            " + job.getName() 
+                   + "\n        __**Title:**__            " + job.getName()
+                   + "\n        __**World:**__            " + job.getBukkitWorld().getName()
                    + "\n        __**Time Start:**__ " +getLondonTime() 
                    + "\nTo join the job type in game chat: ```css\n/job join " + job.getName() + "```";
            if(TheGaffer.isJobDescription()) {

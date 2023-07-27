@@ -17,7 +17,6 @@ package com.mcmiddleearth.thegaffer.events;
 
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
-import lombok.Getter;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 
@@ -25,17 +24,11 @@ import org.bukkit.event.HandlerList;
 public class JobEndEvent extends JobEvent {
 
     private static final HandlerList handlers = new HandlerList();
-    @Getter
     private final Job job;
-    @Getter
     private final OfflinePlayer jobRunner;
-    @Getter
     private final String jobName;
-    @Getter
     private final JobWarp jobWarp;
-    @Getter
     private final String jobProject;
-    @Getter
     private final boolean open;
 
     public JobEndEvent(Job job) {
@@ -54,5 +47,35 @@ public class JobEndEvent extends JobEvent {
 
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+    @Override
+    public Job getJob() {
+        return job;
+    }
+
+    @Override
+    public OfflinePlayer getJobRunner() {
+        return jobRunner;
+    }
+
+    @Override
+    public String getJobName() {
+        return jobName;
+    }
+
+    @Override
+    public JobWarp getJobWarp() {
+        return jobWarp;
+    }
+
+    @Override
+    public String getJobProject() {
+        return jobProject;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return open;
     }
 }

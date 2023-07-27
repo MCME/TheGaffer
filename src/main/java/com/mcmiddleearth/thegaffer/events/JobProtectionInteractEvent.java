@@ -16,7 +16,6 @@
 package com.mcmiddleearth.thegaffer.events;
 
 import com.mcmiddleearth.thegaffer.utilities.ProtectionType;
-import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -25,22 +24,14 @@ import org.bukkit.inventory.ItemStack;
 
 public class JobProtectionInteractEvent extends JobProtectionEvent {
 
-    @Getter
     private final Player player;
-    @Getter
     private final Location location;
-    @Getter
     private final ProtectionType protectionType = ProtectionType.INTERACT;
-    @Getter
     private final Block clickedBlock;
-    @Getter
     private final ItemStack itemClickedWith;
-    @Getter
     private final boolean clickingBlock;
-    @Getter
     private final boolean clickingWithItem;
     private static final HandlerList handlers = new HandlerList();
-    @Getter
     private final boolean blocked;
 
     public JobProtectionInteractEvent(Player player, Location location, Block block, ItemStack item, boolean blocked) {
@@ -60,5 +51,38 @@ public class JobProtectionInteractEvent extends JobProtectionEvent {
 
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public ProtectionType getProtectionType() {
+        return protectionType;
+    }
+
+    public Block getClickedBlock() {
+        return clickedBlock;
+    }
+
+    public ItemStack getItemClickedWith() {
+        return itemClickedWith;
+    }
+
+    public boolean isClickingBlock() {
+        return clickingBlock;
+    }
+
+    public boolean isClickingWithItem() {
+        return clickingWithItem;
+    }
+
+    @Override
+    public boolean isBlocked() {
+        return blocked;
     }
 }

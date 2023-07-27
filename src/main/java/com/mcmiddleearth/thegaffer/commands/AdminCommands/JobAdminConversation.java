@@ -20,34 +20,17 @@ import com.mcmiddleearth.thegaffer.GafferResponses.GenericResponse;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
-import com.mcmiddleearth.thegaffer.storage.JobItem;
-import com.mcmiddleearth.thegaffer.storage.JobKit;
-import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.conversations.Conversable;
-import org.bukkit.conversations.ConversationAbandonedEvent;
-import org.bukkit.conversations.ConversationAbandonedListener;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationFactory;
-import org.bukkit.conversations.ConversationPrefix;
-import org.bukkit.conversations.FixedSetPrompt;
-import org.bukkit.conversations.MessagePrompt;
-import org.bukkit.conversations.NumericPrompt;
-import org.bukkit.conversations.Prompt;
-import org.bukkit.conversations.StringPrompt;
+import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class JobAdminConversation implements CommandExecutor, ConversationAbandonedListener {
 
@@ -168,7 +151,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         }
 
         private String formatSet() {
-            return StringUtils.join(JobDatabase.getActiveJobs().keySet(), ", ");
+            return String.join(", ",JobDatabase.getActiveJobs().keySet());
         }
 
         @Override

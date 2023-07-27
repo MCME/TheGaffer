@@ -15,34 +15,12 @@
  */
 package com.mcmiddleearth.thegaffer.storage;
 
-import com.mcmiddleearth.thegaffer.GafferResponses.BanWorkerResponse;
-import com.mcmiddleearth.thegaffer.GafferResponses.HelperResponse;
-import com.mcmiddleearth.thegaffer.GafferResponses.InviteResponse;
-import com.mcmiddleearth.thegaffer.GafferResponses.KickWorkerResponse;
-import com.mcmiddleearth.thegaffer.GafferResponses.WorkerResponse;
+import com.mcmiddleearth.thegaffer.GafferResponses.*;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
-import java.awt.Polygon;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Logger;
-import lombok.Getter;
-import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -52,81 +30,39 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
+
 public class Job implements Listener {
 
-    @Getter
-    @Setter
     private String name;
-    @Getter
-    @Setter
     private String owner;
-    @Getter
     private boolean running;
-    @Getter
-    @Setter
     private boolean paused;
-    @Getter
-    @Setter
     private JobWarp warp;
-    @Getter
-    @Setter
     private JobWarp tsWarp;
-    @Getter
-    @Setter
     private String ts;
-    @Getter
-    @Setter
     private boolean discordSend;
-    @Getter
-    @Setter
     private String[] discordTags;
-    @Getter
-    @Setter
     private String description;
-    @Getter
-    @Setter
     private ArrayList<String> helpers = new ArrayList();
-    @Getter
-    @Setter
     private ArrayList<String> workers = new ArrayList();
-    @Getter
-    @Setter
     private ArrayList<String> bannedWorkers = new ArrayList();
-    @Getter
-    @Setter
     private ArrayList<String> invitedWorkers = new ArrayList();
-    @Getter
-    @Setter
     private ArrayList<String> admitedWorkers = new ArrayList();
-    @Getter
-    @Setter
     private Long startTime;
-    @Getter
-    @Setter
     private Long endTime;
-    @Getter
-    @Setter
     private String world;
-    @Getter
-    @Setter
     private boolean Private;
-    @Getter
-    @Setter
     private int jobRadius;
-    @Getter
-    @Setter
     private Polygon area;
-    @Getter
-    @Setter
     private Rectangle2D bounds;
-    @Getter
-    @Setter
     private boolean dirty;
-    @Getter
-    @Setter
     private String projectname;
-    @Getter
-    @Setter
     private JobKit kit;
 
     private boolean glowing;
@@ -137,7 +73,6 @@ public class Job implements Listener {
     private String workerTeamName;
     private Scoreboard scoreboard;
 
-    @Getter
     private HashMap<UUID, Long> left = new HashMap<>();
 
     public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr,
@@ -480,6 +415,19 @@ public class Job implements Listener {
         return KickWorkerResponse.KICK_SUCCESS;
     }
 
+    public WorkerResponse leaveJob(OfflinePlayer p){
+        if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
+            return WorkerResponse.NO_PERMISSIONS;
+        }
+        workers.remove(p.getName());
+        removeWorkerTeam(p.getName());
+        VentureChatUtil.leaveJobChannel(p);
+        setDirty(true);
+        sendToAll(ChatColor.AQUA + p.getName() + " has left the job.");
+        Util.debug(p.getName() + " was worker removed from " + name + " with reason: Left by themself");
+        return WorkerResponse.LEAVE_SUCCESS;
+    }
+
     public void updateLocation(Location loc) {
         getWarp().setX(loc.getX());
         getWarp().setY(loc.getY());
@@ -637,5 +585,253 @@ public class Job implements Listener {
                 player.removePotionEffect(PotionEffectType.GLOWING);
             }*/
         }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    public JobWarp getWarp() {
+        return warp;
+    }
+
+    public void setWarp(JobWarp warp) {
+        this.warp = warp;
+    }
+
+    public JobWarp getTsWarp() {
+        return tsWarp;
+    }
+
+    public void setTsWarp(JobWarp tsWarp) {
+        this.tsWarp = tsWarp;
+    }
+
+    public String getTs() {
+        return ts;
+    }
+
+    public void setTs(String ts) {
+        this.ts = ts;
+    }
+
+    public boolean isDiscordSend() {
+        return discordSend;
+    }
+
+    public void setDiscordSend(boolean discordSend) {
+        this.discordSend = discordSend;
+    }
+
+    public String[] getDiscordTags() {
+        return discordTags;
+    }
+
+    public void setDiscordTags(String[] discordTags) {
+        this.discordTags = discordTags;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public ArrayList<String> getHelpers() {
+        return helpers;
+    }
+
+    public void setHelpers(ArrayList<String> helpers) {
+        this.helpers = helpers;
+    }
+
+    public ArrayList<String> getWorkers() {
+        return workers;
+    }
+
+    public void setWorkers(ArrayList<String> workers) {
+        this.workers = workers;
+    }
+
+    public ArrayList<String> getBannedWorkers() {
+        return bannedWorkers;
+    }
+
+    public void setBannedWorkers(ArrayList<String> bannedWorkers) {
+        this.bannedWorkers = bannedWorkers;
+    }
+
+    public ArrayList<String> getInvitedWorkers() {
+        return invitedWorkers;
+    }
+
+    public void setInvitedWorkers(ArrayList<String> invitedWorkers) {
+        this.invitedWorkers = invitedWorkers;
+    }
+
+    public ArrayList<String> getAdmitedWorkers() {
+        return admitedWorkers;
+    }
+
+    public void setAdmitedWorkers(ArrayList<String> admitedWorkers) {
+        this.admitedWorkers = admitedWorkers;
+    }
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getWorld() {
+        return world;
+    }
+
+    public void setWorld(String world) {
+        this.world = world;
+    }
+
+    public boolean isPrivate() {
+        return Private;
+    }
+
+    public void setPrivate(boolean aPrivate) {
+        Private = aPrivate;
+    }
+
+    public int getJobRadius() {
+        return jobRadius;
+    }
+
+    public void setJobRadius(int jobRadius) {
+        this.jobRadius = jobRadius;
+    }
+
+    public Polygon getArea() {
+        return area;
+    }
+
+    public void setArea(Polygon area) {
+        this.area = area;
+    }
+
+    public Rectangle2D getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(Rectangle2D bounds) {
+        this.bounds = bounds;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public String getProjectname() {
+        return projectname;
+    }
+
+    public void setProjectname(String projectname) {
+        this.projectname = projectname;
+    }
+
+    public JobKit getKit() {
+        return kit;
+    }
+
+    public void setKit(JobKit kit) {
+        this.kit = kit;
+    }
+
+    public boolean isGlowing() {
+        return glowing;
+    }
+
+    public void setGlowing(boolean glowing) {
+        this.glowing = glowing;
+    }
+
+    public Team getHelperTeam() {
+        return helperTeam;
+    }
+
+    public void setHelperTeam(Team helperTeam) {
+        this.helperTeam = helperTeam;
+    }
+
+    public String getHelperTeamName() {
+        return helperTeamName;
+    }
+
+    public void setHelperTeamName(String helperTeamName) {
+        this.helperTeamName = helperTeamName;
+    }
+
+    public Team getWorkerTeam() {
+        return workerTeam;
+    }
+
+    public void setWorkerTeam(Team workerTeam) {
+        this.workerTeam = workerTeam;
+    }
+
+    public String getWorkerTeamName() {
+        return workerTeamName;
+    }
+
+    public void setWorkerTeamName(String workerTeamName) {
+        this.workerTeamName = workerTeamName;
+    }
+
+    public Scoreboard getScoreboard() {
+        return scoreboard;
+    }
+
+    public void setScoreboard(Scoreboard scoreboard) {
+        this.scoreboard = scoreboard;
+    }
+
+    public HashMap<UUID, Long> getLeft() {
+        return left;
     }
 }

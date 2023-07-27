@@ -21,18 +21,17 @@ package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 import com.mcmiddleearth.thegaffer.GafferResponses;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -111,7 +110,7 @@ public class AdminMethods {
     }
 
     public String listworkers() {
-        return StringUtils.join(job.getWorkers().toArray(new String[job.getWorkers().size()]), "\n");
+        return String.join("\n",job.getWorkers().toArray(new String[job.getWorkers().size()]));
     }
 
     public GafferResponses.GafferResponse inviteworker(String arg) {

@@ -15,22 +15,24 @@
  */
 package com.mcmiddleearth.thegaffer.commands;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 public class InvHolder {
 
-    @Getter
-    @Setter
     private ItemStack[] contents;
-    @Getter
-    @Setter
     private ItemStack[] armorContents;
 
     public InvHolder(PlayerInventory inv) {
         this.contents = inv.getContents();
         this.armorContents = inv.getArmorContents();
+    }
+
+    public ItemStack[] getContents() {
+        return contents;
+    }
+
+    public ItemStack[] getArmorContents() {
+        return armorContents;
     }
 }

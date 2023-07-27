@@ -25,27 +25,24 @@ import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
 import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
-import static com.mcmiddleearth.thegaffer.utilities.ProtectionUtil.getBuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.Util;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Team;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static com.mcmiddleearth.thegaffer.utilities.ProtectionUtil.getBuildProtection;
 
 public class TheGaffer extends JavaPlugin {
 

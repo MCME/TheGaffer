@@ -15,24 +15,15 @@
  */
 package com.mcmiddleearth.thegaffer.storage.meta;
 
-import java.util.List;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.inventory.meta.BookMeta;
+
+import java.util.List;
 
 public class JobBookMeta {
 
-    @Getter
-    @Setter
     private String author;
-    @Getter
-    @Setter
     private List<String> pages;
-    @Getter
-    @Setter
     private String title;
-    @Getter
-    @Setter
     private List<String> lore;
 
     public JobBookMeta(BookMeta meta) {
@@ -46,5 +37,37 @@ public class JobBookMeta {
 
     public JobBookMeta() {
 
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public List<String> getPages() {
+        return pages;
+    }
+
+    public void setPages(List<String> pages) {
+        this.pages = pages;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<String> getLore() {
+        return lore;
+    }
+
+    public void setLore(List<String> lore) {
+        this.lore = lore;
     }
 }
