@@ -59,6 +59,7 @@ public class TheGaffer extends JavaPlugin {
     static Configuration pluginConfig;
     static boolean TSenabled;
     static List<String> unprotectedWorlds = new ArrayList<>();
+    static List<String> pingableDiscordRoles = new ArrayList<>();
     static ArrayList<Player> listening = new ArrayList<>();
     static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList<>();
     static List<ExternalProtectionHandler> externalProtectionDenyHandlers = new ArrayList<>();
@@ -127,6 +128,7 @@ public class TheGaffer extends JavaPlugin {
         workerColor = pluginConfig.getString("glowing.workerColor", "LIGHT_PURPLE");
         debug = pluginConfig.getBoolean("general.debug");
         unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
+        pingableDiscordRoles = pluginConfig.getStringList("allowRolePing");
         if (pluginConfig.contains("externalProtectionHandlers")) {
             ConfigurationSection section = pluginConfig.getConfigurationSection("externalProtectionHandlers");
             Set<String> handlers = section.getKeys(false);
@@ -244,5 +246,9 @@ public class TheGaffer extends JavaPlugin {
 
     public static String getWorkerColor() {
         return workerColor;
+    }
+
+    public static List<String> getPingableDiscordRoles() {
+        return pingableDiscordRoles;
     }
 }

@@ -51,3 +51,5 @@ glowing:
   enabled: true
   workerColor: DARK_PURPLE
   helperColor: AQUA
+allowRolePing:
+  - Jobber

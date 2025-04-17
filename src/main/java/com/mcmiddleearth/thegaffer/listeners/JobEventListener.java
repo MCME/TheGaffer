@@ -20,11 +20,10 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.utilities.DiscordUtil;
 import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
-import github.scarsz.discordsrv.util.DiscordUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -53,10 +52,10 @@ public class JobEventListener implements Listener {
             VentureChatUtil.leaveJobChannel(p);
         }
         if(job.isDiscordSend()) {
-            TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
+            //TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
                           || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
-            sendDiscord(emoji+" __**Info:**__ The job " + job.getName() 
+            DiscordUtil.sendDiscord(emoji+" __**Info:**__ The job " + job.getName()
                            + " has ended at " + getLondonTime() + ".");
         }
     }
@@ -99,17 +98,18 @@ public class JobEventListener implements Listener {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.8f, 2f);
         }
         if(job.isDiscordSend()) {
-            TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
-           String emoji =(TheGaffer.getDiscordJobEmoji()==null 
-                          || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
+           String emoji =(TheGaffer.getDiscordJobEmoji()==null
+                          || TheGaffer.getDiscordJobEmoji().isEmpty() ?"":":"+TheGaffer.getDiscordJobEmoji()+":");
            Guild guild = DiscordSRV.getPlugin().getMainGuild();
            String tag = "";
            for(String name:job.getDiscordTags()) {
-               if(name!=null && !name.equals("")) {
-                String discTag = DiscordUtil.convertMentionsFromNames("@"+name, guild);
-                tag = tag + discTag+", ";
+               if(name!=null && !name.isEmpty()) {
+//Logger.getGlobal().info("DiscordTag: "+name);
+                   String discTag = "@\""+name+"\"";
+                   tag = tag + discTag+", ";
                }
            }
+           //"<@&724391251604013198>"
            String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
                           +emoji+"\n        __**Leader:**__        " + job.getOwner() 
                    + "\n        __**Title:**__            " + job.getName()
@@ -119,7 +119,7 @@ public class JobEventListener implements Listener {
            if(TheGaffer.isJobDescription()) {
                    discordMessage = discordMessage + "__**Job Description:**__ "+job.getDescription();
            }
-           sendDiscord(discordMessage);
+           DiscordUtil.sendDiscord(discordMessage);
            /*sendDiscord(":ring1 @everyone, there is a new job!!! :ring1"
                                     +"\n         __**Leader:**__      "+job.getOwner()
                                     +"\n         __**Title:**__          "+job.getName()
@@ -140,26 +140,7 @@ public class JobEventListener implements Listener {
         return format.format(calendar.getTime());
      }
 
-    private void sendDiscord(String message) {
-        if ((TheGaffer.getDiscordChannel() != null) && (!TheGaffer.getDiscordChannel().equals("")))
-        {
-          DiscordSRV discordPlugin = DiscordSRV.getPlugin();
-          if (discordPlugin != null)
-          {
-            TextChannel channel = discordPlugin.getDestinationTextChannelForGameChannelName(TheGaffer.getDiscordChannel());
-            if (channel != null) {
-              DiscordUtil.sendMessage(channel, message, 0, false);
-            } else {
-              Logger.getLogger("TheGaffer").warning("Discord channel not found.");
-            }
-          }
-          else
-          {
-            Logger.getLogger("TheGaffer").warning("DiscordSRV plugin not found.");
-          }
-        }
-    }
-    
+
     @EventHandler
     public void onJobProtection(JobProtectionInteractEvent event) {
        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());

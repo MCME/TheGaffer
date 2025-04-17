@@ -294,7 +294,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-            input = input.replace(" ", "");
+            //input = input.replace(", ", ",");
             context.setSessionData("discordTag", input);
             if (TheGaffer.isProjectsEnabled() == true) {
                 return new projectPrompt();
@@ -442,6 +442,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             boolean setKit = (boolean) context.getSessionData("setkit");
             boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
             String[] discordTags = (context.getSessionData("discordTag") != null ? ((String) context.getSessionData("discordTag")).split(",") : new String[0]);
+            for(int i = 0; i < discordTags.length; i++) {
+                discordTags[i] = discordTags[i].trim();
+            }
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
             boolean glowing = false;
