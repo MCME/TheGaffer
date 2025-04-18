@@ -23,6 +23,7 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.utilities.DiscordUtil;
 import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Emote;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,11 +36,8 @@ import org.bukkit.plugin.Plugin;
 import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.List;
 
 public class JobEventListener implements Listener {
 
@@ -54,7 +52,7 @@ public class JobEventListener implements Listener {
         if(job.isDiscordSend()) {
             //TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
-                          || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
+                          || TheGaffer.getDiscordJobEmoji().isEmpty() ?"":":"+TheGaffer.getDiscordJobEmoji()+":");
             DiscordUtil.sendDiscord(emoji+" __**Info:**__ The job " + job.getName()
                            + " has ended at " + getLondonTime() + ".");
         }
@@ -98,9 +96,14 @@ public class JobEventListener implements Listener {
             p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.8f, 2f);
         }
         if(job.isDiscordSend()) {
-           String emoji =(TheGaffer.getDiscordJobEmoji()==null
-                          || TheGaffer.getDiscordJobEmoji().isEmpty() ?"":":"+TheGaffer.getDiscordJobEmoji()+":");
            Guild guild = DiscordSRV.getPlugin().getMainGuild();
+           String emojiString = "";
+           if((TheGaffer.getDiscordJobEmoji()!=null && !TheGaffer.getDiscordJobEmoji().isEmpty())) {
+                List<Emote> emojiList = guild.getEmotesByName(TheGaffer.getDiscordJobEmoji(),true);
+                if(!emojiList.isEmpty()) {
+                    emojiString = "<:"+TheGaffer.getDiscordJobEmoji()+":"+emojiList.getFirst().getId()+">";
+                }
+            }
            String tag = "";
            for(String name:job.getDiscordTags()) {
                if(name!=null && !name.isEmpty()) {
@@ -110,8 +113,8 @@ public class JobEventListener implements Listener {
                }
            }
            //"<@&724391251604013198>"
-           String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
-                          +emoji+"\n        __**Leader:**__        " + job.getOwner() 
+           String discordMessage = emojiString+" ***"+tag+"there is a new job!!!*** "
+                          +emojiString+"\n        __**Leader:**__        " + job.getOwner()
                    + "\n        __**Title:**__            " + job.getName()
                    + "\n        __**World:**__            " + job.getBukkitWorld().getName()
                    + "\n        __**Time Start:**__ " +getLondonTime() 
