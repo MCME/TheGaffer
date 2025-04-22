@@ -25,6 +25,9 @@ import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Emote;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
+import github.scarsz.discordsrv.hooks.permissions.LuckPermsHook;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -60,6 +63,7 @@ public class JobEventListener implements Listener {
 
     @EventHandler
     public void onJobStart(JobStartEvent event) {
+        LuckPerms luckPerms = LuckPermsProvider.get();
         Job job = event.getJob();
         String message = "";
         String first = "";
@@ -77,7 +81,7 @@ public class JobEventListener implements Listener {
             message = message +"\n"+ChatColor.GRAY+"Job Description: "+ChatColor.AQUA+job.getDescription();
         }
         message = message + "\n"+ChatColor.GRAY+"To join the job do "+ChatColor.AQUA+"/job join "+job.getName()
-                          + "\n"+ChatColor.GRAY+"If you are at another world you'll need to first do "+ChatColor.AQUA+"/"+job.getBukkitWorld().getName()
+                          + "\n"+ChatColor.GRAY+"If you are at another world you'll need to first do "+ChatColor.AQUA+"/"+luckPerms.getServerName()
                           + "\n"+ first + second;
         Plugin connectPlugin = Bukkit.getPluginManager().getPlugin("MCME-Connect");
         Player player = Bukkit.getOnlinePlayers().stream().findFirst().orElse(null);
