@@ -1,0 +1,32 @@
+// Root Gradle build for TheGaffer multi-module project
+plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+}
+
+group = 'com.mcmiddleearth'
+version = '2.8.1'
+
+// TODO: Make build generate the JARs for both paper & velocity
+// TODO: Should they share the same version?
+
+// TODO: Move nexus to the bukkit build.gradle?
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.papermc.io/repository/maven-public/' }
+        // PAPER
+        maven { url 'https://nexus.scarsz.me/content/groups/public/' } // discordsrv
+    }
+}
+
+// TODO: Set JDK version to 21 - IntelliJ using JDK 23???
+subprojects {
+    apply plugin: 'java'
+
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+}

@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+//    id 'xyz.jpenilla.run-paper' version '3.0.2'
+    id 'xyz.jpenilla.run-paper' version '2.3.1'
+}
+
+group = rootProject.group
+version = rootProject.version
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT'
+    // FIXME:
+    // compileOnly files('D:/MCME/dev/jars/VentureChat.jar')
+
+    // TODO: Remove when Velocity does the job start broadcast
+    // compileOnly "${project.group}:MCME-Connect:1.5.1"
+    
+    // Q: Simplify?
+    // compileOnly 'com.discordsrv:discordsrv:1.28.0'
+    compileOnly('com.discordsrv:discordsrv:1.28.0') {
+        exclude group: 'net.kyori', module: 'adventure-text-serializer-bungeecord'
+        exclude group: 'net.kyori', module: 'adventure-platform-bukkit'
+        exclude group: 'net.kyori', module: 'adventure-platform-viaversion'
+        exclude group: 'net.kyori', module: 'adventure-platform-facet'
+    }
+    compileOnly 'net.luckperms:api:5.4'
+}
+
+jar {
+    enabled = false
+}
+
+shadowJar {
+    archiveBaseName.set('TheGaffer')
+    archiveVersion.set(rootProject.version)
+    archiveClassifier.set('')
+    mergeServiceFiles()
+}
+
+artifacts {
+    archives shadowJar
+}
+
+tasks {
+    runServer {
+        // Configure the Minecraft version for our task.
+        // This is the only required configuration besides applying the plugin.
+        // Your plugin's jar (or shadowJar if present) will be used automatically.
+        minecraftVersion("1.21.4")
+    }
+}

@@ -1,0 +1,6 @@
+rootProject.name = 'TheGaffer'
+
+include 'thegaffer-bukkit', 'thegaffer-velocity'
+
+project(':thegaffer-bukkit').projectDir = file('thegaffer-bukkit')
+project(':thegaffer-velocity').projectDir = file('thegaffer-velocity')
