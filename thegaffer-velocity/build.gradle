@@ -9,6 +9,7 @@ group = rootProject.group
 version = rootProject.version
 
 dependencies {
+  implementation project(':thegaffer-core')
   compileOnly 'com.velocitypowered:velocity-api:3.4.0-SNAPSHOT'
   annotationProcessor 'com.velocitypowered:velocity-api:3.4.0-SNAPSHOT'
 }

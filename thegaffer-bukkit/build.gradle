@@ -9,6 +9,7 @@ group = rootProject.group
 version = rootProject.version
 
 dependencies {
+    implementation project(':thegaffer-core')
     compileOnly 'io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT'
     // FIXME:
     // compileOnly files('D:/MCME/dev/jars/VentureChat.jar')

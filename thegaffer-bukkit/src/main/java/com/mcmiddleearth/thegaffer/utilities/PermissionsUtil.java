@@ -20,6 +20,7 @@ import org.bukkit.permissions.PermissionDefault;
 
 public class PermissionsUtil {
 
+    // TODO: This is weird
     private static final Permission joinPermission = new Permission("thegaffer.join", PermissionDefault.TRUE);
     
     private static final Permission createPermission = new Permission("thegaffer.create", PermissionDefault.OP);

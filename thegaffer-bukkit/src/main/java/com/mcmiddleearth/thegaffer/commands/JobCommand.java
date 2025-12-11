@@ -15,20 +15,14 @@
  */
 package com.mcmiddleearth.thegaffer.commands;
 
-import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminCommands;
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminCommands;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -38,6 +32,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.ChatPaginator;
+
+import java.util.*;
 
 public class JobCommand implements TabExecutor {
 
@@ -330,6 +326,9 @@ public class JobCommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args[0].equalsIgnoreCase("join")) {
+            return null;
+        }
         if (args[0].equalsIgnoreCase("archive")) {
             return null;
         }
@@ -361,7 +360,7 @@ public class JobCommand implements TabExecutor {
             jobs.addAll(jobsUnique);
             return jobs;
         }
-        if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")
+        if (args[0].equalsIgnoreCase("stop")
                 || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")
                 || args[0].equalsIgnoreCase("warpto")) {
             List<String> jobs = new ArrayList<>();
@@ -385,6 +384,7 @@ public class JobCommand implements TabExecutor {
                 return jobs;
             }
         }
+
         List<String> actions = new ArrayList<>();
         actions.add("archive");
         actions.add("warpto");

@@ -15,6 +15,9 @@
  */
 package com.mcmiddleearth.thegaffer.storage;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import com.mcmiddleearth.thegaffer.Channels;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
@@ -120,6 +123,15 @@ public class JobDatabase {
         j.setDirty(true);
         // saveJobs();
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
+
+        // Q: Here? Or inside the JobStartEvent listener?
+        // TODO: Extract subchannels to shared location
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("CREATE");
+        out.writeUTF(j.getName());
+        // TODO: Feels bad
+        j.getAllAsPlayersArray()[0].sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
+
         return true;
     }
 
@@ -127,6 +139,12 @@ public class JobDatabase {
         if (!activeJobs.containsKey(j.getName())) {
             return false;
         }
+
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF("DELETE");
+        out.writeUTF(j.getName());
+        j.getAllAsPlayersArray()[0].sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
+
         j.setRunning(false);
         j.setEndTime(System.currentTimeMillis());
         j.setDirty(true);

@@ -1,9 +1,11 @@
-name: ${project.artifactId}
+#name: ${project.artifactId}
+name: "TheGaffer"
+#version: ${project.version}
+version: "0.1.0"
 main: com.mcmiddleearth.thegaffer.TheGaffer
-version: ${project.version}
 api-version: 1.19
-website: ${project.url}
-authors: [meggawatts, DonoA, Eriol_Eandur, Planetology, Fraspace5, Jubo]
+#website: ${project.url}
+authors: [meggawatts, DonoA, Eriol_Eandur, Planetology, Fraspace5, Jubo, _Drayz_]
 description: Job API for MCME.
 softdepend: [DiscordSRV, VentureChat]
 author: meggawatts

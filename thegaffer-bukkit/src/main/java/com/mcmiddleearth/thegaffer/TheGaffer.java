@@ -98,7 +98,8 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
         serverInstance.getPluginManager().registerEvents(new CraftingListener(), this);
 
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerOutgoingPluginChannel(this, Channels.MAIN);
 
         new BukkitRunnable() {
 

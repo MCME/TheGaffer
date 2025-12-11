@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+group = rootProject.group
+version = rootProject.version
+
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
+dependencies {
+    // Core module has minimal dependencies (no server-specific APIs)
+}
