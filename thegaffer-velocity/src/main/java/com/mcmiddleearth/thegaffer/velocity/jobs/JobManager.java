@@ -18,6 +18,10 @@ public class JobManager {
     // Q: Is there any point in a Map??? Just have an ArrayList of jobs - job contains its server???
     private static final Map<String, Set<Job>> serverJobs = new HashMap<>();
 
+    public static boolean isEmpty() {
+        return serverJobs.isEmpty();
+    }
+
     public static void addJob(String serverName, Job job) {
         serverJobs
             .computeIfAbsent(serverName, k -> new HashSet<>())
