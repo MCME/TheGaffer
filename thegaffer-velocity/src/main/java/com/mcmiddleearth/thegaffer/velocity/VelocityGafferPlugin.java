@@ -13,7 +13,6 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.slf4j.Logger;
 
@@ -64,15 +63,8 @@ public class VelocityGafferPlugin {
         player.sendMessage(JobManager.getAllJobsComponent());
         // event.getPlayer().sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "There is a job running! Use /job check to find out what it is!");
 
-        Sound anvil = Sound.sound(
-            Key.key("block.anvil.use"),
-            Sound.Source.PLAYER,
-            0.5f,
-            2.0f
-        );
         // To play a sound with Velocity an emitter is required
-        Sound.Emitter emitter = Sound.Emitter.self();
-        event.getPlayer().playSound(anvil, emitter);
+        event.getPlayer().playSound(Sounds.ActiveJob, Sound.Emitter.self());
     }
 
     @Subscribe
