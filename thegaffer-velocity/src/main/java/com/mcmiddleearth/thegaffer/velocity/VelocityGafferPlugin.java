@@ -2,12 +2,11 @@ package com.mcmiddleearth.thegaffer.velocity;
 
 import com.google.inject.Inject;
 import com.mcmiddleearth.thegaffer.Permission;
-import com.mcmiddleearth.thegaffer.velocity.helpers.ServerConnectUtils;
 import com.mcmiddleearth.thegaffer.velocity.jobs.Job;
 import com.mcmiddleearth.thegaffer.velocity.jobs.JobManager;
+import com.mcmiddleearth.thegaffer.velocity.listeners.CommandExecuteListener;
 import com.mcmiddleearth.thegaffer.velocity.listeners.MessageListener;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -49,6 +48,8 @@ public class VelocityGafferPlugin {
     public void onProxyInitialization(ProxyInitializeEvent event) {
         proxy.getEventManager().register(this, new MessageListener());
         proxy.getChannelRegistrar().register(ChannelIdentifiers.MAIN_ID);
+
+        proxy.getEventManager().register(this, new CommandExecuteListener());
     }
 
     @Subscribe
@@ -78,53 +79,5 @@ public class VelocityGafferPlugin {
 
         // To play a sound with Velocity an emitter is required
         player.playSound(Sounds.ActiveJob, Sound.Emitter.self());
-    }
-
-    @Subscribe
-    public void onCommand(CommandExecuteEvent event) {
-        // Q: Move inside job check/join? Prevents checking source if command doesn't match!
-        if (!(event.getCommandSource() instanceof Player sender)) {
-            return;
-        }
-
-        String command = event.getCommand().trim();
-
-        // TODO:
-        // * switch? + Extract handlers
-        // * Add permission checks
-        if (command.startsWith("job check")) {
-            event.setResult(CommandExecuteEvent.CommandResult.denied());
-            sender.sendMessage(JobManager.buildJobsList(
-                "  " + Emojis.CLIPBOARD + " Available Jobs " + Emojis.CLIPBOARD
-            ));
-        }
-        // Q: Intercept /job join <name> as well? Warn the player to just use /job join???
-        else if (command.equals("job join")) {
-            event.setResult(CommandExecuteEvent.CommandResult.denied());
-
-           Optional<Job> singleJob = JobManager.getSingleJob();
-           if (singleJob.isEmpty()) {
-               // Either 0 jobs or >1 jobs
-               sender.sendMessage(JobManager.buildJobsList("Select a job to join!"));
-               return;
-           }
-
-           var jobServerName = singleJob.get().server();
-           sender.getCurrentServer().ifPresent(serverConnection -> {
-               String playerServer = serverConnection.getServerInfo().getName();
-
-               if (playerServer.equalsIgnoreCase(jobServerName)) {
-                   event.setResult(CommandExecuteEvent.CommandResult.forwardToServer());
-                   return;
-               }
-
-               ServerConnectUtils.connectPlayerToServer(
-                   sender,
-                   jobServerName,
-                   // Unable to use forwardToServer - because the command would be forwarded to the original server
-                   targetServer -> sender.spoofChatInput("/job join")
-               );
-           });
-        }
     }
 }
