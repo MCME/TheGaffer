@@ -129,6 +129,7 @@ public class JobDatabase {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("CREATE");
         out.writeUTF(j.getName());
+        out.writeUTF(j.getDescription());
         // TODO: Feels bad
         j.getAllAsPlayersArray()[0].sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
 

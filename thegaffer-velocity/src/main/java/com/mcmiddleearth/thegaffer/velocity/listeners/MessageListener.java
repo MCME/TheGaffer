@@ -43,14 +43,14 @@ public class MessageListener {
         // Q: Broadcast on job deletion?
         // TODO: Magic strings
         switch (subchannel) {
-            case "CREATE" -> handleJobCreation(backendName, jobName, player);
+            case "CREATE" -> handleJobCreation(backendName, jobName, player, in.readUTF());
             case "DELETE" -> JobManager.removeJob(backendName, jobName);
             default -> VelocityGafferPlugin.getLogger().warn("Subchannel '{}' has no handler!", subchannel);
         }
     }
 
-    private void handleJobCreation(String backendName, String jobName, Player creator) {
-        Job newJob = new Job(jobName, creator.getUsername(), backendName);
+    private void handleJobCreation(String backendName, String jobName, Player creator, String description) {
+        Job newJob = new Job(jobName, creator.getUsername(), backendName, description);
         JobManager.addJob(newJob);
 
         VelocityGafferPlugin.getProxy().sendMessage(

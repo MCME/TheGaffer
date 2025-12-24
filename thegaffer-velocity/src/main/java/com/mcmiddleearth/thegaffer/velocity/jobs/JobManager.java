@@ -57,6 +57,9 @@ public class JobManager {
             Placeholder.unparsed("creator", job.creator())
         );
 
+        Component descriptionLine = Component.text(" Description: ", NamedTextColor.GRAY)
+            .append(Component.text(job.description(), TextColor.fromHexString("#dedede")));
+
         Component joinButton = Component.text("          ")
             .append(buildJoinButton(job, "⟫ Click to Join ⟪"));
 
@@ -65,6 +68,7 @@ public class JobManager {
             .append(title).appendNewline().appendNewline()
             .append(jobLine).appendNewline()
             .append(creatorLine).appendNewline()
+            .append(descriptionLine).appendNewline().appendNewline()
             .append(joinButton).appendNewline().appendNewline()
             .append(border);
     }
@@ -89,7 +93,10 @@ public class JobManager {
             .sorted(Comparator.comparing(Job::name))
             .forEach(job -> {
                 Component jobName = Component.text(job.name())
-                    .color(NamedTextColor.AQUA);
+                    .color(NamedTextColor.AQUA)
+                    .hoverEvent(
+                        HoverEvent.showText(Component.text(job.description()))
+                    );
 
                 String text = "  <gray>- <job> (by <player-tag><creator><gray>)<join>";
                 Component jobLine = VelocityGafferPlugin.mm.deserialize(

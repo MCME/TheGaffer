@@ -1,6 +1,6 @@
 package com.mcmiddleearth.thegaffer.velocity.jobs;
 
-public record Job(String name, String creator, String server) {
+public record Job(String name, String creator, String server, String description) {
     @Override
     public boolean equals(Object o) {
         return o instanceof Job job && name.equals(job.name) && server.equals(job.server);
