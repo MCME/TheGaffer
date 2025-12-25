@@ -137,7 +137,7 @@ public class JobManager {
                     player,
                     job.server(),
                     // Unable to use forwardToServer - because the command would be forwarded to the original server
-                    targetServer -> player.spoofChatInput("/job join " + job.name())
+                    newConnection -> player.spoofChatInput("/job join " + job.name())
                 );
             });
         });

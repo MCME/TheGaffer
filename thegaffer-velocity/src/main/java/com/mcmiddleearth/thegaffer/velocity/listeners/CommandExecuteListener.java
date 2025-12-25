@@ -71,7 +71,7 @@ public class CommandExecuteListener {
                 sender,
                 jobServerName,
                 // Unable to use 'forwardToServer' - because the command would be forwarded to the original server
-                targetServer -> sender.spoofChatInput("/job join")
+                newConnection -> sender.spoofChatInput("/job join")
             );
         });
     }

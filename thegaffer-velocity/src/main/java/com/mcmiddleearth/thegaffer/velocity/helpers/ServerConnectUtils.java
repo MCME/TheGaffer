@@ -3,6 +3,7 @@ package com.mcmiddleearth.thegaffer.velocity.helpers;
 import com.mcmiddleearth.thegaffer.velocity.VelocityGafferPlugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -20,12 +21,12 @@ public final class ServerConnectUtils {
      *
      * @param sender The player to connect
      * @param targetServerName Name of the target server
-     * @param teleportCallback Callback to run on successful connection
+     * @param callback Runs on successful connection (provides the player's connection)
      */
     public static void connectPlayerToServer(
         Player sender,
         String targetServerName,
-        Consumer<RegisteredServer> teleportCallback // callback on success
+        Consumer<ServerConnection> callback
     ) {
         ProxyServer proxy = VelocityGafferPlugin.getProxy();
         Optional<RegisteredServer> optTargetServer = proxy.getServer(targetServerName);
@@ -65,8 +66,7 @@ public final class ServerConnectUtils {
                     return;
                 }
 
-                // Successful connection
-                teleportCallback.accept(targetServer);
+                sender.getCurrentServer().ifPresent(callback);
             });
     }
 }
