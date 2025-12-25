@@ -22,6 +22,7 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -130,8 +131,10 @@ public class JobDatabase {
         out.writeUTF("CREATE");
         out.writeUTF(j.getName());
         out.writeUTF(j.getDescription());
-        // TODO: Feels bad
-        j.getAllAsPlayersArray()[0].sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
+        Player owner = TheGaffer.getServerInstance().getOfflinePlayer(j.getOwner()).getPlayer();
+        if (owner != null) {
+            owner.sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
+        }
 
         return true;
     }
@@ -141,10 +144,13 @@ public class JobDatabase {
             return false;
         }
 
+        // TODO: Protocol
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("DELETE");
         out.writeUTF(j.getName());
-        j.getAllAsPlayersArray()[0].sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
+        TheGaffer.getServerInstance().getOnlinePlayers().stream().findFirst().ifPresent(player -> {
+            player.sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
+        });
 
         j.setRunning(false);
         j.setEndTime(System.currentTimeMillis());
