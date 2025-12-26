@@ -17,8 +17,11 @@ package com.mcmiddleearth.thegaffer.listeners;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
+import com.mcmiddleearth.thegaffer.messages.JobCreateMessage;
+import com.mcmiddleearth.thegaffer.messages.JobDeleteMessage;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.utilities.DiscordUtil;
+import com.mcmiddleearth.thegaffer.utilities.PluginMessenger;
 import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Emote;
@@ -45,6 +48,12 @@ public class JobEventListener implements Listener {
             VentureChatUtil.leaveJobChannel(p);
         }
 
+        // Notify the proxy
+        JobDeleteMessage message = new JobDeleteMessage(job.getName());
+        TheGaffer.getServerInstance().getOnlinePlayers()
+            .stream().findFirst()
+            .ifPresent(player -> PluginMessenger.sendToPlayer(player, message));
+
         if(job.isDiscordSend()) {
             //TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
@@ -57,6 +66,13 @@ public class JobEventListener implements Listener {
     @EventHandler
     public void onJobStart(JobStartEvent event) {
         Job job = event.getJob();
+
+        // Notify the proxy
+        JobCreateMessage message = new JobCreateMessage(job.getName(), job.getDescription());
+        Player owner = TheGaffer.getServerInstance().getOfflinePlayer(job.getOwner()).getPlayer();
+        if (owner != null) {
+            PluginMessenger.sendToPlayer(owner, message);
+        }
 
         if (job.isDiscordSend()) {
            Guild guild = DiscordSRV.getPlugin().getMainGuild();

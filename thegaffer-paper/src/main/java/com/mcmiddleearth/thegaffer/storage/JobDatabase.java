@@ -15,14 +15,10 @@
  */
 package com.mcmiddleearth.thegaffer.storage;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import com.mcmiddleearth.thegaffer.Channels;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -114,27 +110,18 @@ public class JobDatabase {
         }
     }
      */
+
     public static boolean activateJob(Job j) {
         if (activeJobs.containsKey(j.getName())) {
             return false;
         }
+
         j.generateBounds();
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         j.setDirty(true);
         // saveJobs();
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
-
-        // Q: Here? Or inside the JobStartEvent listener?
-        // TODO: Extract subchannels to shared location
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("CREATE");
-        out.writeUTF(j.getName());
-        out.writeUTF(j.getDescription());
-        Player owner = TheGaffer.getServerInstance().getOfflinePlayer(j.getOwner()).getPlayer();
-        if (owner != null) {
-            owner.sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
-        }
 
         return true;
     }
@@ -143,14 +130,6 @@ public class JobDatabase {
         if (!activeJobs.containsKey(j.getName())) {
             return false;
         }
-
-        // TODO: Protocol
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("DELETE");
-        out.writeUTF(j.getName());
-        TheGaffer.getServerInstance().getOnlinePlayers().stream().findFirst().ifPresent(player -> {
-            player.sendPluginMessage(TheGaffer.getPluginInstance(), Channels.MAIN, out.toByteArray());
-        });
 
         j.setRunning(false);
         j.setEndTime(System.currentTimeMillis());
