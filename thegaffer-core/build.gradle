@@ -10,4 +10,6 @@ targetCompatibility = '21'
 
 dependencies {
     // Core module has minimal dependencies (no server-specific APIs)
+    // implementation 'com.google.guava:guava:31.1-jre'
+    compileOnly 'com.google.guava:guava:31.1-jre'
 }

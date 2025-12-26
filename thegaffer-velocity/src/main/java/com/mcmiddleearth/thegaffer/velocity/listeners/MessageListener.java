@@ -2,6 +2,9 @@ package com.mcmiddleearth.thegaffer.velocity.listeners;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import com.mcmiddleearth.thegaffer.messages.JobCreateMessage;
+import com.mcmiddleearth.thegaffer.messages.JobDeleteMessage;
+import com.mcmiddleearth.thegaffer.messages.Subchannel;
 import com.mcmiddleearth.thegaffer.velocity.ChannelIdentifiers;
 import com.mcmiddleearth.thegaffer.velocity.Emojis;
 import com.mcmiddleearth.thegaffer.velocity.Sounds;
@@ -13,11 +16,9 @@ import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
 
 public class MessageListener {
-
-    private static final MiniMessage mm = MiniMessage.miniMessage();
 
     @Subscribe
     public void onPluginMessageFromBackend(PluginMessageEvent event) {
@@ -37,15 +38,18 @@ public class MessageListener {
         String backendName = backend.getServerInfo().getName();
 
         ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
-        String subchannel = in.readUTF();
-        String jobName = in.readUTF();
+        Subchannel subchannel = Subchannel.from(in.readUTF());
 
-        // Q: Broadcast on job deletion?
-        // TODO: Magic strings
         switch (subchannel) {
-            case "CREATE" -> handleJobCreation(backendName, jobName, player, in.readUTF());
-            case "DELETE" -> JobManager.removeJob(backendName, jobName);
-            default -> VelocityGafferPlugin.getLogger().warn("Subchannel '{}' has no handler!", subchannel);
+            case JOB_CREATED -> {
+                JobCreateMessage message = JobCreateMessage.deserialise(in);
+                handleJobCreation(backendName, message.jobName(), player, message.description());
+            }
+            case JOB_DELETED -> {
+                JobDeleteMessage message = JobDeleteMessage.deserialise(in);
+                JobManager.removeJob(backendName, message.jobName());
+            }
+            case null, default -> VelocityGafferPlugin.getLogger().warn("Subchannel '{}' from '{}' has no handler!", subchannel, backendName);
         }
     }
 
@@ -53,12 +57,12 @@ public class MessageListener {
         Job newJob = new Job(jobName, creator.getUsername(), backendName, description);
         JobManager.addJob(newJob);
 
-        VelocityGafferPlugin.getProxy().sendMessage(
-            JobManager.buildJobBlock(
-                newJob,
-                "    %s NEW JOB AVAILABLE %s".formatted(Emojis.CLIPBOARD, Emojis.CLIPBOARD)
-            )
+        Component announcement = JobManager.buildJobBlock(
+            newJob,
+            "    %s NEW JOB AVAILABLE %s".formatted(Emojis.CLIPBOARD, Emojis.CLIPBOARD)
         );
+        VelocityGafferPlugin.getProxy().sendMessage(announcement);
+
         // To play a sound with Velocity an emitter is required
         VelocityGafferPlugin.getProxy().playSound(Sounds.ActiveJob, Sound.Emitter.self());
     }
