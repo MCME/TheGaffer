@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TheGaffer — Rework Dossier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15110C; --ink-2:#1D1812; --ink-3:#26201A;
+    --paper:#EFE7D7; --muted:#A99B85; --faint:#7C7060;
+    --brass:#D8B25E; --brass-deep:#B5862F;
+    --crit:#E5575A; --high:#F08A45; --med:#E7C45F; --low:#9DB58A; --good:#5FB6A6;
+    --line:rgba(216,178,94,.16); --line-soft:rgba(239,231,215,.09);
+    --font-display:'Fraunces',Georgia,'Times New Roman',serif;
+    --font-sans:'Hanken Grotesk','Segoe UI',system-ui,sans-serif;
+    --font-mono:'IBM Plex Mono','Consolas',monospace;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--paper);
+    font-family:var(--font-sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; letter-spacing:.005em;
+    background-image:
+      radial-gradient(1200px 600px at 70% -10%, rgba(216,178,94,.10), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(229,87,90,.05), transparent 55%);
+    background-attachment:fixed;
+  }
+  /* grain overlay */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.4;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  .wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 28px}
+  a{color:var(--brass); text-decoration:none; border-bottom:1px solid rgba(216,178,94,.3)}
+  a:hover{color:#EEC694}
+  code,.mono{font-family:var(--font-mono); font-size:.86em}
+  .codepath{font-family:var(--font-mono); font-size:.82em; color:var(--brass); background:rgba(216,178,94,.07);
+    padding:1px 6px; border-radius:4px; border:1px solid rgba(216,178,94,.14); white-space:nowrap}
+
+  /* ---------- sticky nav ---------- */
+  nav.bar{position:sticky; top:0; z-index:20; backdrop-filter:blur(10px);
+    background:linear-gradient(var(--ink),rgba(21,17,12,.82));
+    border-bottom:1px solid var(--line); transform:translateY(-100%); transition:transform .3s ease}
+  nav.bar.show{transform:translateY(0)}
+  .bar-in{max-width:var(--maxw); margin:0 auto; padding:11px 28px; display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+  .bar-title{font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; color:var(--brass); text-transform:uppercase}
+  .bar-links{display:flex; gap:16px; margin-left:auto; flex-wrap:wrap}
+  .bar-links a{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.08em; color:var(--muted);
+    text-transform:uppercase; border:0; transition:color .2s}
+  .bar-links a:hover,.bar-links a.active{color:var(--paper)}
+
+  /* ---------- masthead ---------- */
+  header.hero{padding:46px 0 30px; border-bottom:1px solid var(--line)}
+  .stamp{display:flex; justify-content:space-between; align-items:center; gap:16px;
+    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--faint); padding-bottom:30px; flex-wrap:wrap}
+  .stamp .dot{color:var(--brass)}
+  .kicker{font-family:var(--font-mono); font-size:12.5px; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--brass-deep); margin-bottom:14px}
+  h1.title{font-family:var(--font-display); font-weight:900; font-size:clamp(52px,9vw,118px);
+    line-height:.9; letter-spacing:-.02em; margin:0; color:var(--paper)}
+  h1.title em{font-style:italic; font-weight:400; color:var(--brass)}
+  .sub{font-family:var(--font-display); font-style:italic; font-weight:400; font-size:clamp(18px,2.4vw,26px);
+    color:var(--muted); margin:16px 0 0; max-width:62ch}
+  .meta{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
+    margin-top:36px; background:var(--line); border:1px solid var(--line)}
+  .meta div{background:var(--ink); padding:14px 16px}
+  .meta dt{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); margin:0 0 5px}
+  .meta dd{margin:0; font-size:14.5px; font-weight:600; color:var(--paper)}
+
+  /* ---------- stat band ---------- */
+  .stats{display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line);
+    border:1px solid var(--line); margin:40px 0}
+  .stat{background:var(--ink-2); padding:22px 16px; text-align:center; position:relative; overflow:hidden}
+  .stat .n{font-family:var(--font-display); font-weight:900; font-size:clamp(34px,5vw,52px); line-height:1}
+  .stat .l{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:8px}
+  .stat::after{content:""; position:absolute; left:0; right:0; bottom:0; height:3px; background:currentColor; opacity:.5}
+  .s-crit{color:var(--crit)} .s-high{color:var(--high)} .s-med{color:var(--med)} .s-low{color:var(--low)} .s-good{color:var(--good)}
+  .stat .l{color:var(--muted)}
+
+  /* ---------- sections ---------- */
+  section{padding:54px 0; border-bottom:1px solid var(--line-soft)}
+  .sec-head{margin-bottom:30px}
+  .sec-kicker{font-family:var(--font-mono); font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--brass-deep); display:block; margin-bottom:10px}
+  h2{font-family:var(--font-display); font-weight:600; font-size:clamp(28px,4vw,42px); letter-spacing:-.01em; margin:0; line-height:1.05}
+  h3{font-family:var(--font-sans); font-weight:700; font-size:19px; margin:34px 0 6px; letter-spacing:.01em}
+  p.lead{font-size:18px; color:var(--paper); max-width:70ch}
+  p{max-width:74ch}
+  .muted{color:var(--muted)}
+
+  /* protection model rail */
+  .rail{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-top:22px}
+  .rail .c{border:1px solid var(--line); border-left:3px solid var(--brass); padding:16px 18px; background:var(--ink-2)}
+  .rail .c b{display:block; font-size:14px; margin-bottom:4px}
+  .rail .c span{font-size:13.5px; color:var(--muted)}
+
+  /* ---------- featured callouts ---------- */
+  .callout{border:1px solid var(--line); background:
+      linear-gradient(180deg, rgba(216,178,94,.06), rgba(216,178,94,.01)), var(--ink-2);
+    border-radius:3px; padding:26px 28px; margin:20px 0; position:relative; overflow:hidden}
+  .callout::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--brass)}
+  .callout .tag{font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--brass); display:inline-flex; align-items:center; gap:8px; margin-bottom:10px}
+  .callout h3{margin:0 0 10px; font-family:var(--font-display); font-weight:600; font-size:23px; letter-spacing:-.01em}
+  .callout.crit::before{background:var(--crit)} .callout.crit .tag{color:var(--crit)}
+  .resolved{display:inline-block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--good); border:1px solid rgba(95,182,166,.4); border-radius:999px; padding:3px 10px; margin-left:6px}
+
+  /* ---------- findings ---------- */
+  .filter{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 26px}
+  .filter button{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); background:transparent; border:1px solid var(--line); padding:7px 13px; border-radius:999px; cursor:pointer; transition:all .18s}
+  .filter button:hover{color:var(--paper); border-color:var(--brass)}
+  .filter button.on{color:var(--ink); background:var(--brass); border-color:var(--brass); font-weight:600}
+
+  .group{margin-bottom:26px}
+  .group-label{font-family:var(--font-mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); margin:30px 0 14px; display:flex; align-items:center; gap:12px}
+  .group-label::after{content:""; flex:1; height:1px; background:var(--line)}
+
+  .finding{display:grid; grid-template-columns:64px 1fr; gap:18px; border:1px solid var(--line-soft);
+    border-left:3px solid var(--sev,var(--brass)); background:var(--ink-2); padding:18px 20px; margin-bottom:12px;
+    border-radius:2px; transition:transform .18s ease, background .18s ease, border-color .18s}
+  .finding:hover{transform:translateX(4px); background:var(--ink-3); border-color:var(--line)}
+  .finding[data-sev="crit"]{--sev:var(--crit)} .finding[data-sev="high"]{--sev:var(--high)}
+  .finding[data-sev="med"]{--sev:var(--med)} .finding[data-sev="low"]{--sev:var(--low)}
+  .fid{font-family:var(--font-display); font-weight:900; font-size:26px; color:var(--sev,var(--brass)); line-height:1}
+  .fid small{display:block; font-family:var(--font-mono); font-size:9px; font-weight:500; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--faint); margin-top:6px}
+  .finding h4{margin:1px 0 8px; font-size:17px; font-weight:700; letter-spacing:.005em}
+  .finding .where{font-family:var(--font-mono); font-size:11.5px; color:var(--muted); margin-bottom:9px; word-break:break-word}
+  .finding .impact{font-size:14.5px; color:var(--paper); margin:0 0 8px}
+  .finding .fix{font-size:14px; color:var(--muted); margin:0; padding-top:8px; border-top:1px dashed var(--line-soft)}
+  .finding .fix b{color:var(--brass); font-weight:600; font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-right:6px}
+  .pill{display:inline-block; font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    padding:2px 7px; border-radius:999px; border:1px solid currentColor; margin-left:8px; vertical-align:middle}
+
+  /* fixed list */
+  .fixed{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:18px}
+  .fixed .f{border:1px solid var(--line-soft); border-left:3px solid var(--good); background:var(--ink-2); padding:14px 16px; font-size:14px}
+  .fixed .f b{color:var(--good)}
+
+  /* roadmap */
+  table.road{width:100%; border-collapse:collapse; margin-top:20px; font-size:14.5px}
+  table.road th{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--faint); text-align:left; padding:0 12px 12px; border-bottom:1px solid var(--line)}
+  table.road td{padding:14px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top}
+  table.road tr:hover td{background:var(--ink-2)}
+  .step{font-family:var(--font-display); font-weight:900; font-size:20px; color:var(--brass)}
+  .tag-pill{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; padding:3px 9px; border-radius:999px; display:inline-block}
+  .e-s{color:var(--good); border:1px solid rgba(95,182,166,.4)} .e-m{color:var(--med); border:1px solid rgba(231,196,95,.4)} .e-l{color:var(--high); border:1px solid rgba(240,138,69,.4)}
+  .r-low{color:var(--low)} .r-med{color:var(--med)} .r-high{color:var(--crit)}
+  td .ids{font-family:var(--font-mono); font-size:11.5px; color:var(--muted)}
+
+  footer{padding:46px 0 70px; color:var(--faint); font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; line-height:1.9}
+  footer .big{font-family:var(--font-display); font-style:italic; font-size:20px; color:var(--muted); letter-spacing:0; margin-bottom:18px; display:block}
+
+  /* reveal animation (degrades gracefully without JS) */
+  .js .reveal{opacity:0; transform:translateY(18px)}
+  .js .reveal.in{opacity:1; transform:none; transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1)}
+  .hero .kicker,.hero h1,.hero .sub,.hero .meta{animation:rise .8s both}
+  .hero h1{animation-delay:.05s} .hero .sub{animation-delay:.16s} .hero .meta{animation-delay:.26s}
+  @keyframes rise{from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:none}}
+
+  @media (max-width:620px){
+    .stats{grid-template-columns:repeat(2,1fr)} .stat:last-child{grid-column:span 2}
+    .finding{grid-template-columns:1fr; gap:10px} .fid{display:flex; align-items:baseline; gap:10px}
+    .fid small{margin-top:0}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+  /* ---------- print ---------- */
+  @media print{
+    :root{--ink:#fff;--ink-2:#fff;--ink-3:#fff;--paper:#1a1a1a;--muted:#444;--faint:#666;--line:#ccc;--line-soft:#e4e4e4;--brass:#8a6a1e;--brass-deep:#6e5418}
+    body{background:#fff!important; color:#1a1a1a; font-size:11pt}
+    body::before,nav.bar{display:none!important}
+    a{color:#000; border:0}
+    .finding,.callout,.stat,.meta div,.rail .c,.fixed .f{break-inside:avoid}
+    section{padding:18px 0; border-color:#ddd}
+    .reveal{opacity:1!important; transform:none!important}
+    h1.title{font-size:42pt} .stats{break-inside:avoid}
+    .codepath{color:#6e5418; background:none; border:0; padding:0}
+  }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<nav class="bar" id="navbar">
+  <div class="bar-in">
+    <span class="bar-title">The Gaffer · Rework</span>
+    <span class="bar-links">
+      <a href="#summary">Summary</a>
+      <a href="#headline">Headlines</a>
+      <a href="#findings">Findings</a>
+      <a href="#fixed">Fixed</a>
+      <a href="#roadmap">Roadmap</a>
+    </span>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="stamp">
+      <span>MCME <span class="dot">//</span> Internal Engineering Dossier</span>
+      <span>Confidential · For Engineering Review</span>
+    </div>
+    <div class="kicker">Build-Protection Plugin · Technical Audit &amp; Remediation Plan</div>
+    <h1 class="title">The&nbsp;<em>Gaffer</em></h1>
+    <p class="sub">A stability, performance &amp; maintainability audit of the canonical plugin — with a dependency-ordered plan for the rework.</p>
+    <dl class="meta">
+      <div><dt>Repository</dt><dd>MCME/TheGaffer</dd></div>
+      <div><dt>Version</dt><dd>2.8 · MC 1.19</dd></div>
+      <div><dt>Commit</dt><dd class="mono">87fd116</dd></div>
+      <div><dt>Reviewed</dt><dd>2026-06-28</dd></div>
+      <div><dt>Scope</dt><dd>38 files · ~5,285 LOC</dd></div>
+    </dl>
+  </header>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <section id="summary">
+    <div class="sec-head reveal">
+      <span class="sec-kicker">01 — The Brief</span>
+      <h2>Executive summary</h2>
+    </div>
+    <p class="lead reveal">TheGaffer is sound in shape but carries the three classic hazards of a long-lived Bukkit plugin. The core engine has barely changed since 2019 — four years of commits added <em>features</em>, not fixes — so the findings below are current, not historical. Two items dominate the rework: <strong>job persistence is currently disabled</strong>, and a sister plugin <strong>(MCME-Architect) depends on TheGaffer's protection API</strong> in a way that constrains any refactor.</p>
+
+    <div class="stats reveal">
+      <div class="stat s-crit"><div class="n">5</div><div class="l">Critical</div></div>
+      <div class="stat s-high"><div class="n">10</div><div class="l">High</div></div>
+      <div class="stat s-med"><div class="n">5</div><div class="l">Medium</div></div>
+      <div class="stat s-low"><div class="n">6</div><div class="l">Low / cleanup</div></div>
+      <div class="stat s-good"><div class="n">4</div><div class="l">Already fixed</div></div>
+    </div>
+
+    <div class="rail reveal">
+      <div class="c"><b>Stability</b><span>An async timer calls the main-thread-only Bukkit API; no clean shutdown; an unbounded log leak.</span></div>
+      <div class="c"><b>Performance</b><span>The protection check &amp; move handler re-scan all jobs and allocate on the busiest events.</span></div>
+      <div class="c"><b>User-friendliness</b><span>Identity-by-name, destructive inventory ops, case sensitivity, console spam.</span></div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTEXT ===================== -->
+  <section id="context">
+    <div class="sec-head reveal">
+      <span class="sec-kicker">02 — What It Does</span>
+      <h2>The protection model</h2>
+    </div>
+    <p class="reveal">A <strong>default-deny map lock</strong>. Every protected action funnels through one method — <span class="codepath">ProtectionUtil.getBuildProtection()</span> — which permits a build action only when one of these holds:</p>
+    <div class="rail reveal">
+      <div class="c"><b>Bypass permission</b><span><code>thegaffer.ignoreprotection</code> (default OP)</span></div>
+      <div class="c"><b>Unprotected world</b><span>The world is listed in <code>unprotectedworlds</code></span></div>
+      <div class="c"><b>External allow</b><span>Another plugin's allow-handler returns true</span></div>
+      <div class="c"><b>Active in a job</b><span>Worker, inside the job's radius, job not paused</span></div>
+    </div>
+    <p class="reveal" style="margin-top:22px">A <em>job</em> is therefore a temporary, bounded, revocable grant of build access on an otherwise read-only map. Enforcement also covers hanging entities, specific interactions, all crafting, and an automatic survival↔creative switch at the job boundary. <span class="muted">This single method is both the correctness keystone and the performance keystone — most high-priority findings touch it.</span></p>
+  </section>
+
+  <!-- ===================== HEADLINES ===================== -->
+  <section id="headline">
+    <div class="sec-head reveal">
+      <span class="sec-kicker">03 — Read These First</span>
+      <h2>Headline findings</h2>
+    </div>
+
+    <div class="callout crit reveal">
+      <span class="tag">● P1 · Critical <span class="resolved">Root cause confirmed</span></span>
+      <h3>Job persistence was removed for security in 2020 — and never replaced</h3>
+      <p>The storage layer is entirely commented out (<span class="codepath">JobDatabase.java:32-112</span>). Git history pins it to commit <code>242c5b1</code> (<em>"MCMEProject api and security issue"</em>, 2020-02-07), which <strong>removed the abandoned codehaus Jackson 1.x library</strong> — and since that library was the persistence engine, disabled load/save with it. No replacement was ever built, so <strong>jobs live only in memory and are lost on every restart</strong>, and have been for 3+ years.</p>
+      <p class="muted" style="margin-bottom:0">Storage did <strong>not</strong> move to MCME-Connect (verified — that's the network plugin, zero job references). <b style="color:var(--brass)">Action:</b> reimplement persistence safely (Bukkit <code>YamlConfiguration</code>, or modern <code>com.fasterxml.jackson</code> with a fixed target type) — don't uncomment the old code.</p>
+    </div>
+
+    <div class="callout reveal">
+      <span class="tag">◆ Cross-repo constraint</span>
+      <h3>MCME-Architect depends on TheGaffer's static protection API</h3>
+      <p>The builder toolset <strong>MCME-Architect</strong> calls TheGaffer <em>reflectively, by method name</em>, via its <span class="codepath">TheGafferUtil</span> bridge — <code>hasBuildPermission(Player, Location)</code> and <code>getBuildProtectionMessage(Player, Location)</code> — at ~13 sites. There is no compile-time link, and if the lookup fails Architect <strong>fails open</strong> (allows building).</p>
+      <p class="muted" style="margin-bottom:0"><b style="color:var(--brass)">Implication:</b> those two <code>static</code> methods are a load-bearing public API. Renaming or changing them during the rework <em>silently disables Architect's protection</em> rather than erroring. Keep the signatures stable, or update both repos in lockstep.</p>
+    </div>
+  </section>
+
+  <!-- ===================== FINDINGS ===================== -->
+  <section id="findings">
+    <div class="sec-head reveal">
+      <span class="sec-kicker">04 — The Audit</span>
+      <h2>Findings by severity</h2>
+    </div>
+    <div class="filter reveal" id="filter">
+      <button data-f="all" class="on">All</button>
+      <button data-f="crit">Critical</button>
+      <button data-f="high">High</button>
+      <button data-f="med">Medium</button>
+      <button data-f="low">Low</button>
+    </div>
+
+    <!-- CRITICAL -->
+    <div class="group" data-group>
+      <div class="group-label">Critical · Stability &amp; data safety</div>
+      <div class="finding" data-sev="crit">
+        <div class="fid">C1<small>Threading</small></div>
+        <div>
+          <h4>Async cleanup task calls the main-thread-only Bukkit API</h4>
+          <div class="where">TheGaffer.java:110 · CleanupUtil.java:70, 99</div>
+          <p class="impact">The cleanup runs on <code>runTaskTimerAsynchronously</code> but performs scoreboard / inventory / teleport / event work — undefined behaviour that passes testing then corrupts state under load.</p>
+          <p class="fix"><b>Fix</b> Make the cleanup task synchronous (<code>runTaskTimerAsynchronously</code> → <code>runTaskTimer</code>) — this removes async rather than adding it; nothing here is expensive or I/O-bound.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="crit">
+        <div class="fid">C2<small>Concurrency</small></div>
+        <div>
+          <h4>Shared job collections mutated from two threads</h4>
+          <div class="where">JobDatabase.java:29-30 (TreeMaps) · CleanupUtil.java:58</div>
+          <p class="impact">The async task iterates the job maps while the main thread mutates them → intermittent <code>ConcurrentModificationException</code> / corruption.</p>
+          <p class="fix"><b>Fix</b> Resolved for free by making the cleanup task synchronous (C1).</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="crit">
+        <div class="fid">C3<small>Lifecycle</small></div>
+        <div>
+          <h4>No <code>onDisable()</code> — no clean shutdown</h4>
+          <div class="where">TheGaffer.java (absent)</div>
+          <p class="impact"><code>/reload</code> stacks duplicate tasks &amp; double-registers listeners; in-memory state (abandoner timers, <code>/job prep</code> inventories) is lost.</p>
+          <p class="fix"><b>Fix</b> Add <code>onDisable()</code> — cancel tasks, persist state, restore prepped inventories.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="crit">
+        <div class="fid">C4<small>Memory</small></div>
+        <div>
+          <h4>Unbounded memory leak in the logger</h4>
+          <div class="where">Util.java:11, 32</div>
+          <p class="impact">Every log call appends to a <code>static</code> list that is never read or cleared — and <code>debug()</code> appends even when debug is off. Grows without bound.</p>
+          <p class="fix"><b>Fix</b> Delete the list (or make it a bounded ring buffer).</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="crit">
+        <div class="fid">P1<small>Persistence</small></div>
+        <div>
+          <h4>Job persistence disabled since 2020 — see headline</h4>
+          <div class="where">JobDatabase.java:32-112 · commit 242c5b1</div>
+          <p class="impact">Jackson removed for security; persistence never replaced. Jobs are lost on restart.</p>
+          <p class="fix"><b>Fix</b> Reimplement persistence safely (YAML or modern Jackson). Implementation lands in Roadmap Step 6.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIGH PERF -->
+    <div class="group" data-group>
+      <div class="group-label">High · Performance (hot paths)</div>
+      <div class="finding" data-sev="high">
+        <div class="fid">H1<small>Hot path</small></div>
+        <div>
+          <h4>Protection check allocates &amp; rescans on every block action</h4>
+          <div class="where">ProtectionUtil.java:62, 65</div>
+          <p class="impact">Builds two <code>HashMap</code>s over all jobs per edit — including an <code>areas</code> map that is <strong>never read</strong>. O(jobs × workers) + 2 allocations on the hottest method in the plugin.</p>
+          <p class="fix"><b>Fix</b> A <code>Map&lt;UUID, Job&gt;</code> player-index + per-world job lists; delete the dead <code>areas</code> map today.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">H2<small>Hot path</small></div>
+        <div>
+          <h4><code>playerMove</code> runs the expensive scan twice</h4>
+          <div class="where">PlayerListener.java:54, 63</div>
+          <p class="impact"><code>getJobWorking</code> + <code>getBuildProtection</code> per block-boundary move, per player — on the highest-frequency event in Minecraft.</p>
+          <p class="fix"><b>Fix</b> One lookup; early-return when no jobs are active; act only on real gamemode transitions.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">H3<small>Events</small></div>
+        <div>
+          <h4>Per-job listeners + dead event dispatch</h4>
+          <div class="where">Job.java:40 · JobDatabase.java:119 · JobEventListener.java:163-186</div>
+          <p class="impact">Every <code>Job</code> is its own listener (join/quit fan out to N handlers), and five custom events fire on every action with empty handlers.</p>
+          <p class="fix"><b>Fix</b> One listener over the registry; gate event dispatch on registered listeners; drop the empty handlers.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">H5<small>Identity</small></div>
+        <div>
+          <h4>Identity by player name, not UUID</h4>
+          <div class="where">Job.java:52-56, 151 · 28× getOfflinePlayer(String)</div>
+          <p class="impact">The deprecated name overload can block on a Mojang lookup; names change, silently orphaning members, bans and invites.</p>
+          <p class="fix"><b>Fix</b> Store UUIDs, resolve names for display. Own milestone + one-time converter.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIGH FEATURES -->
+    <div class="group" data-group>
+      <div class="group-label">High · Broken / surprising behaviour</div>
+      <div class="finding" data-sev="high">
+        <div class="fid">P2<small>New feature</small></div>
+        <div>
+          <h4>Project feature can NPE / ClassCastException</h4>
+          <div class="where">JobCreationConversation.java:382, 393</div>
+          <p class="impact">A field-initializer casts the <code>McMeProject</code> plugin lookup directly, then calls it — null if absent, CCE if it doesn't implement the interface.</p>
+          <p class="fix"><b>Fix</b> Null-check and resolve through a safe accessor.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">B2<small>Commands</small></div>
+        <div>
+          <h4><code>/job admin</code> path is fragile</h4>
+          <div class="where">JobAdminCommands.java:51, 76, 99</div>
+          <p class="impact">Omitting the name throws AIOOBE (<code>args[3]</code>); <code>addhelper</code> is missing from its map; a bad job name → null → NPE. Reflection dispatch throughout.</p>
+          <p class="fix"><b>Fix</b> Validate arity &amp; job before dispatch; replace reflection with explicit handlers.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">B4<small>Scope</small></div>
+        <div>
+          <h4><code>CraftingListener</code> blocks all crafting, ignoring the world exception</h4>
+          <div class="where">CraftingListener.java:25</div>
+          <p class="impact">Cancels crafting for any non-bypass player everywhere — even in <code>unprotectedworlds</code> (e.g. plotworld), inconsistent with the rest of the model. Unchecked cast too.</p>
+          <p class="fix"><b>Fix</b> Honour the same world/permission exceptions as <code>getBuildProtection</code>.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">B6<small>Logic</small></div>
+        <div>
+          <h4>Batch invite / ban / kick short-circuit on the first player</h4>
+          <div class="where">Job.java:336-355</div>
+          <p class="impact"><code>inviteworker a,b</code> skips <code>b</code> entirely if <code>a</code> is already invited.</p>
+          <p class="fix"><b>Fix</b> Accumulate per-player results instead of returning inside the loop.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">B7<small>Permissions</small></div>
+        <div>
+          <h4>Permissions are never registered</h4>
+          <div class="where">PermissionsUtil.java · plugin.yml (no permissions block)</div>
+          <p class="impact"><code>thegaffer.join</code>'s intended <code>default: true</code> has no effect unless a perms plugin grants it.</p>
+          <p class="fix"><b>Fix</b> Declare the permissions in <code>plugin.yml</code>.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="high">
+        <div class="fid">B1·B3<small>TeamSpeak</small></div>
+        <div>
+          <h4>TeamSpeak bugs <span class="pill" style="color:var(--muted)">moot after TS removal</span></h4>
+          <div class="where">JobCreationConversation.java:436 · JobAdminConversation.java:449-454</div>
+          <p class="impact">TS channel discarded (<code>setTs</code>/<code>setTS</code> key mismatch); <code>setTeamSpeakchannel</code> prompt is a no-op. TeamSpeak is retired at MCME.</p>
+          <p class="fix"><b>Fix</b> Delete the dead TeamSpeak code (Roadmap Step 2) rather than repairing.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDIUM -->
+    <div class="group" data-group>
+      <div class="group-label">Medium · UX &amp; latent bugs</div>
+      <div class="finding" data-sev="med">
+        <div class="fid">M1<small>Data loss</small></div>
+        <div>
+          <h4><code>removeWorker</code> wipes the player's entire inventory</h4>
+          <div class="where">Job.java:324 · (and abandoner auto-cleanup) · leaveJob does not</div>
+          <p class="impact">Real item loss; behaviour is inconsistent between leave / kick / ban / abandon.</p>
+          <p class="fix"><b>Fix</b> Only clear job-kit items, and make the behaviour consistent &amp; opt-in.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="med">
+        <div class="fid">M2<small>Input</small></div>
+        <div>
+          <h4><code>/job archive &lt;non-number&gt;</code> throws</h4>
+          <div class="where">JobCommand.java:305</div>
+          <p class="impact"><code>Integer.valueOf</code> on raw input → <code>NumberFormatException</code> + console error.</p>
+          <p class="fix"><b>Fix</b> Parse with a fallback to page 1.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="med">
+        <div class="fid">M3<small>Noise</small></div>
+        <div>
+          <h4>Console spam &amp; loud audio; debug on by default</h4>
+          <div class="where">Job.java:543-571 · JobEventListener.java:99 · config.yml:3, 12, 43</div>
+          <p class="impact">Un-gated <code>Logger.getGlobal</code> on every team change; server-wide wither-death sound on job start; <code>debug: true</code> default; duplicate <code>TS</code> key.</p>
+          <p class="fix"><b>Fix</b> Remove stray logging; gate/soften the sound; default debug off; de-dupe config.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="med">
+        <div class="fid">M4<small>Correctness</small></div>
+        <div>
+          <h4>Owner-timeout drops the old owner; timezone &amp; message bugs</h4>
+          <div class="where">CleanupUtil.java:99 · JobEventListener.java:131 · GafferResponses.java:57</div>
+          <p class="impact"><code>selectNewOwner</code> never re-adds the offline owner as helper; <code>getLondonTime()</code> mislabels UTC as London (wrong in BST); a message reads literally <code>%name</code> (missing <code>%</code>).</p>
+          <p class="fix"><b>Fix</b> Demote the owner directly; use <code>ZoneId.of("Europe/London")</code>; fix the token.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="med">
+        <div class="fid">M5<small>UX</small></div>
+        <div>
+          <h4>Case-sensitive job names</h4>
+          <div class="where">JobCommand / JobDatabase</div>
+          <p class="impact">Players must match exact case for join / info / stop — the README even warns about it.</p>
+          <p class="fix"><b>Fix</b> Case-insensitive keys (<code>TreeMap</code> with <code>CASE_INSENSITIVE_ORDER</code>).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW -->
+    <div class="group" data-group>
+      <div class="group-label">Low · Cleanup &amp; modernization</div>
+      <div class="finding" data-sev="low">
+        <div class="fid">L1<small>Dead code</small></div>
+        <div>
+          <h4>Dead code &amp; vestigial config</h4>
+          <div class="where">Start() · unused Methods maps · empty handlers · servlet config · dead getFile()/dirty</div>
+          <p class="impact">Unused methods, duplicated registries, and config that nothing reads.</p>
+          <p class="fix"><b>Fix</b> Remove; much of it disappears with the TeamSpeak cull.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="low">
+        <div class="fid">L2<small>Versioning</small></div>
+        <div>
+          <h4>Cross-version fragility in item (de)serialization</h4>
+          <div class="where">JobItem.java:76, 112</div>
+          <p class="impact"><code>Material.valueOf</code> aborts a whole kit/job load on a renamed material; <code>Enchantment.getByName</code> can return null → NPE.</p>
+          <p class="fix"><b>Fix</b> Tolerant lookups with logged skips on unknown keys.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="low">
+        <div class="fid">L3<small>Minor bug</small></div>
+        <div>
+          <h4>Book author set to its title; kit edge cases</h4>
+          <div class="where">JobItem.java:91 · JobKit.replaceInventory</div>
+          <p class="impact">Saved books get the wrong author; kit restore can NPE / silently drop overflow items.</p>
+          <p class="fix"><b>Fix</b> Use the real author; null-guard and handle full inventories.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="low">
+        <div class="fid">L4<small>Style</small></div>
+        <div>
+          <h4>Naming conventions</h4>
+          <div class="where">Private · For / Min / Max · fileSeperator (typo)</div>
+          <p class="impact">Capitalised locals/fields and a misspelled identifier hurt readability.</p>
+          <p class="fix"><b>Fix</b> Rename to Java conventions during the touch-ups.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="low">
+        <div class="fid">L5<small>Build</small></div>
+        <div>
+          <h4>Non-reproducible build &amp; no tests</h4>
+          <div class="where">pom.xml:71 (hardcoded VentureChat systemPath) · no src/test</div>
+          <p class="impact">Build depends on an absolute path on one machine; zero automated tests.</p>
+          <p class="fix"><b>Fix</b> Install the jar to the local repo / use a real dependency; add a test scaffold + CI.</p>
+        </div>
+      </div>
+      <div class="finding" data-sev="low">
+        <div class="fid">L6<small>Modular</small></div>
+        <div>
+          <h4>Static-singleton state throughout</h4>
+          <div class="where">TheGaffer.java · JobDatabase.java</div>
+          <p class="impact">Global mutable statics make testing hard and reloads fragile (compounds C2/C3).</p>
+          <p class="fix"><b>Fix</b> Optional longer-term: pass a plugin/service instance instead of statics.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FIXED ===================== -->
+  <section id="fixed">
+    <div class="sec-head reveal">
+      <span class="sec-kicker">05 — Credit Where Due</span>
+      <h2>Already fixed since 2019</h2>
+    </div>
+    <p class="reveal muted">The 36 commits between the old fork and v2.8 did land some real fixes — worth noting so the rework doesn't re-litigate them:</p>
+    <div class="fixed reveal">
+      <div class="f"><b>Scoreboard overflow</b> — team names truncated to 14 chars (Job.java:109-113)</div>
+      <div class="f"><b>Threading (partial)</b> — <code>JobEndEvent</code> now dispatched on the main thread (JobDatabase.java:137)</div>
+      <div class="f"><b>Material rename</b> — <code>DANDELION_YELLOW</code> → <code>DANDELION</code></div>
+      <div class="f"><b>QoL</b> — <code>/job leave</code> added; <code>/job join</code> auto-joins a sole job</div>
+    </div>
+    <p class="reveal muted" style="margin-top:20px">Also preserved &amp; good: the <code>GafferResponse</code> enum pattern, the external-handler extensibility, and the Conversation-API job creation flow.</p>
+  </section>
+
+  <!-- ===================== ROADMAP ===================== -->
+  <section id="roadmap">
+    <div class="sec-head reveal">
+      <span class="sec-kicker">06 — The Plan</span>
+      <h2>Recommended order of attack</h2>
+    </div>
+    <p class="reveal muted">Dependency-ordered, not severity-ordered: each step unblocks or shrinks the next. Effort: S = hours · M = ~a day · L = multi-day.</p>
+    <div class="reveal" style="overflow-x:auto">
+    <table class="road">
+      <thead><tr><th>#</th><th>Work</th><th>Addresses</th><th>Effort</th><th>Risk</th></tr></thead>
+      <tbody>
+        <tr><td><span class="step">0</span></td><td>Persistence root cause <strong>resolved</strong> — decide replacement approach</td><td class="ids">P1</td><td><span class="tag-pill e-s">—</span></td><td class="r-low">Low</td></tr>
+        <tr><td><span class="step">1</span></td><td>Make the cleanup task synchronous</td><td class="ids">C1, C2</td><td><span class="tag-pill e-s">S</span></td><td class="r-low">Low</td></tr>
+        <tr><td><span class="step">2</span></td><td>Remove dead TeamSpeak code + orphaned <code>/job admit</code></td><td class="ids">B1, B3, L1</td><td><span class="tag-pill e-m">M</span></td><td class="r-low">Low</td></tr>
+        <tr><td><span class="step">3</span></td><td>Safety batch: delete log leak, drop <code>areas</code> alloc, debug off, kill stray logging</td><td class="ids">C4, H1*, M3</td><td><span class="tag-pill e-s">S</span></td><td class="r-low">Low</td></tr>
+        <tr><td><span class="step">4</span></td><td>Fix broken features: admin path, project NPE, permissions, archive parse</td><td class="ids">B2, B7, P2, M2</td><td><span class="tag-pill e-m">M</span></td><td class="r-low">Low</td></tr>
+        <tr><td><span class="step">5</span></td><td>Performance: player→job index, gate custom events</td><td class="ids">H1, H2, H3</td><td><span class="tag-pill e-m">M</span></td><td class="r-med">Medium</td></tr>
+        <tr><td><span class="step">6</span></td><td>Reimplement persistence safely + <code>onDisable()</code></td><td class="ids">P1, C3</td><td><span class="tag-pill e-l">L</span></td><td class="r-med">Medium</td></tr>
+        <tr><td><span class="step">7</span></td><td>Identity migration: name → UUID (own branch + file converter)</td><td class="ids">H5</td><td><span class="tag-pill e-l">L</span></td><td class="r-high">Med–High</td></tr>
+        <tr><td><span class="step">8</span></td><td>Modernization + tests/CI</td><td class="ids">L2–L6</td><td><span class="tag-pill e-l">L</span></td><td class="r-low">Low</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout reveal" style="margin-top:28px">
+      <span class="tag">⚠ Refactor guardrail</span>
+      <h3>Don't break the Architect contract</h3>
+      <p style="margin-bottom:0">Steps 6–7 touch the most code. Throughout, preserve the static signatures <code>TheGaffer.hasBuildPermission(Player, Location)</code> and <code>getBuildProtectionMessage(Player, Location)</code> — MCME-Architect calls them reflectively and <strong>fails open</strong> if they change. Either keep them stable, or land a matching update to <code>MCME-Architect/util/TheGafferUtil.java</code> in the same release.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span class="big">Prepared as a static code review of MCME/TheGaffer @ 87fd116 (v2.8).</span>
+    Method — full read of all 38 source files + config; cross-referenced against MCME-Architect, MCME-Connect, and the mcme-structure docs hub.<br>
+    Line references are point-in-time; re-confirm if <span class="mono">master</span> has advanced. Findings IDs (C/H/P/B/M/L) are stable handles for tracking in issues or PRs.<br>
+    Companion detail: <span class="mono">AUDIT.md</span> in the repository root.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  // sticky nav reveal
+  var bar=document.getElementById('navbar'), hero=document.querySelector('.hero');
+  var onScroll=function(){ if(window.scrollY > hero.offsetHeight-40) bar.classList.add('show'); else bar.classList.remove('show'); };
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  // scroll reveal
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in'); io.unobserve(e.target);}})},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(function(el){io.observe(el)});
+  } else { document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')}); }
+
+  // severity filter
+  var btns=document.querySelectorAll('#filter button');
+  btns.forEach(function(b){ b.addEventListener('click',function(){
+    var f=b.getAttribute('data-f');
+    btns.forEach(function(x){x.classList.toggle('on',x===b)});
+    document.querySelectorAll('.finding').forEach(function(card){
+      card.style.display=(f==='all'||card.getAttribute('data-sev')===f)?'':'none';
+    });
+    // hide groups with no visible cards
+    document.querySelectorAll('[data-group]').forEach(function(g){
+      var any=Array.prototype.some.call(g.querySelectorAll('.finding'),function(c){return c.style.display!=='none'});
+      g.style.display=any?'':'none';
+    });
+  });});
+
+  // active section in nav
+  var links=document.querySelectorAll('.bar-links a'), secs=[].map.call(links,function(a){return document.querySelector(a.getAttribute('href'))});
+  if('IntersectionObserver' in window){
+    var so=new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting){
+      links.forEach(function(l){l.classList.toggle('active', l.getAttribute('href')==='#'+e.target.id)});
+    }})},{rootMargin:'-45% 0px -50% 0px'});
+    secs.forEach(function(s){if(s)so.observe(s)});
+  }
+})();
+</script>
+</body>
+</html>
