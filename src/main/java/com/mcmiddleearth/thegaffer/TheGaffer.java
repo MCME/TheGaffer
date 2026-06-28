@@ -99,6 +99,10 @@ public class TheGaffer extends JavaPlugin {
 
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
+        // Runs SYNC (main thread): the cleanup reassigns job owners and removes
+        // abandoned workers, which call the Bukkit API (scoreboards/teams, player
+        // inventories, teleports) and must not run off-thread. Do NOT switch this
+        // back to runTaskTimerAsynchronously.
         new BukkitRunnable() {
 
             @Override
@@ -107,7 +111,7 @@ public class TheGaffer extends JavaPlugin {
                 CleanupUtil.scheduledCleanup();
                 CleanupUtil.scheduledAbandonersCleanup();
             }
-        }.runTaskTimerAsynchronously(this, 0, (5 * 60) * 20);
+        }.runTaskTimer(this, 0, (5 * 60) * 20);
     }
 
     public static void setupConfig() {
