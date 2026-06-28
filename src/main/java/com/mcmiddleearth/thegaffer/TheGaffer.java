@@ -18,9 +18,11 @@ package com.mcmiddleearth.thegaffer;
 
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
+import com.mcmiddleearth.thegaffer.commands.JobChatCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
 import com.mcmiddleearth.thegaffer.listeners.CraftingListener;
+import com.mcmiddleearth.thegaffer.listeners.JobChatListener;
 import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
@@ -92,10 +94,12 @@ public class TheGaffer extends JavaPlugin {
         getCommand("createjob").setExecutor(new JobCreationConversation());
         getCommand("job").setExecutor(new JobCommand());
         getCommand("jobadmin").setExecutor(new JobAdminConversation());
+        getCommand("jobchat").setExecutor(new JobChatCommand());
         serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
         serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
         serverInstance.getPluginManager().registerEvents(new CraftingListener(), this);
+        serverInstance.getPluginManager().registerEvents(new JobChatListener(), this);
 
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 

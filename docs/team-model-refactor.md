@@ -26,10 +26,10 @@ Vanilla `/teammsg` is per-message and reads teams from the **main** scoreboard. 
 
 ### b) Native job chat — `/jobchat` (`/jc`) toggle
 - A per-player toggle command `/jobchat` (alias `/jc`); `/jc <message>` also sends a one-off.
-- Listen to Paper's **`io.papermc.paper.event.player.AsyncChatEvent`**: if the sender has job chat enabled and is in a job, restrict `event.viewers()` to that job's online members and render with a `[Job]` prefix (Adventure `Component`). Toggle off → normal chat.
+- Listen to Paper's **`io.papermc.paper.event.player.AsyncChatEvent`**: if the sender has sticky job chat on, **cancel the event** and re-dispatch on the main thread, delivering the message (with a `[Job]` prefix) to the job's online members. Toggle off → normal chat.
 - Recipients come from TheGaffer's own membership (`getAllAsPlayersArray()`) — **no scoreboard and no VentureChat needed.**
 
-> **Concurrency note (main implementation risk).** `AsyncChatEvent` fires **off the main thread**. Resolving the sender's job and members must be thread-safe — do **not** read the raw `ArrayList` membership from the async handler while the main thread mutates it (that's the same class of bug as C1/C2). Use a thread-safe **`player → job` index** (`ConcurrentHashMap<UUID, Job>` — the same index proposed for the H1/H2 hot-path fix), keep the toggle in a concurrent set, and iterate a snapshot of members. The chat handler then becomes safe *and* lays the groundwork for the perf fix.
+> **Concurrency note.** `AsyncChatEvent` fires **off the main thread**, so the handler does *no* off-thread reads of job state: it checks only a concurrent toggle, then **cancels** the event and hops to the main thread (`Bukkit.getScheduler().runTask`) to resolve membership via the existing `JobDatabase.getJobWorking()` / `getAllAsPlayersArray()` and send. Safe by construction, no parallel index. (The `player → job` index for the H1/H2 hot-path fix is therefore **decoupled** — it comes with the perf step, not chat.) Cancelling also keeps job chat private — it does not reach the main chat or the Discord bridge, which is the intended channel behaviour.
 
 ### c) Glow — unchanged
 Keep the helper/worker teams on the per-job custom scoreboard exactly as today (decision #1). No change required for this rework.
@@ -38,7 +38,7 @@ Keep the helper/worker teams on the per-job custom scoreboard exactly as today (
 Delete `VentureChatUtil` and its ~11 call sites, the VentureChat dependency, and the hardcoded `systemPath`. Remove the dead `jobChat()` (or fold it into the new handler).
 
 ## Caveats & risks
-- **Async chat thread-safety** — see the concurrency note; this is the main risk and the reason to build the `player → job` index alongside.
+- **Async chat thread-safety** — handled by cancelling the async event and doing all job reads/sends on the main thread (see the concurrency note); no parallel index needed.
 - **No migration needed** — there's no persistence today, so one-job-per-player is simply enforced going forward.
 - **Chat formatting** — match MCME's existing chat style (prefix/colour) so job chat reads consistently with the server.
 
@@ -48,7 +48,7 @@ Delete `VentureChatUtil` and its ~11 call sites, the VentureChat dependency, and
 
 ## Implementation order
 1. **Enforce one job per player** (join / invite / create guards).
-2. **Add the `/jobchat` handler** over the membership lists, with the thread-safe `player → job` index.
+2. **Add the `/jobchat` handler** — cancel the async chat event and re-dispatch to job members on the main thread (`utilities/JobChat`, `listeners/JobChatListener`, `commands/JobChatCommand`).
 3. **Remove VentureChat** (util, call sites, dependency, `systemPath`).
 
 ## Future (parked) — main scoreboard + locator bar, together

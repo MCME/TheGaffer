@@ -28,3 +28,8 @@ commands:
     description: Launches the jobadmin conversation can also be done with /job admin
     usage: |
            /jobadmin
+  jobchat:
+    description: Toggle job chat, or send a one-off message with /jc <message>
+    usage: |
+           /jobchat [message]
+    aliases: [jc]
