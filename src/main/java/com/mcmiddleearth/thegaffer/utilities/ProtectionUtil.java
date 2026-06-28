@@ -19,7 +19,6 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
-import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -59,10 +58,8 @@ public class ProtectionUtil {
                 return BuildProtection.NO_JOB;
             } else {
                 HashMap<Job, World> workingworlds = new HashMap<>();
-                HashMap<Job, Rectangle2D> areas = new HashMap<>();
                 for (Job job : JobDatabase.getActiveJobs().values()) {
                     workingworlds.put(job, job.getBukkitWorld());
-                    areas.put(job, job.getBounds());
                 }
                 if (!workingworlds.containsValue(world)) {
                     return BuildProtection.WORLD_DENIED;

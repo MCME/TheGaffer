@@ -1,6 +1,6 @@
 # General options
 general:
-    debug: true
+    debug: false
 # Servlet configuration
 servlet:
     enabled: false
