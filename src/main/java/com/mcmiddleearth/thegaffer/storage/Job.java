@@ -19,7 +19,6 @@ import com.mcmiddleearth.thegaffer.GafferResponses.*;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
-import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -91,7 +90,6 @@ public class Job implements Listener {
         this.tsWarp = tswarp;
         this.projectname = project;
         admitedWorkers.add(this.owner);
-        VentureChatUtil.joinJobChannel(owner);
         if (jr > 1000) {
             jr = 1000;
         }
@@ -269,7 +267,6 @@ public class Job implements Listener {
         }
         helpers.add(p.getName());
         addHelperTeam(p.getName());
-        VentureChatUtil.joinJobChannel(p.getUniqueId());
         setDirty(true);
         // JobDatabase.saveJobs();
         sendToHelpers(ChatColor.AQUA + p.getName() + " has been added as a helper to the job.");
@@ -282,7 +279,6 @@ public class Job implements Listener {
         }
         helpers.remove(p.getName());
         removeHelperTeam(p.getName());
-        VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
         // JobDatabase.saveJobs();
         Util.debug(p.getName() + " was helper kicked from " + name + " with reason: " + reason);
@@ -311,7 +307,6 @@ public class Job implements Listener {
         }
         workers.add(p.getName());
         addWorkerTeam(p.getName());
-        VentureChatUtil.joinJobChannel(p.getUniqueId());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
             if (kit != null) {
@@ -333,7 +328,6 @@ public class Job implements Listener {
         }
         workers.remove(p.getName());
         removeWorkerTeam(p.getName());
-        VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
         // JobDatabase.saveJobs();
         sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
@@ -370,7 +364,6 @@ public class Job implements Listener {
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
                 workerTeam.removeEntry(p.getName());
-                VentureChatUtil.leaveJobChannel(p);
             }
             invitedWorkers.remove(p.getName());
         }
@@ -384,7 +377,6 @@ public class Job implements Listener {
             if (workers.contains(p.getName())) {
                 workers.remove(p.getName());
                 removeWorkerTeam(p.getName());
-                VentureChatUtil.leaveJobChannel(p);
             }
             if (bannedWorkers.contains(p.getName())) {
                 return BanWorkerResponse.ALREADY_BANNED;
@@ -415,7 +407,6 @@ public class Job implements Listener {
             }
             workers.remove(p.getName());
             removeWorkerTeam(p.getName());
-            VentureChatUtil.leaveJobChannel(p);
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         }
         setDirty(true);
@@ -429,7 +420,6 @@ public class Job implements Listener {
         }
         workers.remove(p.getName());
         removeWorkerTeam(p.getName());
-        VentureChatUtil.leaveJobChannel(p);
         setDirty(true);
         sendToAll(ChatColor.AQUA + p.getName() + " has left the job.");
         Util.debug(p.getName() + " was worker removed from " + name + " with reason: Left by themself");

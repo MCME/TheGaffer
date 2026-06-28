@@ -5,7 +5,7 @@ api-version: 1.19
 website: ${project.url}
 authors: [meggawatts, DonoA, Eriol_Eandur, Planetology, Fraspace5, Jubo]
 description: Job API for MCME.
-softdepend: [DiscordSRV, VentureChat]
+softdepend: [DiscordSRV, MCME-Connect]
 author: meggawatts
 commands:
   createjob:
