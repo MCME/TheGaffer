@@ -34,7 +34,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.List;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class Job implements Listener {
 
@@ -538,7 +537,6 @@ public class Job implements Listener {
 
     private void addHelperTeam(String playerName) {
         if (glowing) {
-            Logger.getGlobal().info("add helper: " + playerName);
             helperTeam.addEntry(playerName);
             setGlow(playerName, true);
         }
@@ -546,7 +544,6 @@ public class Job implements Listener {
 
     private void addWorkerTeam(String playerName) {
         if (glowing) {
-            Logger.getGlobal().info("add worker: " + playerName);
             workerTeam.addEntry(playerName);
             setGlow(playerName, true);
         }
@@ -554,7 +551,6 @@ public class Job implements Listener {
 
     private void removeHelperTeam(String playerName) {
         if (glowing) {
-            Logger.getGlobal().info("remove helper: " + playerName);
             helperTeam.removeEntry(playerName);
             setGlow(playerName, false);
         }
@@ -562,7 +558,6 @@ public class Job implements Listener {
 
     private void removeWorkerTeam(String playerName) {
         if (glowing) {
-            Logger.getGlobal().info("remove Worker: " + playerName);
             workerTeam.removeEntry(playerName);
             setGlow(playerName, false);
         }
