@@ -64,6 +64,14 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
+            if (sender instanceof Player) {
+                Job current = JobDatabase.getJobWorking((Player) sender);
+                if (current != null) {
+                    sender.sendMessage(ChatColor.RED + "You are already in the job " + ChatColor.AQUA + current.getName()
+                            + ChatColor.RED + " - leave or stop it before creating a new one.");
+                    return true;
+                }
+            }
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;
         } else {
