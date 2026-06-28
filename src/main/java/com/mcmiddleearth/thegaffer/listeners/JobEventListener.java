@@ -20,7 +20,6 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.utilities.VentureChatUtil;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
@@ -50,7 +49,6 @@ public class JobEventListener implements Listener {
         job.sendToAll(ChatColor.GRAY + "The " + job.getName() + " job has ended.");
         for (Player p : job.getAllAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1f);
-            VentureChatUtil.leaveJobChannel(p);
         }
         if(job.isDiscordSend()) {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());

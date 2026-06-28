@@ -64,18 +64,6 @@
             <scope>provided</scope>
         </dependency>-->
         <dependency>
-            <groupId>com.venturechat</groupId>
-            <artifactId>venturechat</artifactId>
-            <version>3.5.0</version>
-            <scope>system</scope>
-            <systemPath>D:/MCME/dev/jars/VentureChat.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>MCME-Connect</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-        <dependency>
             <groupId>com.discordsrv</groupId>
             <artifactId>discordsrv</artifactId>
             <version>1.26.0</version>
