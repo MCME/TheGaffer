@@ -1,73 +1,60 @@
-# Design note — Job team model: vanilla team chat + glow consolidation
+# Design note — Native job chat + glow (decisions resolved)
 
-**Status:** Proposal for review · Branch `2026-rework` · 2026-06
-**Relates to:** AUDIT.md findings around the VentureChat dependency (build wart L5) and the glow feature.
+**Status:** Decisions resolved — ready to implement · Branch `2026-rework` · 2026-06
+**Relates to:** AUDIT.md — VentureChat dependency / non-reproducible build (L5), hot-path perf (H1/H2), threading (C1/C2).
 
 ## Goal
 
-Make a job's **scoreboard Team** the single source of truth for "who is in this job," and let vanilla Minecraft render the rest:
+Replace the VentureChat per-job chat channel with **native job chat owned by TheGaffer**, remove the VentureChat dependency (and its hardcoded `D:/MCME/dev/jars/VentureChat.jar` path), keep the existing glow as-is, and **park the locator bar** as a future, version-gated enhancement.
 
-- **Team chat** via the built-in `/teammsg` (`/tm`) command → **replaces the VentureChat per-job channel** and removes that dependency (and its hardcoded `D:/MCME/dev/jars/VentureChat.jar` build path).
-- **Glow** keeps working off the same team (it already uses team colour).
-- **Locator bar** colour-coding comes along for free later, once on a supporting version (see *Future*, parked).
+## Decisions (resolved)
 
-One team membership → up to three native features, zero third-party plugins.
+1. **Helper/worker split: kept.** It's a real role distinction — *helpers* are staff co-managers (need the create permission; can edit the job and add helpers), *workers* are builders (join permission). The glow shows them in different colours so managers are identifiable at a glance. Retained for glow; it does **not** affect chat under the approach below.
+2. **One job per player: enforced.** A player may belong to at most one active job in any role (owner/helper/worker). Guarded in the join, invite, and create paths.
+3. **No main-scoreboard dependency (for now).** Concurrency was never at risk — a scoreboard holds *many* teams, so unlimited concurrent jobs are fine regardless. The main scoreboard mattered only for vanilla `/teammsg`, which the sticky-chat requirement makes unnecessary (see #4). Glow stays on its current per-job scoreboards.
+4. **Sticky team chat: yes.** Players can toggle into job chat so all their messages route to the job without typing a command each time.
 
-## Current implementation (what exists today)
+## Why native chat instead of vanilla `/teammsg`
 
-- **Glow** (`Job.setGlowing()` / `addHelperTeam` / `addWorkerTeam` / `setGlow`): creates a **per-job custom scoreboard** (`Bukkit.getScoreboardManager().getNewScoreboard()`), registers **two teams per job** — `<job>H` (helpers) and `<job>W` (workers) — sets their colours, adds members, and assigns that custom scoreboard to each member via `player.setScoreboard(...)`.
-- **VentureChat** (`VentureChatUtil`): the *only* use is `addListening` / `removeListening` to subscribe/unsubscribe job members to a chat channel (named after the Discord channel). ~11 call sites in `Job`/`JobEventListener`. There is **no chat listener** in TheGaffer, and `Job.jobChat(...)` is **dead code** (never called).
+Vanilla `/teammsg` is per-message and reads teams from the **main** scoreboard. Making chat *sticky* requires intercepting chat anyway (a chat handler) — which removes the only benefit of the vanilla command and avoids entangling chat with the scoreboard. So chat is implemented directly over TheGaffer's existing membership data. This keeps **chat** (who receives a message) and **glow / locator** (how a player is rendered) as the two separate concerns they actually are.
 
-## Proposed model
+## Approach
 
-1. **One team per job**, on the **main scoreboard** (`getMainScoreboard()`), not a per-job custom board.
-2. All members (owner + helpers + workers) join that one team.
-3. Team colour = the job's colour (config). Glow uses it as today.
-4. **Chat:** members use vanilla `/teammsg` / `/tm`. No listener needed for basic per-message team chat.
-5. **Remove** `VentureChatUtil`, its ~11 call sites, the VentureChat dependency, and the hardcoded systemPath. Remove or repurpose the dead `jobChat()`.
+### a) Enforce one job per player — *do first*
+- In `addWorker` / the `/job join` path, the invite & admin paths, and `createjob`: reject if the player is already in an active job (owner/helper/worker), with a clear message.
+- Simplifies `getJobWorking` (unambiguous) and satisfies the future one-team-per-player rule.
 
-## Why main scoreboard (the crux)
+### b) Native job chat — `/jobchat` (`/jc`) toggle
+- A per-player toggle command `/jobchat` (alias `/jc`); `/jc <message>` also sends a one-off.
+- Listen to Paper's **`io.papermc.paper.event.player.AsyncChatEvent`**: if the sender has job chat enabled and is in a job, restrict `event.viewers()` to that job's online members and render with a `[Job]` prefix (Adventure `Component`). Toggle off → normal chat.
+- Recipients come from TheGaffer's own membership (`getAllAsPlayersArray()`) — **no scoreboard and no VentureChat needed.**
 
-Vanilla `/teammsg` resolves teams from the **main** scoreboard. The current glow uses **per-player custom** scoreboards, which the vanilla command does not consult. So team chat only works if the job teams live on the main scoreboard. **This must be confirmed by testing on the target server version before committing to the approach.**
+> **Concurrency note (main implementation risk).** `AsyncChatEvent` fires **off the main thread**. Resolving the sender's job and members must be thread-safe — do **not** read the raw `ArrayList` membership from the async handler while the main thread mutates it (that's the same class of bug as C1/C2). Use a thread-safe **`player → job` index** (`ConcurrentHashMap<UUID, Job>` — the same index proposed for the H1/H2 hot-path fix), keep the toggle in a concurrent set, and iterate a snapshot of members. The chat handler then becomes safe *and* lays the groundwork for the perf fix.
 
-Moving to the main scoreboard also changes glow visibility: today only job members (who hold the custom board) see the glow colour; on the main board it's server-wide. That is likely acceptable (or desirable) but is a behaviour change to confirm.
+### c) Glow — unchanged
+Keep the helper/worker teams on the per-job custom scoreboard exactly as today (decision #1). No change required for this rework.
 
-## Open decisions (need head-dev input)
-
-1. **One team per job vs keep the helper/worker split.**
-   - *One team* → unified team chat, one locator colour, simpler. Helper/worker distinction would move to another signal (e.g. a name prefix or a separate indicator).
-   - *Two teams* (status quo) → keeps the visual helper/worker colour split, but means **two** `/teammsg` channels and two locator colours per job.
-   - **Recommendation:** one team per job.
-2. **One job per player.** Vanilla allows a player on **only one team at a time**. The current code does not stop a player being a worker in two active jobs simultaneously, and the glow already shares this latent assumption. The team model makes it a hard constraint: either **enforce one job per player** (add a guard in `addWorker`), or accept that the team reflects only their latest/primary job. **Recommendation:** enforce one active job per player.
-3. **Chat UX.** `/teammsg <msg>` is per-message. VentureChat let players *set* an active channel so all chat routed there. If "set job chat as my default" is wanted, add a small `/jobchat` toggle backed by `AsyncChatEvent` that reroutes the player's chat to the team — still using the team as the delivery target.
-4. **Team options.** Decide defaults for `Team.Option` (nametag visibility, collision, friendly fire) now that teams are server-visible.
+### d) Remove VentureChat
+Delete `VentureChatUtil` and its ~11 call sites, the VentureChat dependency, and the hardcoded `systemPath`. Remove the dead `jobChat()` (or fold it into the new handler).
 
 ## Caveats & risks
-
-- Main-scoreboard teams are **server-wide**: team names must be unique (the existing 16-char limit handling helps) and must be cleaned up on job end (already done in `setRunning(false)` — extend to the single-team model). Watch for conflicts with any other plugin that manages main-scoreboard teams or nametag colours for the same players.
-- No persistence today (audit P1) → teams are rebuilt on job activation; no migration of saved state needed yet.
-- `/teammsg` requires the player to actually be on the team (handled by membership sync).
+- **Async chat thread-safety** — see the concurrency note; this is the main risk and the reason to build the `player → job` index alongside.
+- **No migration needed** — there's no persistence today, so one-job-per-player is simply enforced going forward.
+- **Chat formatting** — match MCME's existing chat style (prefix/colour) so job chat reads consistently with the server.
 
 ## What this removes
+- The **VentureChat dependency** + hardcoded `systemPath` (closes part of audit L5 — non-reproducible build).
+- `VentureChatUtil` + its call sites, and the dead `jobChat()`.
 
-- The **VentureChat dependency** and its hardcoded `systemPath` (closes part of audit L5 — non-reproducible build).
-- `VentureChatUtil` + its call sites.
-- The dead `jobChat()` (or repurpose it for the optional `/jobchat` toggle).
+## Implementation order
+1. **Enforce one job per player** (join / invite / create guards).
+2. **Add the `/jobchat` handler** over the membership lists, with the thread-safe `player → job` index.
+3. **Remove VentureChat** (util, call sites, dependency, `systemPath`).
 
-## Effort & sequencing
-
-Moderate — refactor `setGlowing`/`add*Team`/`remove*Team`/`setGlow` to use the main scoreboard with one team per job; delete VentureChat usage + dep; optional `/jobchat` toggle. Fits after the safety/cleanup steps and pairs naturally with the "remove dead integrations" pass.
-
-## Future (parked) — Locator bar
-
-Not part of this rework; revisit after the version bump.
-
-- The locator bar is **Java 1.21.6+**. TheGaffer currently targets **1.19**, so this needs the modernisation/version-bump step first (and the server on 1.21.6+).
-- Mechanic check: teams **colour-code** players on the locator bar; they do **not** gate visibility — by default everyone sees everyone. "Team-only visibility" is not a vanilla feature (open feature request). So the payoff is: once on a coloured job team and on a supporting version, **job members are colour-coded on everyone's locator bar automatically — no extra code**, just the version.
-- Action when revisited: confirm the running server version, then it's essentially free given the team model above.
+## Future (parked) — main scoreboard + locator bar, together
+- The locator bar (Java **1.21.6+**) colour-codes players by **team** on everyone's bar; it does **not** gate visibility (everyone sees everyone by default). To get job members colour-coded there, their team must live on the **main** scoreboard so all viewers resolve the colour.
+- So "move glow teams to the main scoreboard" and "locator-bar colours" are one bundled, **version-gated** step — revisit after the modernisation / version bump (TheGaffer currently targets 1.19). Not part of this rework.
 
 ## References
-
 - [Locator Bar – Minecraft Wiki](https://minecraft.wiki/w/Locator_Bar)
-- [Java Edition 1.21.6 – Minecraft Wiki](https://minecraft.wiki/w/Java_Edition_1.21.6)
-- Bukkit `Scoreboard` / `Team` API; vanilla `/teammsg` (`/tm`)
+- Paper `AsyncChatEvent`; Adventure `Component`; Bukkit `Scoreboard` / `Team`
