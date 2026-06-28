@@ -20,6 +20,7 @@ public class GafferResponses {
     public enum HelperResponse implements GafferResponse {
 
         ALREADY_HELPER("%name% is already a helper on %job%.", false),
+        ALREADY_IN_JOB("%name% is already in another job.", false),
         NO_PERMISSIONS("%name% does not have the proper permissions.", false),
         NOT_ONLINE("%name% is not online.", false),
         NOT_HELPER("%name% is not a helper on %job%.", false),
@@ -48,6 +49,7 @@ public class GafferResponses {
     public enum WorkerResponse implements GafferResponse {
 
         ALREADY_WORKER("You are already a part of %job%.", false),
+        ALREADY_IN_JOB("You are already in another job - use /job leave first.", false),
         NO_PERMISSIONS("You do not have permissions to join %job%.", false),
         NOT_INVITED("%job% is private, and you are not invited.", false),
         NOT_WORKER("%name% is not part of the job.", false),

@@ -257,6 +257,10 @@ public class Job implements Listener {
         if (helpers.contains(p.getName())) {
             return HelperResponse.ALREADY_HELPER;
         }
+        Job current = JobDatabase.getJobWorking(p);
+        if (current != null && !current.getName().equals(name)) {
+            return HelperResponse.ALREADY_IN_JOB;
+        }
         if (!p.isOnline()) {
             return HelperResponse.NOT_ONLINE;
         }
@@ -291,6 +295,10 @@ public class Job implements Listener {
         }
         if (bannedWorkers.contains(p.getName())) {
             return WorkerResponse.WORKER_BANNED;
+        }
+        Job current = JobDatabase.getJobWorking(p);
+        if (current != null && !current.getName().equals(name)) {
+            return WorkerResponse.ALREADY_IN_JOB;
         }
         if (!p.isOnline()) {
             return WorkerResponse.NOT_ONLINE;
