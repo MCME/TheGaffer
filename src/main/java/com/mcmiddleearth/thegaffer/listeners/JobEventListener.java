@@ -24,6 +24,8 @@ import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import github.scarsz.discordsrv.util.DiscordUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -44,7 +46,7 @@ public class JobEventListener implements Listener {
     @EventHandler
     public void onJobEnd(JobEndEvent event) {
         Job job = event.getJob();
-        job.sendToAll(ChatColor.GRAY + "The " + job.getName() + " job has ended.");
+        job.sendToAll(Component.text("The " + job.getName() + " job has ended.", NamedTextColor.GRAY));
         for (Player p : job.getAllAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1f);
         }

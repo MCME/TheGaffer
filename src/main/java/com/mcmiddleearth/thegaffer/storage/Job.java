@@ -19,6 +19,9 @@ import com.mcmiddleearth.thegaffer.GafferResponses.*;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -196,24 +199,40 @@ public class Job implements Listener {
         return players;
     }
 
-    public String getInfo() {
-        StringBuilder out = new StringBuilder();
-        String inviteOnly = (Private) ? ChatColor.RED + "Private" : ChatColor.GREEN + "Public";
-        out.append(ChatColor.AQUA).append(getName()).append(ChatColor.GRAY).append(" (").append(inviteOnly).append(ChatColor.GRAY).append(")").append("\n");
-        out.append("Started by: ").append(ChatColor.AQUA).append(getOwner()).append("\n").append(ChatColor.GRAY);
-        out.append("Started on: ").append(ChatColor.AQUA).append(new Date(startTime).toGMTString()).append("\n").append(ChatColor.GRAY);
+    public Component getInfo() {
+        Component info = Component.text(getName(), NamedTextColor.AQUA)
+                .append(Component.text(" (", NamedTextColor.GRAY))
+                .append(Private
+                        ? Component.text("Private", NamedTextColor.RED)
+                        : Component.text("Public", NamedTextColor.GREEN))
+                .append(Component.text(")", NamedTextColor.GRAY))
+                .append(Component.newline())
+                .append(Component.text("Started by: ", NamedTextColor.GRAY))
+                .append(Component.text(getOwner(), NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Started on: ", NamedTextColor.GRAY))
+                .append(Component.text(new Date(startTime).toGMTString(), NamedTextColor.AQUA))
+                .append(Component.newline());
         if (!running) {
-            out.append("Stopped on: ").append(ChatColor.AQUA).append(new Date(endTime).toGMTString()).append("\n").append(ChatColor.GRAY);
+            info = info.append(Component.text("Stopped on: ", NamedTextColor.GRAY))
+                    .append(Component.text(new Date(endTime).toGMTString(), NamedTextColor.AQUA))
+                    .append(Component.newline());
         }
-        out.append("Location: ").append(ChatColor.AQUA).append(getWorld()).append(" (x: ").append((int) getWarp().getX()).append(", y: ").append((int) getWarp().getY()).append(", z: ").append((int) getWarp().getZ()).append(")").append("\n").append(ChatColor.GRAY);
-        String status = (running) ? ChatColor.GREEN + "OPEN" : ChatColor.RED + "CLOSED";
-        out.append("Status: ").append(status);
-        return out.toString();
+        return info
+                .append(Component.text("Location: ", NamedTextColor.GRAY))
+                .append(Component.text(getWorld() + " (x: " + (int) getWarp().getX()
+                        + ", y: " + (int) getWarp().getY()
+                        + ", z: " + (int) getWarp().getZ() + ")", NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Status: ", NamedTextColor.GRAY))
+                .append(running
+                        ? Component.text("OPEN", NamedTextColor.GREEN)
+                        : Component.text("CLOSED", NamedTextColor.RED));
     }
 
     public void pauseJob(String pauser) {
         this.paused = true;
-        sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has paused the job.");
+        sendToAll(Component.text(pauser + " has paused the job.", NamedTextColor.BLUE, TextDecoration.BOLD));
         for (Player p : getAllAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_LAND, 1, 0.2f);
         }
@@ -221,7 +240,7 @@ public class Job implements Listener {
 
     public void unpauseJob(String pauser) {
         this.paused = false;
-        sendToAll(ChatColor.BLUE + "" + ChatColor.BOLD + pauser + " has unpaused the job.");
+        sendToAll(Component.text(pauser + " has unpaused the job.", NamedTextColor.BLUE, TextDecoration.BOLD));
         for (Player p : getAllAsPlayersArray()) {
             p.playSound(p.getLocation(), Sound.BLOCK_ANVIL_LAND, 1, 2f);
         }
@@ -245,7 +264,7 @@ public class Job implements Listener {
         addHelperTeam(p.getName());
         setDirty(true);
         // JobDatabase.saveJobs();
-        sendToHelpers(ChatColor.AQUA + p.getName() + " has been added as a helper to the job.");
+        sendToHelpers(Component.text(p.getName() + " has been added as a helper to the job.", NamedTextColor.AQUA));
         return HelperResponse.ADD_SUCCESS;
     }
 
@@ -291,7 +310,7 @@ public class Job implements Listener {
         }
         setDirty(true);
         //  JobDatabase.saveJobs();
-        sendToAll(ChatColor.AQUA + p.getName() + " has joined the job.");
+        sendToAll(Component.text(p.getName() + " has joined the job.", NamedTextColor.AQUA));
         return WorkerResponse.ADD_SUCCESS;
     }
 
@@ -306,7 +325,7 @@ public class Job implements Listener {
         removeWorkerTeam(p.getName());
         setDirty(true);
         // JobDatabase.saveJobs();
-        sendToAll(ChatColor.AQUA + p.getName() + " has been removed from the job.");
+        sendToAll(Component.text(p.getName() + " has been removed from the job.", NamedTextColor.AQUA));
         Util.debug(p.getName() + " was worker removed from " + name + " with reason: " + reason);
         return WorkerResponse.REMOVE_SUCCESS;
     }
@@ -397,7 +416,7 @@ public class Job implements Listener {
         workers.remove(p.getName());
         removeWorkerTeam(p.getName());
         setDirty(true);
-        sendToAll(ChatColor.AQUA + p.getName() + " has left the job.");
+        sendToAll(Component.text(p.getName() + " has left the job.", NamedTextColor.AQUA));
         Util.debug(p.getName() + " was worker removed from " + name + " with reason: Left by themself");
         return WorkerResponse.LEAVE_SUCCESS;
     }
@@ -429,7 +448,7 @@ public class Job implements Listener {
         }
     }
 
-    public int sendToHelpers(String message) {
+    public int sendToHelpers(Component message) {
         int count = 0;
         for (String hName : helpers) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(hName).isOnline()) {
@@ -444,7 +463,7 @@ public class Job implements Listener {
         return count;
     }
 
-    public int sendToWorkers(String message) {
+    public int sendToWorkers(Component message) {
         int count = 0;
         for (String wName : workers) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {
@@ -455,7 +474,7 @@ public class Job implements Listener {
         return count;
     }
 
-    public int sendToAll(String message) {
+    public int sendToAll(Component message) {
         return sendToHelpers(message) + sendToWorkers(message);
     }
 
