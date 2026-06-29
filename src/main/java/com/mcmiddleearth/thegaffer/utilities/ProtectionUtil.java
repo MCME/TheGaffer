@@ -19,7 +19,6 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
-import java.util.HashMap;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -53,45 +52,32 @@ public class ProtectionUtil {
                 ProtectionUtil.isAllowedToBuild(player, location)) {
             return BuildProtection.ALLOWED;
         } else {
-            World world = location.getWorld();
             if (JobDatabase.getActiveJobs().isEmpty()) {
                 return BuildProtection.NO_JOB;
-            } else {
-                HashMap<Job, World> workingworlds = new HashMap<>();
-                for (Job job : JobDatabase.getActiveJobs().values()) {
-                    workingworlds.put(job, job.getBukkitWorld());
+            }
+            // Single pass: find whether any job is in this world and which job (if any)
+            // the player is a worker in. One job per player is enforced, so at most one.
+            World world = location.getWorld();
+            boolean jobInWorld = false;
+            Job playerJob = null;
+            for (Job job : JobDatabase.getActiveJobs().values()) {
+                if (world.equals(job.getBukkitWorld())) {
+                    jobInWorld = true;
                 }
-                if (!workingworlds.containsValue(world)) {
-                    return BuildProtection.WORLD_DENIED;
-                } else {
-                    boolean playerisworking = false;
-                    for (Job job : workingworlds.keySet()) {
-                        if (job.isPlayerWorking(player)) {
-                            playerisworking = true;
-                        }
-                    }
-                    if (!playerisworking) {
-                        return BuildProtection.NOT_IN_JOB;
-                    } else {
-                        boolean isinjobarea = false;
-                        int x = location.getBlockX();
-                        int z = location.getBlockZ();
-                        for (Job job : JobDatabase.getActiveJobs().values()) {
-                            if (job.isPlayerWorking(player) && job.getBounds().contains(x, z)) {
-                                isinjobarea = true;
-                                if (job.isPaused()) {
-                                    return BuildProtection.JOB_PAUSED;
-                                }
-                            }
-                        }
-                        if (isinjobarea) {
-                            return BuildProtection.ALLOWED;
-                        } else {
-                            return BuildProtection.OUT_OF_BOUNDS;
-                        }
-                    }
+                if (job.isPlayerWorking(player)) {
+                    playerJob = job;
                 }
             }
+            if (!jobInWorld) {
+                return BuildProtection.WORLD_DENIED;
+            }
+            if (playerJob == null) {
+                return BuildProtection.NOT_IN_JOB;
+            }
+            if (playerJob.getBounds().contains(location.getBlockX(), location.getBlockZ())) {
+                return playerJob.isPaused() ? BuildProtection.JOB_PAUSED : BuildProtection.ALLOWED;
+            }
+            return BuildProtection.OUT_OF_BOUNDS;
         }
     }
     

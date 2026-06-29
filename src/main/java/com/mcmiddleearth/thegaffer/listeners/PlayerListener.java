@@ -22,6 +22,7 @@ import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,37 +50,40 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void playerMove(PlayerMoveEvent event) {
-        if (event.getFrom().getBlock() != event.getTo().getBlock()) {
-
-            if (JobDatabase.getJobWorking(event.getPlayer()) == null) {
-                return;
+        Location to = event.getTo();
+        if (to == null) {
+            return;
+        }
+        Location from = event.getFrom();
+        // Only act when the player actually crosses into a different block.
+        // (The old reference-equality check on getBlock() was always true, so this ran every tick.)
+        if (from.getBlockX() == to.getBlockX()
+                && from.getBlockY() == to.getBlockY()
+                && from.getBlockZ() == to.getBlockZ()) {
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+            playersSwitchedToCreative.remove(player.getUniqueId());
+            return;
+        }
+        // Single protection lookup decides the gamemode (no separate getJobWorking scan).
+        if (ProtectionUtil.getBuildProtection(player, to).equals(BuildProtection.ALLOWED)) {
+            if (player.getGameMode() == GameMode.SURVIVAL) {
+                if (!playersSwitchedToCreative.contains(player.getUniqueId())) {
+                    playersSwitchedToCreative.add(player.getUniqueId());
+                }
+                player.setGameMode(GameMode.CREATIVE);
             }
-
-            Player player = event.getPlayer();
-            if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+        } else {
+            if (playersSwitchedToCreative.contains(player.getUniqueId())) {
+                boolean flying = player.isFlying();
+                player.setGameMode(GameMode.SURVIVAL);
+                if (TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight", true)) {
+                    player.setAllowFlight(true);
+                    player.setFlying(flying);
+                }
                 playersSwitchedToCreative.remove(player.getUniqueId());
-                return;
-            }
-            if (ProtectionUtil.getBuildProtection(player, player.getLocation()).equals(BuildProtection.ALLOWED)) {
-                if (player.getGameMode() == GameMode.SURVIVAL) {
-                    if (!playersSwitchedToCreative.contains(player.getUniqueId())) {
-                        playersSwitchedToCreative.add(player.getUniqueId());
-                    }
-                    player.setGameMode(GameMode.CREATIVE);
-                }
-            } else {
-                if (playersSwitchedToCreative.contains(player.getUniqueId())) {
-                    boolean flying = false;
-                    if (player.isFlying()) {
-                        flying = true;
-                    }
-                    player.setGameMode(GameMode.SURVIVAL);
-                    if (TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight", true)) {
-                        player.setAllowFlight(true);
-                        player.setFlying(flying);
-                    }
-                    playersSwitchedToCreative.remove(player.getUniqueId());
-                }
             }
         }
     }
