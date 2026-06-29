@@ -35,9 +35,13 @@ public class StatsManager {
 
     private static final Map<UUID, PlayerAggregate> aggregate = new HashMap<>();
 
+    /** Test seam: when non-null, statsDir() returns this instead of the real plugin data folder. */
+    static File statsDirOverride = null;
+
     private StatsManager() { }
 
     private static File statsDir() {
+        if (statsDirOverride != null) { return statsDirOverride; }
         return new File(TheGaffer.getPluginDataFolder(), TheGaffer.getFileSeperator() + "stats");
     }
 
@@ -88,7 +92,7 @@ public class StatsManager {
         s.setEndTime(endTime);
         if (persist) {
             JobStatsStorage.save(s, statsDir(), true);
-            new File(activeDir(), jobName + "-0" + TheGaffer.getFileExtension()).delete();
+            new File(activeDir(), JobStatsStorage.recordFileName(jobName, 0L)).delete();
         }
         ingest(s);
         return s;
@@ -136,6 +140,27 @@ public class StatsManager {
         return all.size() > limit ? all.subList(0, limit) : all;
     }
 
+    // ---- active snapshot (flush / reload) ----
+
+    /** Snapshots every live job's counters to stats/active/{@code <job>-0.yml}. */
+    public static void flushActive(boolean async) {
+        for (JobStats s : live.values()) {
+            JobStatsStorage.save(s, activeDir(), async); // endTime == 0 => "<job>-0.yml"
+        }
+    }
+
+    /**
+     * Reloads in-progress counters for jobs that are still running (call on enable, after jobs load).
+     * Only restores entries whose job name appears in {@code JobDatabase.getActiveJobs()}.
+     */
+    public static void loadActive() {
+        for (JobStats s : JobStatsStorage.readAll(activeDir())) {
+            if (com.mcmiddleearth.thegaffer.storage.JobDatabase.getActiveJobs().containsKey(s.getName())) {
+                live.put(s.getName(), s);
+            }
+        }
+    }
+
     // ---- test seams (no Bukkit Job required) ----
 
     static void beginForTest(String name, UUID owner, String project, String world,
@@ -145,5 +170,12 @@ public class StatsManager {
 
     static JobStats finishForTest(String name, long endTime) {
         return finishInternal(name, endTime, false);
+    }
+
+    /** Test seam for loadActive: unconditionally restores all active snapshots matching the given name. */
+    static void loadActiveForTest(String name) {
+        for (JobStats s : JobStatsStorage.readAll(activeDir())) {
+            if (s.getName().equals(name)) { live.put(s.getName(), s); }
+        }
     }
 }
