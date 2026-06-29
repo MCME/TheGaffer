@@ -1,0 +1,23 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ master, main, "2026-rework" ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      # Compiles, runs the JUnit/MockBukkit suite, and builds the jar.
+      - name: Build and test
+        run: mvn -B verify
