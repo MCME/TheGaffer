@@ -54,8 +54,7 @@ public class JobStatsStorage {
             for (String key : builders.getKeys(false)) {
                 try {
                     UUID id = UUID.fromString(key);
-                    s.recordPlace(id, builders.getInt(key + ".placed"));
-                    s.recordBreak(id, builders.getInt(key + ".broke"));
+                    s.setBuilderStat(id, builders.getInt(key + ".placed"), builders.getInt(key + ".broke"));
                 } catch (IllegalArgumentException ignored) { }
             }
         }

@@ -65,6 +65,12 @@ public class JobStats {
         addParticipant(id);
     }
 
+    /** Restores stored counts directly (idempotent, unlike the additive recordPlace/recordBreak). */
+    public void setBuilderStat(UUID id, int placed, int broke) {
+        builders.put(id, new BuilderStat(placed, broke));
+        addParticipant(id);
+    }
+
     public long getDurationMillis() {
         long end = endTime > 0 ? endTime : System.currentTimeMillis();
         return Math.max(0, end - startTime);
