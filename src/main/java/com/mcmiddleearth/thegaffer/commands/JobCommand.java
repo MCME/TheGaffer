@@ -298,7 +298,11 @@ public class JobCommand implements TabExecutor {
                             }
                         }
                         if (args.length > 1) {
-                            pageNum = Integer.valueOf(args[1]);
+                            try {
+                                pageNum = Integer.parseInt(args[1]);
+                            } catch (NumberFormatException ex) {
+                                pageNum = 1;
+                            }
                         }
                         ChatPaginator.ChatPage page = ChatPaginator.paginate(out.toString(), pageNum, ChatPaginator.AVERAGE_CHAT_PAGE_WIDTH, 8);
                         player.sendMessage(ChatColor.AQUA + "Job Archive Page: " + page.getPageNumber() + " of " + page.getTotalPages());

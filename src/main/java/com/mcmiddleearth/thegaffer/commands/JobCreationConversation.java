@@ -313,7 +313,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     private class projectPrompt extends StringPrompt {
 
-        ExternalProjectHandler mcproject = (ExternalProjectHandler) Bukkit.getPluginManager().getPlugin("McMeProject");
+        ExternalProjectHandler mcproject =
+                (Bukkit.getPluginManager().getPlugin("McMeProject") instanceof ExternalProjectHandler h) ? h : null;
 
         @Override
         public String getPromptText(ConversationContext context) {
@@ -324,13 +325,13 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
 
-            if (mcproject.getProjectNames().contains(input)) {
+            if (mcproject != null && mcproject.getProjectNames().contains(input)) {
 
                 context.setSessionData("project", input);
                 String jobname = (String) context.getSessionData("jobname");
 
                 return new GlowEffectPrompt();
-            } else if (input.equalsIgnoreCase("nothing")) {
+            } else if (mcproject == null || input.equalsIgnoreCase("nothing")) {
 
                 context.setSessionData("project", "nothing");
 
