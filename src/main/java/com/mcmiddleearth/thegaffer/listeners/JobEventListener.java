@@ -20,6 +20,7 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.utilities.Util;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
@@ -71,7 +72,7 @@ public class JobEventListener implements Listener {
             second = color + "~" + second;
         }
         message = first + second +"\n"
-                          + ChatColor.AQUA + ChatColor.BOLD + job.getOwner() + ChatColor.GRAY + ChatColor.BOLD
+                          + ChatColor.AQUA + ChatColor.BOLD + Util.nameOf(job.getOwner()) + ChatColor.GRAY + ChatColor.BOLD
                           + " has started a job.\n"
                           + ChatColor.GRAY + "Job Name: " + ChatColor.AQUA + job.getName();
         if(TheGaffer.isJobDescription()) {
@@ -111,7 +112,7 @@ public class JobEventListener implements Listener {
                }
            }
            String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
-                          +emoji+"\n        __**Leader:**__        " + job.getOwner() 
+                          +emoji+"\n        __**Leader:**__        " + Util.nameOf(job.getOwner()) 
                    + "\n        __**Title:**__            " + job.getName()
                    + "\n        __**World:**__            " + job.getBukkitWorld().getName()
                    + "\n        __**Time Start:**__ " +getLondonTime() 
@@ -121,7 +122,7 @@ public class JobEventListener implements Listener {
            }
            sendDiscord(discordMessage);
            /*sendDiscord(":ring1 @everyone, there is a new job!!! :ring1"
-                                    +"\n         __**Leader:**__      "+job.getOwner()
+                                    +"\n         __**Leader:**__      "+Util.nameOf(job.getOwner())
                                     +"\n         __**Title:**__          "+job.getName()
                                     +"\n         __**Time Start:**__ "+getLondonTime()
                                     +"\n         To join the job typ in game chat: ```css\n/job join "+job.getName());*/

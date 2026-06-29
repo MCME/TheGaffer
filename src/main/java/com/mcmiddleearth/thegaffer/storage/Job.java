@@ -41,17 +41,17 @@ import java.util.*;
 public class Job implements Listener {
 
     private String name;
-    private String owner;
+    private UUID owner;
     private boolean running;
     private boolean paused;
     private JobWarp warp;
     private boolean discordSend;
     private String[] discordTags;
     private String description;
-    private ArrayList<String> helpers = new ArrayList();
-    private ArrayList<String> workers = new ArrayList();
-    private ArrayList<String> bannedWorkers = new ArrayList();
-    private ArrayList<String> invitedWorkers = new ArrayList();
+    private ArrayList<UUID> helpers = new ArrayList();
+    private ArrayList<UUID> workers = new ArrayList();
+    private ArrayList<UUID> bannedWorkers = new ArrayList();
+    private ArrayList<UUID> invitedWorkers = new ArrayList();
     private Long startTime;
     private Long endTime;
     private String world;
@@ -73,7 +73,7 @@ public class Job implements Listener {
 
     private HashMap<UUID, Long> left = new HashMap<>();
 
-    public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr,
+    public Job(String name, String description, UUID owner, boolean running, JobWarp warp, String world, boolean Private, int jr,
             boolean discordSend, String[] discordTags, String project) {
         this.name = name;
         this.description = description;
@@ -111,7 +111,7 @@ public class Job implements Listener {
 
         glowing = true;
 
-        addHelperTeam(owner);
+        addHelperTeam(Util.nameOf(owner));
     }
 
     public Job() {
@@ -139,11 +139,11 @@ public class Job implements Listener {
     }
 
     public boolean isPlayerHelper(OfflinePlayer p) {
-        return helpers.contains(p.getName());
+        return helpers.contains(p.getUniqueId());
     }
 
     public boolean isPlayerWorking(OfflinePlayer p) {
-        return workers.contains(p.getName());
+        return workers.contains(p.getUniqueId());
     }
 
     public World getBukkitWorld() {
@@ -153,7 +153,7 @@ public class Job implements Listener {
 
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
-        for (String pName : workers) {
+        for (UUID pName : workers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
             if (p.isOnline()) {
                 players.add(p.getPlayer());
@@ -164,13 +164,13 @@ public class Job implements Listener {
 
     public Player[] getAllAsPlayersArray() {
         ArrayList<Player> players = new ArrayList<>();
-        for (String pName : workers) {
+        for (UUID pName : workers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
             if (p.isOnline()) {
                 players.add(p.getPlayer());
             }
         }
-        for (String pName : helpers) {
+        for (UUID pName : helpers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
             if (p.isOnline()) {
                 players.add(p.getPlayer());
@@ -187,7 +187,7 @@ public class Job implements Listener {
 
     public ArrayList<Player> getWorkersAsPlayersList() {
         ArrayList<Player> players = new ArrayList<>();
-        for (String pName : workers) {
+        for (UUID pName : workers) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(pName);
             if (p.isOnline()) {
                 players.add(p.getPlayer());
@@ -208,7 +208,7 @@ public class Job implements Listener {
                 .append(Component.text(")", NamedTextColor.GRAY))
                 .append(Component.newline())
                 .append(Component.text("Started by: ", NamedTextColor.GRAY))
-                .append(Component.text(getOwner(), NamedTextColor.AQUA))
+                .append(Component.text(Util.nameOf(owner), NamedTextColor.AQUA))
                 .append(Component.newline())
                 .append(Component.text("Started on: ", NamedTextColor.GRAY))
                 .append(Component.text(new Date(startTime).toGMTString(), NamedTextColor.AQUA))
@@ -247,7 +247,7 @@ public class Job implements Listener {
     }
 
     public HelperResponse addHelper(OfflinePlayer p) {
-        if (helpers.contains(p.getName())) {
+        if (helpers.contains(p.getUniqueId())) {
             return HelperResponse.ALREADY_HELPER;
         }
         Job current = JobDatabase.getJobWorking(p);
@@ -260,7 +260,7 @@ public class Job implements Listener {
         if (!p.getPlayer().hasPermission(PermissionsUtil.getCreatePermission())) {
             return HelperResponse.NO_PERMISSIONS;
         }
-        helpers.add(p.getName());
+        helpers.add(p.getUniqueId());
         addHelperTeam(p.getName());
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -269,10 +269,10 @@ public class Job implements Listener {
     }
 
     public HelperResponse removeHelper(OfflinePlayer p, String reason) {
-        if (!helpers.contains(p.getName())) {
+        if (!helpers.contains(p.getUniqueId())) {
             return HelperResponse.NOT_HELPER;
         }
-        helpers.remove(p.getName());
+        helpers.remove(p.getUniqueId());
         removeHelperTeam(p.getName());
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -281,10 +281,10 @@ public class Job implements Listener {
     }
 
     public WorkerResponse addWorker(OfflinePlayer p) {
-        if (workers.contains(p.getName())) {
+        if (workers.contains(p.getUniqueId())) {
             return WorkerResponse.ALREADY_WORKER;
         }
-        if (bannedWorkers.contains(p.getName())) {
+        if (bannedWorkers.contains(p.getUniqueId())) {
             return WorkerResponse.WORKER_BANNED;
         }
         Job current = JobDatabase.getJobWorking(p);
@@ -297,10 +297,10 @@ public class Job implements Listener {
         if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
             return WorkerResponse.NO_PERMISSIONS;
         }
-        if (Private && !(invitedWorkers.contains(p.getName()))) {
+        if (Private && !(invitedWorkers.contains(p.getUniqueId()))) {
             return WorkerResponse.NOT_INVITED;
         }
-        workers.add(p.getName());
+        workers.add(p.getUniqueId());
         addWorkerTeam(p.getName());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
@@ -315,13 +315,13 @@ public class Job implements Listener {
     }
 
     public WorkerResponse removeWorker(OfflinePlayer p, String reason) {
-        if (!workers.contains(p.getName())) {
+        if (!workers.contains(p.getUniqueId())) {
             return WorkerResponse.NOT_WORKER;
         }
         if (p.isOnline()) {
             p.getPlayer().getInventory().clear();
         }
-        workers.remove(p.getName());
+        workers.remove(p.getUniqueId());
         removeWorkerTeam(p.getName());
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -332,10 +332,10 @@ public class Job implements Listener {
 
     public InviteResponse inviteWorker(List<OfflinePlayer> ps) {
         for (OfflinePlayer p : ps) {
-            if (invitedWorkers.contains(p.getName())) {
+            if (invitedWorkers.contains(p.getUniqueId())) {
                 return InviteResponse.ALREADY_INVITED;
             }
-            if (bannedWorkers.contains(p.getName())) {
+            if (bannedWorkers.contains(p.getUniqueId())) {
                 return InviteResponse.WORKER_BANNED;
             }
             if (!p.isOnline()) {
@@ -344,7 +344,7 @@ public class Job implements Listener {
             if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
                 return InviteResponse.NO_PERMISSIONS;
             }
-            invitedWorkers.add(p.getName());
+            invitedWorkers.add(p.getUniqueId());
         }
         setDirty(true);
         //  JobDatabase.saveJobs();
@@ -353,14 +353,14 @@ public class Job implements Listener {
 
     public InviteResponse uninviteWorker(List<OfflinePlayer> ps) {
         for (OfflinePlayer p : ps) {
-            if (!invitedWorkers.contains(p.getName())) {
+            if (!invitedWorkers.contains(p.getUniqueId())) {
                 return InviteResponse.NOT_INVITED;
             }
-            if (workers.contains(p.getName())) {
-                workers.remove(p.getName());
+            if (workers.contains(p.getUniqueId())) {
+                workers.remove(p.getUniqueId());
                 workerTeam.removeEntry(p.getName());
             }
-            invitedWorkers.remove(p.getName());
+            invitedWorkers.remove(p.getUniqueId());
         }
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -369,14 +369,14 @@ public class Job implements Listener {
 
     public BanWorkerResponse banWorker(List<OfflinePlayer> ps) {
         for (OfflinePlayer p : ps) {
-            if (workers.contains(p.getName())) {
-                workers.remove(p.getName());
+            if (workers.contains(p.getUniqueId())) {
+                workers.remove(p.getUniqueId());
                 removeWorkerTeam(p.getName());
             }
-            if (bannedWorkers.contains(p.getName())) {
+            if (bannedWorkers.contains(p.getUniqueId())) {
                 return BanWorkerResponse.ALREADY_BANNED;
             }
-            bannedWorkers.add(p.getName());
+            bannedWorkers.add(p.getUniqueId());
         }
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -385,10 +385,10 @@ public class Job implements Listener {
 
     public BanWorkerResponse unbanWorker(List<OfflinePlayer> ps) {
         for (OfflinePlayer p : ps) {
-            if (bannedWorkers.contains(p.getName())) {
+            if (bannedWorkers.contains(p.getUniqueId())) {
                 return BanWorkerResponse.ALREADY_UNBANNED;
             }
-            bannedWorkers.remove(p.getName());
+            bannedWorkers.remove(p.getUniqueId());
         }
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -397,10 +397,10 @@ public class Job implements Listener {
 
     public KickWorkerResponse kickWorker(List<OfflinePlayer> ps, String reason) {
         for (OfflinePlayer p : ps) {
-            if (!workers.contains(p.getName())) {
+            if (!workers.contains(p.getUniqueId())) {
                 return KickWorkerResponse.NOT_IN_JOB;
             }
-            workers.remove(p.getName());
+            workers.remove(p.getUniqueId());
             removeWorkerTeam(p.getName());
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
         }
@@ -413,7 +413,7 @@ public class Job implements Listener {
         if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
             return WorkerResponse.NO_PERMISSIONS;
         }
-        workers.remove(p.getName());
+        workers.remove(p.getUniqueId());
         removeWorkerTeam(p.getName());
         setDirty(true);
         sendToAll(Component.text(p.getName() + " has left the job.", NamedTextColor.AQUA));
@@ -441,7 +441,7 @@ public class Job implements Listener {
     }
 
     public void bringAllWorkers(Location to) {
-        for (String wName : workers) {
+        for (UUID wName : workers) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {
                 TheGaffer.getServerInstance().getOfflinePlayer(wName).getPlayer().teleport(to);
             }
@@ -450,7 +450,7 @@ public class Job implements Listener {
 
     public int sendToHelpers(Component message) {
         int count = 0;
-        for (String hName : helpers) {
+        for (UUID hName : helpers) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(hName).isOnline()) {
                 TheGaffer.getServerInstance().getOfflinePlayer(hName).getPlayer().sendMessage(message);
                 count++;
@@ -465,7 +465,7 @@ public class Job implements Listener {
 
     public int sendToWorkers(Component message) {
         int count = 0;
-        for (String wName : workers) {
+        for (UUID wName : workers) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {
                 TheGaffer.getServerInstance().getOfflinePlayer(wName).getPlayer().sendMessage(message);
                 count++;
@@ -480,10 +480,10 @@ public class Job implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onLeave(PlayerQuitEvent event) {
-        if (event.getPlayer().getName().equals(owner)) {
+        if (event.getPlayer().getUniqueId().equals(owner)) {
             TheGaffer.scheduleOwnerTimeout(this);
         }
-        if (workers.contains(event.getPlayer().getName())) {
+        if (workers.contains(event.getPlayer().getUniqueId())) {
             left.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
     }
@@ -496,8 +496,8 @@ public class Job implements Listener {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
             }
-        } else if (event.getPlayer().getName().equals(owner)
-                || helpers.contains(event.getPlayer().getName())) {
+        } else if (event.getPlayer().getUniqueId().equals(owner)
+                || helpers.contains(event.getPlayer().getUniqueId())) {
             if (glowing) {
                 event.getPlayer().setGlowing(true);
                 event.getPlayer().setScoreboard(scoreboard);
@@ -508,9 +508,9 @@ public class Job implements Listener {
     public void setRunning(boolean running) {
         this.running = running;
         if (glowing && !running) {
-            helpers.forEach(helper -> removeHelperTeam(helper));
-            workers.forEach(worker -> removeWorkerTeam(worker));
-            removeHelperTeam(owner);
+            helpers.forEach(helper -> removeHelperTeam(Util.nameOf(helper)));
+            workers.forEach(worker -> removeWorkerTeam(Util.nameOf(worker)));
+            removeHelperTeam(Util.nameOf(owner));
             helperTeam.unregister();
             workerTeam.unregister();
         }
@@ -573,11 +573,11 @@ public class Job implements Listener {
         return running;
     }
 
-    public String getOwner() {
+    public UUID getOwner() {
         return owner;
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(UUID owner) {
         this.owner = owner;
     }
 
@@ -621,35 +621,35 @@ public class Job implements Listener {
         this.description = description;
     }
 
-    public ArrayList<String> getHelpers() {
+    public ArrayList<UUID> getHelpers() {
         return helpers;
     }
 
-    public void setHelpers(ArrayList<String> helpers) {
+    public void setHelpers(ArrayList<UUID> helpers) {
         this.helpers = helpers;
     }
 
-    public ArrayList<String> getWorkers() {
+    public ArrayList<UUID> getWorkers() {
         return workers;
     }
 
-    public void setWorkers(ArrayList<String> workers) {
+    public void setWorkers(ArrayList<UUID> workers) {
         this.workers = workers;
     }
 
-    public ArrayList<String> getBannedWorkers() {
+    public ArrayList<UUID> getBannedWorkers() {
         return bannedWorkers;
     }
 
-    public void setBannedWorkers(ArrayList<String> bannedWorkers) {
+    public void setBannedWorkers(ArrayList<UUID> bannedWorkers) {
         this.bannedWorkers = bannedWorkers;
     }
 
-    public ArrayList<String> getInvitedWorkers() {
+    public ArrayList<UUID> getInvitedWorkers() {
         return invitedWorkers;
     }
 
-    public void setInvitedWorkers(ArrayList<String> invitedWorkers) {
+    public void setInvitedWorkers(ArrayList<UUID> invitedWorkers) {
         this.invitedWorkers = invitedWorkers;
     }
 

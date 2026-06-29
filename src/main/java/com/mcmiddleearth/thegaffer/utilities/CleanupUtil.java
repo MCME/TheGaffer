@@ -84,7 +84,7 @@ public class CleanupUtil {
     
     public static void selectNewOwner(Job job) {
         ArrayList<OfflinePlayer> possibles = new ArrayList<>();
-        for (String name : job.getHelpers()) {
+        for (UUID name : job.getHelpers()) {
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(name);
             if (p.isOnline()) {
                 possibles.add(p);
@@ -97,7 +97,7 @@ public class CleanupUtil {
             Collections.shuffle(possibles);
             OfflinePlayer choice = possibles.get(index);
             job.addHelper(TheGaffer.getServerInstance().getOfflinePlayer(job.getOwner()));
-            job.setOwner(choice.getName());
+            job.setOwner(choice.getUniqueId());
             Util.debug("Selecting " + choice.getName() + " as " + job.getName() + "'s new owner.");
         } else {
             Util.debug("No new owner found for " + job.getName() + ". Disabling job.");

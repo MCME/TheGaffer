@@ -24,6 +24,7 @@ import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -368,7 +369,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public String getPromptText(ConversationContext context) {
             String jobname = (String) context.getSessionData("jobname");
-            String owner = ((Player) context.getForWhom()).getName();
+            UUID owner = ((Player) context.getForWhom()).getUniqueId();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
