@@ -41,4 +41,24 @@ class StatsManagerTest {
         // live entry cleared after finish
         assertNull(StatsManager.getLive("river"));
     }
+
+    @Test
+    void aggregateRanksBuildersByPlaced() {
+        UUID alice = UUID.randomUUID();
+        UUID bob = UUID.randomUUID();
+
+        JobStats j1 = new JobStats("j1", alice, "p", "world", 0, 0, 10, 0L, 1000L);
+        j1.recordPlace(alice, 100); j1.recordPlace(bob, 50);
+        JobStats j2 = new JobStats("j2", bob, "p", "world", 0, 0, 10, 0L, 1000L);
+        j2.recordPlace(alice, 25);
+
+        StatsManager.ingest(j1);
+        StatsManager.ingest(j2);
+
+        java.util.List<StatsManager.PlayerAggregate> top = StatsManager.getLeaderboard(StatsManager.SortKey.PLACED, 10);
+        assertEquals(alice, top.get(0).getId());   // 125 placed
+        assertEquals(bob, top.get(1).getId());     //  50 placed
+        assertEquals(125, StatsManager.getPlayerTotals(alice).getPlaced());
+        assertEquals(2, StatsManager.getPlayerTotals(alice).getJobs());
+    }
 }
