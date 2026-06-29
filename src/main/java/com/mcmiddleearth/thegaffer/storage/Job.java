@@ -42,8 +42,6 @@ public class Job implements Listener {
     private boolean running;
     private boolean paused;
     private JobWarp warp;
-    private JobWarp tsWarp;
-    private String ts;
     private boolean discordSend;
     private String[] discordTags;
     private String description;
@@ -51,7 +49,6 @@ public class Job implements Listener {
     private ArrayList<String> workers = new ArrayList();
     private ArrayList<String> bannedWorkers = new ArrayList();
     private ArrayList<String> invitedWorkers = new ArrayList();
-    private ArrayList<String> admitedWorkers = new ArrayList();
     private Long startTime;
     private Long endTime;
     private String world;
@@ -74,7 +71,7 @@ public class Job implements Listener {
     private HashMap<UUID, Long> left = new HashMap<>();
 
     public Job(String name, String description, String owner, boolean running, JobWarp warp, String world, boolean Private, int jr,
-            boolean discordSend, String[] discordTags, String ts, JobWarp tswarp, String project) {
+            boolean discordSend, String[] discordTags, String project) {
         this.name = name;
         this.description = description;
         this.owner = owner;
@@ -85,10 +82,7 @@ public class Job implements Listener {
         this.startTime = System.currentTimeMillis();
         this.discordSend = discordSend;
         this.discordTags = discordTags;
-        this.ts = ts;
-        this.tsWarp = tswarp;
         this.projectname = project;
-        admitedWorkers.add(this.owner);
         if (jr > 1000) {
             jr = 1000;
         }
@@ -153,23 +147,6 @@ public class Job implements Listener {
         return TheGaffer.getServerInstance().getWorld(world);
     }
 
-    public String getTSchannel() {
-        return this.ts;
-    }
-
-    public void clearTS() {
-        admitedWorkers.removeAll(admitedWorkers);
-        admitedWorkers.clear();
-        admitedWorkers.add(owner);
-    }
-
-    public void addAdmitedWorker(String worker) {
-        admitedWorkers.add(worker);
-    }
-//    @JsonIgnore
-//    public JobWarp getTSwarp() {
-//        return this.tsWarp;
-//    }
 
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
@@ -616,22 +593,6 @@ public class Job implements Listener {
         this.warp = warp;
     }
 
-    public JobWarp getTsWarp() {
-        return tsWarp;
-    }
-
-    public void setTsWarp(JobWarp tsWarp) {
-        this.tsWarp = tsWarp;
-    }
-
-    public String getTs() {
-        return ts;
-    }
-
-    public void setTs(String ts) {
-        this.ts = ts;
-    }
-
     public boolean isDiscordSend() {
         return discordSend;
     }
@@ -686,14 +647,6 @@ public class Job implements Listener {
 
     public void setInvitedWorkers(ArrayList<String> invitedWorkers) {
         this.invitedWorkers = invitedWorkers;
-    }
-
-    public ArrayList<String> getAdmitedWorkers() {
-        return admitedWorkers;
-    }
-
-    public void setAdmitedWorkers(ArrayList<String> admitedWorkers) {
-        this.admitedWorkers = admitedWorkers;
     }
 
     public Long getStartTime() {

@@ -60,8 +60,6 @@ public class JobAdminCommands implements TabExecutor{
         Methods.put("setradius", 1);
         Methods.put("setkit", 0);
         Methods.put("clearworkerinven", 0);
-        Methods.put("setteamspeakwarp", 0);
-        Methods.put("setteamspeakchannel", 1);
     }
 
     @Override

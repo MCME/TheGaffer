@@ -57,9 +57,7 @@ public class TheGaffer extends JavaPlugin {
     static String fileExtension = ".job";
     static boolean debug = false;
     //@Getter
-    //static boolean TS;
     static Configuration pluginConfig;
-    static boolean TSenabled;
     static List<String> unprotectedWorlds = new ArrayList<>();
     static ArrayList<Player> listening = new ArrayList<>();
     static List<ExternalProtectionHandler> externalProtectionAllowHandlers = new ArrayList<>();
@@ -80,7 +78,6 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         setupConfig();
 
-        //new TSfetcher().runTaskTimer(this, 20, 1200);
 
         /*
         try {
@@ -120,11 +117,6 @@ public class TheGaffer extends JavaPlugin {
 
     public static void setupConfig() {
         pluginConfig = TheGaffer.getPluginInstance().getConfig();
-        if (pluginConfig.contains("TS")) {
-            TSenabled = pluginConfig.getBoolean("TS", false);
-        } else {
-            TSenabled = false;
-        }
         jobDescription = pluginConfig.getBoolean("jobDescription", false);
         jobKitsEnabled = pluginConfig.getBoolean("jobKits", false);
         discordEnabled = pluginConfig.contains("discord");
@@ -202,9 +194,6 @@ public class TheGaffer extends JavaPlugin {
         return pluginConfig;
     }
 
-    public static boolean isTSenabled() {
-        return TSenabled;
-    }
 
     public static List<String> getUnprotectedWorlds() {
         return unprotectedWorlds;
