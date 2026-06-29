@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -18,10 +18,14 @@ package com.mcmiddleearth.thegaffer.storage;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
+import com.mcmiddleearth.thegaffer.utilities.Util;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.TreeMap;
 
 public class JobDatabase {
@@ -29,87 +33,111 @@ public class JobDatabase {
     private static final TreeMap<String, Job> activeJobs = new TreeMap<>();
     private static final TreeMap<String, Job> inactiveJobs = new TreeMap<>();
 
-    /*
-    public static int loadJobs() throws IOException {
+    /**
+     * Loads every job file from the {@code jobs/} folder into memory. Running
+     * jobs are re-activated (bounds regenerated, listener registered, owner
+     * timeout rescheduled); stopped jobs go to the inactive map. An unreadable
+     * file is logged and skipped rather than aborting startup.
+     */
+    public static int loadJobs() {
         int count = 0;
-        File activeJobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs");
-        if (!activeJobFolder.exists()) {
-            activeJobFolder.mkdirs();
+        File jobFolder = new File(TheGaffer.getPluginDataFolder(),
+                TheGaffer.getFileSeperator() + "jobs");
+        if (!jobFolder.exists()) {
+            jobFolder.mkdirs();
+            return 0;
         }
-
-        String[] aJ = activeJobFolder.list((dir, name) -> name.endsWith(TheGaffer.getFileExtension()));
-
-        ArrayList<Job> tjobs = new ArrayList<>();
-        for (String fName : aJ) {
-            File jFile = new File(activeJobFolder, fName);
-            if (!jFile.isDirectory()) {
-                Job job = TheGaffer.getJsonMapper().readValue(jFile, Job.class);
-                tjobs.add(job);
+        File[] files = jobFolder.listFiles((dir, fname) -> fname.endsWith(TheGaffer.getFileExtension()));
+        if (files == null) {
+            return 0;
+        }
+        for (File jFile : files) {
+            if (jFile.isDirectory()) {
+                continue;
             }
-        }
-        for (Job jerb : tjobs) {
-            jerb.setDirty(false);
-            if (jerb.isRunning()) {
-                activateJob(jerb);
-                TheGaffer.scheduleOwnerTimeout(jerb);
+            try {
+                YamlConfiguration config = YamlConfiguration.loadConfiguration(jFile);
+                Job job = JobStorage.fromYaml(config);
+                if (job.getName() == null) {
+                    Util.severe("Skipping job file without a name: " + jFile.getName());
+                    continue;
+                }
+                if (job.isRunning()) {
+                    job.generateBounds();
+                    activeJobs.put(job.getName(), job);
+                    TheGaffer.getServerInstance().getPluginManager()
+                            .registerEvents(job, TheGaffer.getPluginInstance());
+                    TheGaffer.scheduleOwnerTimeout(job);
+                } else {
+                    inactiveJobs.put(job.getName(), job);
+                }
+                job.setDirty(false);
                 count++;
-            } else {
-                inactiveJobs.put(jerb.getName(), jerb);
-                count++;
+            } catch (Exception ex) {
+                Util.severe("Failed to load job file " + jFile.getName() + ": " + ex.getMessage());
             }
         }
         return count;
     }
 
-    public static void saveJobs() {
-        File jobFolder = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs");
-        if (!jobFolder.exists()) {
-            jobFolder.mkdirs();
-        }
-        for (Job jerb : activeJobs.values()) {
-            if (jerb.isDirty()) {
-                boolean successful = true;
-                File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
-                File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
-                try {
-                    TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
-                } catch (IOException ex) {
-                    Util.severe(Arrays.toString(ex.getStackTrace()));
-                    successful = false;
-                } finally {
-                    if (successful) {
-                        if (afterLocation.exists()) {
-                            afterLocation.delete();
-                        }
-                        newLocation.renameTo(afterLocation);
-                    }
-                }
-                jerb.setDirty(false);
+    /** Persists a single job (file write happens off-thread). */
+    public static void saveJob(Job j) {
+        writeJobFile(j, true);
+        j.setDirty(false);
+    }
+
+    /** Persists every dirty job. Pass {@code async=false} only on shutdown. */
+    public static void saveAllDirty(boolean async) {
+        for (Job j : activeJobs.values()) {
+            if (j.isDirty()) {
+                writeJobFile(j, async);
+                j.setDirty(false);
             }
         }
-        for (Job jerb : inactiveJobs.values()) {
-            if (jerb.isDirty()) {
-                boolean successful = true;
-                File newLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension() + ".new");
-                File afterLocation = new File(jobFolder, jerb.getName() + TheGaffer.getFileExtension());
-                try {
-                    TheGaffer.getJsonMapper().writeValue(newLocation, jerb);
-                } catch (IOException ex) {
-                    Util.severe(Arrays.toString(ex.getStackTrace()));
-                    successful = false;
-                } finally {
-                    if (successful) {
-                        if (afterLocation.exists()) {
-                            afterLocation.delete();
-                        }
-                        newLocation.renameTo(afterLocation);
-                    }
-                }
-                jerb.setDirty(false);
+        for (Job j : inactiveJobs.values()) {
+            if (j.isDirty()) {
+                writeJobFile(j, async);
+                j.setDirty(false);
             }
         }
     }
-     */
+
+    // Builds the YAML snapshot on the calling (main) thread, then performs the
+    // blocking file write either async (normal runtime) or sync (on disable,
+    // when the scheduler can no longer run async tasks). The config is a
+    // snapshot, so the async write never touches live job state.
+    private static void writeJobFile(Job j, boolean async) {
+        final YamlConfiguration config = JobStorage.toYaml(j);
+        final File target = j.getFile();
+        final String jobName = j.getName();
+        Runnable write = () -> {
+            File dir = target.getParentFile();
+            if (dir != null && !dir.exists()) {
+                dir.mkdirs();
+            }
+            File tmp = new File(dir, target.getName() + ".new");
+            try {
+                config.save(tmp);
+                if (target.exists()) {
+                    target.delete();
+                }
+                tmp.renameTo(target);
+            } catch (IOException ex) {
+                Util.severe("Failed to save job " + jobName + ": " + ex.getMessage());
+            }
+        };
+        if (async) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    write.run();
+                }
+            }.runTaskAsynchronously(TheGaffer.getPluginInstance());
+        } else {
+            write.run();
+        }
+    }
+
     public static boolean activateJob(Job j) {
         if (activeJobs.containsKey(j.getName())) {
             return false;
@@ -118,7 +146,7 @@ public class JobDatabase {
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         j.setDirty(true);
-        // saveJobs();
+        saveJob(j);
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
         return true;
     }
@@ -133,7 +161,7 @@ public class JobDatabase {
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
-        // saveJobs();
+        saveJob(j);
         new BukkitRunnable() {
             @Override
             public void run() {

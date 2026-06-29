@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -22,79 +22,89 @@ import org.bukkit.inventory.PlayerInventory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A saved snapshot of a player's inventory, handed to workers who join a job.
+ * Items are stored as native Bukkit {@link ItemStack}s so they serialize
+ * directly via YamlConfiguration (full NBT, cross-version migration handled by
+ * the server) — no manual item DTOs required.
+ */
 public class JobKit {
 
-    private JobItem[] contents;
-    private JobItem helmet;
-    private JobItem chestplate;
-    private JobItem pants;
-    private JobItem boots;
-
-    public void replaceInventory(Player p) {
-        p.getInventory().clear();
-        for (JobItem i : contents) {
-            p.getInventory().addItem(i.toBukkitItem());
-        }
-        p.getInventory().setHelmet(helmet.toBukkitItem());
-        p.getInventory().setChestplate(chestplate.toBukkitItem());
-        p.getInventory().setLeggings(pants.toBukkitItem());
-        p.getInventory().setBoots(boots.toBukkitItem());
-        p.updateInventory();
-    }
+    private List<ItemStack> contents = new ArrayList<>();
+    private ItemStack helmet;
+    private ItemStack chestplate;
+    private ItemStack pants;
+    private ItemStack boots;
 
     public JobKit() {
-
     }
 
     public JobKit(PlayerInventory inv) {
-        helmet = new JobItem(inv.getHelmet());
-        chestplate = new JobItem(inv.getChestplate());
-        pants = new JobItem(inv.getLeggings());
-        boots = new JobItem(inv.getBoots());
-        List<JobItem> contentS = new ArrayList<>();
+        contents = new ArrayList<>();
         for (ItemStack i : inv.getContents()) {
-            contentS.add(new JobItem(i));
+            if (i != null) {
+                contents.add(i);
+            }
         }
-        contents = contentS.toArray(new JobItem[contentS.size()]);
+        helmet = inv.getHelmet();
+        chestplate = inv.getChestplate();
+        pants = inv.getLeggings();
+        boots = inv.getBoots();
     }
 
-    public JobItem[] getContents() {
+    public void replaceInventory(Player p) {
+        p.getInventory().clear();
+        if (contents != null) {
+            for (ItemStack i : contents) {
+                if (i != null) {
+                    p.getInventory().addItem(i);
+                }
+            }
+        }
+        p.getInventory().setHelmet(helmet);
+        p.getInventory().setChestplate(chestplate);
+        p.getInventory().setLeggings(pants);
+        p.getInventory().setBoots(boots);
+        p.updateInventory();
+    }
+
+    public List<ItemStack> getContents() {
         return contents;
     }
 
-    public void setContents(JobItem[] contents) {
+    public void setContents(List<ItemStack> contents) {
         this.contents = contents;
     }
 
-    public JobItem getHelmet() {
+    public ItemStack getHelmet() {
         return helmet;
     }
 
-    public void setHelmet(JobItem helmet) {
+    public void setHelmet(ItemStack helmet) {
         this.helmet = helmet;
     }
 
-    public JobItem getChestplate() {
+    public ItemStack getChestplate() {
         return chestplate;
     }
 
-    public void setChestplate(JobItem chestplate) {
+    public void setChestplate(ItemStack chestplate) {
         this.chestplate = chestplate;
     }
 
-    public JobItem getPants() {
+    public ItemStack getPants() {
         return pants;
     }
 
-    public void setPants(JobItem pants) {
+    public void setPants(ItemStack pants) {
         this.pants = pants;
     }
 
-    public JobItem getBoots() {
+    public ItemStack getBoots() {
         return boots;
     }
 
-    public void setBoots(JobItem boots) {
+    public void setBoots(ItemStack boots) {
         this.boots = boots;
     }
 }
