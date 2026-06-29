@@ -87,5 +87,19 @@
             </exclusions>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Test-only: run plugin logic under a mock Bukkit/Paper server (no real server needed) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seeseemelk</groupId>
+            <artifactId>MockBukkit-v1.19</artifactId>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
