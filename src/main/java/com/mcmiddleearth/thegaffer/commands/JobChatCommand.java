@@ -19,7 +19,8 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.JobChat;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,30 +36,31 @@ public class JobChatCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("You must be a player to use job chat.");
+            sender.sendMessage(Component.text("You must be a player to use job chat."));
             return true;
         }
         Player player = (Player) sender;
         if (!player.hasPermission(PermissionsUtil.getJoinPermission())) {
-            player.sendMessage(ChatColor.RED + "You don't have permission.");
+            player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
             return true;
         }
         Job job = JobDatabase.getJobWorking(player);
         if (job == null) {
             JobChat.clear(player.getName());
-            player.sendMessage(ChatColor.RED + "You are not in a job.");
+            player.sendMessage(Component.text("You are not in a job.", NamedTextColor.RED));
             return true;
         }
         if (args.length > 0) {
             String message = String.join(" ", args);
-            job.sendToAll(ChatColor.AQUA + "[Job] " + ChatColor.RESET + player.getName() + ": " + ChatColor.WHITE + message);
+            job.sendToAll(Component.text("[Job] ", NamedTextColor.AQUA)
+                    .append(Component.text(player.getName() + ": " + message, NamedTextColor.WHITE)));
             return true;
         }
         boolean on = JobChat.toggle(player.getName());
         if (on) {
-            player.sendMessage(ChatColor.GREEN + "Job chat enabled - your messages now go to your job. Use /jc again to turn it off.");
+            player.sendMessage(Component.text("Job chat enabled - your messages now go to your job. Use /jc again to turn it off.", NamedTextColor.GREEN));
         } else {
-            player.sendMessage(ChatColor.GREEN + "Job chat disabled.");
+            player.sendMessage(Component.text("Job chat disabled.", NamedTextColor.GREEN));
         }
         return true;
     }
