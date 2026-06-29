@@ -486,21 +486,6 @@ public class Job implements Listener {
         }
     }
 
-    public void jobChat(Player p, String[] chat) {
-        String prefix;
-        String message;
-        if (p.getName().equals(owner) || helpers.contains(p.getName())) {
-            prefix = "[" + ChatColor.DARK_RED + "J" + ChatColor.RESET + "] ";
-            message = ChatColor.AQUA + chat[1] + ChatColor.RESET;
-        } else {
-            prefix = "[" + ChatColor.YELLOW + "J" + ChatColor.RESET + "] ";
-            message = ChatColor.WHITE + chat[1] + ChatColor.RESET;
-        }
-        for (Player player : getAllAsPlayersArray()) {
-            player.sendMessage(chat[0] + prefix + message);
-        }
-    }
-
     public void setRunning(boolean running) {
         this.running = running;
         if (glowing && !running) {

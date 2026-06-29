@@ -33,12 +33,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import java.awt.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 
 public class JobEventListener implements Listener {
@@ -94,7 +92,9 @@ public class JobEventListener implements Listener {
         }
         
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
-            p.playSound(p.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.8f, 2f);
+            // A gentle server-wide cue for the new-job broadcast (the old
+            // ENTITY_WITHER_DEATH was an alarming, full-volume blast for everyone).
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
         }
         if(job.isDiscordSend()) {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
@@ -127,16 +127,11 @@ public class JobEventListener implements Listener {
     }
 
     private String getLondonTime() {
-        Calendar calendar = new GregorianCalendar();
-        TimeZone zone = calendar.getTimeZone();
-        zone.setID("Europe/London");
-        zone.setRawOffset(0);
-        calendar.setTimeZone(zone);
-        SimpleDateFormat format = (SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.SHORT,Locale.UK);
-        format.setCalendar(calendar);
-        format.applyPattern("HH:mm z");
-        return format.format(calendar.getTime());
-     }
+        // Europe/London applies GMT/BST automatically. The old code forced a
+        // raw UTC offset, so the time was an hour off during British Summer Time.
+        return ZonedDateTime.now(ZoneId.of("Europe/London"))
+                .format(DateTimeFormatter.ofPattern("HH:mm z", Locale.UK));
+    }
 
     private void sendDiscord(String message) {
         if ((TheGaffer.getDiscordChannel() != null) && (!TheGaffer.getDiscordChannel().equals("")))

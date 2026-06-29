@@ -23,11 +23,7 @@ import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -209,7 +205,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 return new kitPrompt();
             } else {
                 context.setSessionData("setkit", false);
-                return newTeamspeakOrDiscordOrFinishPrompt();
+                return newDiscordOrFinishPrompt();
             }
         }
 
@@ -234,7 +230,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     }
 
-    public Prompt newTeamspeakOrDiscordOrFinishPrompt() {
+    public Prompt newDiscordOrFinishPrompt() {
         if (TheGaffer.isDiscordEnabled()) {
             return new discordAnnouncePrompt();
         }
@@ -252,7 +248,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("setkit", input);
-            return newTeamspeakOrDiscordOrFinishPrompt();//new discordAnnouncePrompt();
+            return newDiscordOrFinishPrompt();//new discordAnnouncePrompt();
         }
 
         @Override
