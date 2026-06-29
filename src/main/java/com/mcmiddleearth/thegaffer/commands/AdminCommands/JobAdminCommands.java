@@ -48,6 +48,7 @@ public class JobAdminCommands implements TabExecutor{
     }
     
     public JobAdminCommands(){
+        Methods.put("addhelper", 1);
         Methods.put("removehelper", 1);
         Methods.put("kickworker", 1);
         Methods.put("banworker", 1);
@@ -71,8 +72,12 @@ public class JobAdminCommands implements TabExecutor{
                     return false;                                       //cmd arg 0 arg 1   arg 2    arg 3 -
                 }else if(!args[0].equalsIgnoreCase("admin")){
                     return false;
-                }else if(args.length>=Methods.get(args[2])+1){
+                }else if(args.length>=Methods.get(args[2])+3){
                     Job j = JobDatabase.getActiveJobs().get(args[1]);
+                    if(j == null){
+                        p.sendMessage(ChatColor.RED + "No active job by that name.");
+                        return true;
+                    }
                     AdminMethods am = new AdminMethods(j, p);
                     if(Methods.get(args[2]) == 0){
                         boolean success = true;

@@ -33,3 +33,13 @@ commands:
     usage: |
            /jobchat [message]
     aliases: [jc]
+permissions:
+  thegaffer.join:
+    description: Allows a player to join and use jobs
+    default: true
+  thegaffer.create:
+    description: Allows creating and managing jobs (staff)
+    default: op
+  thegaffer.ignoreprotection:
+    description: Bypass build protection (build anywhere)
+    default: op
