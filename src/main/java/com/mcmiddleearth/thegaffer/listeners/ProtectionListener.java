@@ -23,7 +23,8 @@ import com.mcmiddleearth.thegaffer.events.JobProtectionHangingPlaceEvent;
 import com.mcmiddleearth.thegaffer.events.JobProtectionInteractEvent;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -63,7 +64,7 @@ public class ProtectionListener implements Listener {
                 event.setBuild(false);
                 break;
         }
-        event.getPlayer().sendMessage(ChatColor.DARK_RED + buildProtection.getMessage());
+        event.getPlayer().sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
         jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -86,7 +87,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        event.getPlayer().sendMessage(ChatColor.DARK_RED + buildProtection.getMessage());
+        event.getPlayer().sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
         jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -113,7 +114,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        player.sendMessage(ChatColor.DARK_RED + buildProtection.getMessage());
+        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
         jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -137,7 +138,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        player.sendMessage(ChatColor.DARK_RED + buildProtection.getMessage());
+        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
         jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -247,7 +248,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        player.sendMessage(ChatColor.DARK_RED + buildProtection.getMessage());
+        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
         jobEvent = new JobProtectionInteractEvent(player, event.getClickedBlock().getLocation(), event.getClickedBlock(), event.getItem(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
