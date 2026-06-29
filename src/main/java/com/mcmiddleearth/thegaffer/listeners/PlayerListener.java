@@ -18,9 +18,12 @@ package com.mcmiddleearth.thegaffer.listeners;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -40,8 +43,9 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         event.getPlayer().setGlowing(false);
-        if (JobDatabase.getActiveJobs().size() > 0 && event.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
-            event.getPlayer().sendMessage(ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "There is a job running! Use /job check to find out what it is!");
+        if (!JobDatabase.getActiveJobs().isEmpty() && event.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
+            event.getPlayer().sendMessage(Component.text("There is a job running! ", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+                    .append(Msg.button("[Click to check]", NamedTextColor.AQUA, "/job check", "Run /job check")));
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
         }
     }
