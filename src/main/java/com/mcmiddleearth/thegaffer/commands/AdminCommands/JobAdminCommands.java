@@ -28,7 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -75,7 +76,7 @@ public class JobAdminCommands implements TabExecutor{
                 }else if(args.length>=Methods.get(args[2])+3){
                     Job j = JobDatabase.getActiveJobs().get(args[1]);
                     if(j == null){
-                        p.sendMessage(ChatColor.RED + "No active job by that name.");
+                        p.sendMessage(Component.text("No active job by that name.", NamedTextColor.RED));
                         return true;
                     }
                     AdminMethods am = new AdminMethods(j, p);
@@ -89,9 +90,9 @@ public class JobAdminCommands implements TabExecutor{
                             Logger.getLogger(JobAdminCommands.class.getName()).log(Level.SEVERE, null, ex);
                         }finally{
                             if(success){
-                                p.sendMessage(ChatColor.AQUA + "Job Edited!");
+                                p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
                             }else{
-                                p.sendMessage(ChatColor.RED + "Job Edit Failed!");
+                                p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
                             }
                         }
                         return true;
@@ -105,9 +106,9 @@ public class JobAdminCommands implements TabExecutor{
                             Logger.getLogger(JobAdminCommands.class.getName()).log(Level.SEVERE, null, ex);
                         }finally{
                             if(success){
-                                p.sendMessage(ChatColor.AQUA + "Job Edited!");
+                                p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
                             }else{
-                                p.sendMessage(ChatColor.RED + "Job Edit Failed!");
+                                p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
                             }
                         }
                         return true;

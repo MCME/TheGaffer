@@ -23,8 +23,9 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -116,7 +117,9 @@ public class AdminMethods {
         for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
             if (Bukkit.getOfflinePlayer(pname).isOnline()) {
-                Bukkit.getOfflinePlayer(pname).getPlayer().sendMessage(ChatColor.AQUA + job.getOwner() + ChatColor.GRAY + " has invited you to " + ChatColor.GREEN + job.getName());
+                Bukkit.getOfflinePlayer(pname).getPlayer().sendMessage(Component.text(job.getOwner(), NamedTextColor.AQUA)
+                        .append(Component.text(" has invited you to ", NamedTextColor.GRAY))
+                        .append(Component.text(job.getName(), NamedTextColor.GREEN)));
             }
         }
         return job.inviteWorker(ls);
