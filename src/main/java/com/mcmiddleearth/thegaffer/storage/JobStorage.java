@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Maps a {@link Job} to/from a Bukkit {@link YamlConfiguration}. Only the
@@ -33,7 +34,7 @@ public class JobStorage {
     public static YamlConfiguration toYaml(Job job) {
         YamlConfiguration c = new YamlConfiguration();
         c.set("name", job.getName());
-        c.set("owner", job.getOwner());
+        c.set("owner", job.getOwner() == null ? null : job.getOwner().toString());
         c.set("running", job.isRunning());
         c.set("paused", job.isPaused());
         c.set("private", job.isPrivate());
@@ -47,10 +48,10 @@ public class JobStorage {
             c.set("discordTags", new ArrayList<>(Arrays.asList(job.getDiscordTags())));
         }
         c.set("project", job.getProjectname());
-        c.set("helpers", job.getHelpers());
-        c.set("workers", job.getWorkers());
-        c.set("bannedWorkers", job.getBannedWorkers());
-        c.set("invitedWorkers", job.getInvitedWorkers());
+        c.set("helpers", toStrings(job.getHelpers()));
+        c.set("workers", toStrings(job.getWorkers()));
+        c.set("bannedWorkers", toStrings(job.getBannedWorkers()));
+        c.set("invitedWorkers", toStrings(job.getInvitedWorkers()));
 
         JobWarp w = job.getWarp();
         if (w != null) {
@@ -76,7 +77,13 @@ public class JobStorage {
     public static Job fromYaml(YamlConfiguration c) {
         Job job = new Job();
         job.setName(c.getString("name"));
-        job.setOwner(c.getString("owner"));
+        String ownerId = c.getString("owner");
+        if (ownerId != null) {
+            try {
+                job.setOwner(UUID.fromString(ownerId));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
         job.setRunning(c.getBoolean("running"));
         job.setPaused(c.getBoolean("paused"));
         job.setPrivate(c.getBoolean("private"));
@@ -90,10 +97,10 @@ public class JobStorage {
             job.setDiscordTags(c.getStringList("discordTags").toArray(new String[0]));
         }
         job.setProjectname(c.getString("project"));
-        job.setHelpers(new ArrayList<>(c.getStringList("helpers")));
-        job.setWorkers(new ArrayList<>(c.getStringList("workers")));
-        job.setBannedWorkers(new ArrayList<>(c.getStringList("bannedWorkers")));
-        job.setInvitedWorkers(new ArrayList<>(c.getStringList("invitedWorkers")));
+        job.setHelpers(toUuids(c.getStringList("helpers")));
+        job.setWorkers(toUuids(c.getStringList("workers")));
+        job.setBannedWorkers(toUuids(c.getStringList("bannedWorkers")));
+        job.setInvitedWorkers(toUuids(c.getStringList("invitedWorkers")));
 
         if (c.contains("warp")) {
             JobWarp w = new JobWarp();
@@ -122,5 +129,24 @@ public class JobStorage {
             job.setKit(kit);
         }
         return job;
+    }
+
+    private static List<String> toStrings(List<UUID> ids) {
+        List<String> out = new ArrayList<>();
+        for (UUID id : ids) {
+            out.add(id.toString());
+        }
+        return out;
+    }
+
+    private static ArrayList<UUID> toUuids(List<String> strings) {
+        ArrayList<UUID> out = new ArrayList<>();
+        for (String s : strings) {
+            try {
+                out.add(UUID.fromString(s));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return out;
     }
 }

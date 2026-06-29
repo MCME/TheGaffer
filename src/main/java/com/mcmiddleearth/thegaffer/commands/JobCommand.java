@@ -198,7 +198,7 @@ public class JobCommand implements TabExecutor {
                             Job job = JobDatabase.getActiveJobs().get(jobName);
                             out = out.append(Component.newline())
                                     .append(Msg.button(jobName, NamedTextColor.AQUA, "/job join " + jobName, "Click to join " + jobName))
-                                    .append(Component.text(" with " + job.getOwner() + " (" + job.getWorkers().size() + ")", NamedTextColor.GRAY));
+                                    .append(Component.text(" with " + Util.nameOf(job.getOwner()) + " (" + job.getWorkers().size() + ")", NamedTextColor.GRAY));
                         }
                         player.sendMessage(out);
                     } else {
@@ -314,7 +314,7 @@ public class JobCommand implements TabExecutor {
                             if (!first) {
                                 out.append("\n");
                             }
-                            out.append(ChatColor.AQUA).append(job.getName()).append(ChatColor.GRAY).append(" with ").append(job.getOwner()).append(" (").append(job.getWorkers().size()).append(")");
+                            out.append(ChatColor.AQUA).append(job.getName()).append(ChatColor.GRAY).append(" with ").append(Util.nameOf(job.getOwner())).append(" (").append(job.getWorkers().size()).append(")");
                             if (first) {
                                 first = false;
                             }

@@ -23,6 +23,7 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
+import com.mcmiddleearth.thegaffer.utilities.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -33,6 +34,7 @@ import org.bukkit.inventory.PlayerInventory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -109,7 +111,11 @@ public class AdminMethods {
     }
 
     public String listworkers() {
-        return String.join("\n",job.getWorkers().toArray(new String[job.getWorkers().size()]));
+        List<String> names = new ArrayList<>();
+        for (UUID id : job.getWorkers()) {
+            names.add(Util.nameOf(id));
+        }
+        return String.join("\n", names);
     }
 
     public GafferResponses.GafferResponse inviteworker(String arg) {
@@ -117,7 +123,7 @@ public class AdminMethods {
         for (String pname : arg.split(",")) {
             ls.add(Bukkit.getOfflinePlayer(pname));
             if (Bukkit.getOfflinePlayer(pname).isOnline()) {
-                Bukkit.getOfflinePlayer(pname).getPlayer().sendMessage(Component.text(job.getOwner(), NamedTextColor.AQUA)
+                Bukkit.getOfflinePlayer(pname).getPlayer().sendMessage(Component.text(Util.nameOf(job.getOwner()), NamedTextColor.AQUA)
                         .append(Component.text(" has invited you to ", NamedTextColor.GRAY))
                         .append(Component.text(job.getName(), NamedTextColor.GREEN)));
             }
@@ -141,7 +147,7 @@ public class AdminMethods {
     public Object setkit() {
         JobKit kit = new JobKit(p.getInventory());
         job.setKit(kit);
-        for (String pname : job.getWorkers()) {
+        for (UUID pname : job.getWorkers()) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(pname).isOnline()) {
                 job.getKit().replaceInventory(TheGaffer.getServerInstance().getOfflinePlayer(pname).getPlayer());
             }
