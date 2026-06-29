@@ -21,6 +21,7 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import java.util.ArrayList;
@@ -29,6 +30,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -65,15 +69,17 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
 
                                 JobDatabase.deactivateJob(JobDatabase.getActiveJobs().get(jobname));
-                                player.sendMessage(ChatColor.GRAY + "Successfully closed the " + ChatColor.AQUA + jobname + ChatColor.GRAY + " job.");
+                                player.sendMessage(Component.text("Successfully closed the ", NamedTextColor.GRAY)
+                                        .append(Component.text(jobname, NamedTextColor.AQUA))
+                                        .append(Component.text(" job.", NamedTextColor.GRAY)));
                             } else {
-                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                                player.sendMessage(Component.text("No job found by that name.", NamedTextColor.RED));
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                            player.sendMessage(Component.text("You must provide a job name.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED + "You don't have permission.");
+                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                     }
                     return true;
                 }
@@ -84,15 +90,15 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
                                 target.pauseJob(player.getName());
-                                player.sendMessage(ChatColor.GREEN + "Paused " + target.getName());
+                                player.sendMessage(Component.text("Paused " + target.getName(), NamedTextColor.GREEN));
                             } else {
-                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                                player.sendMessage(Component.text("No job found by that name.", NamedTextColor.RED));
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                            player.sendMessage(Component.text("You must provide a job name.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED + "You don't have permission.");
+                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                     }
                     return true;
                 }
@@ -103,15 +109,15 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
                                 target.unpauseJob(player.getName());
-                                player.sendMessage(ChatColor.GREEN + "Un paused " + target.getName());
+                                player.sendMessage(Component.text("Un paused " + target.getName(), NamedTextColor.GREEN));
                             } else {
-                                player.sendMessage(ChatColor.RED + "No job found by that name.");
+                                player.sendMessage(Component.text("No job found by that name.", NamedTextColor.RED));
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "You must provide a job name.");
+                            player.sendMessage(Component.text("You must provide a job name.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED + "You don't have permission.");
+                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                     }
                     return true;
                 }
@@ -120,15 +126,15 @@ public class JobCommand implements TabExecutor {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                     if (TheGaffer.getListening().contains(player)) {
                         TheGaffer.getListening().remove(player);
-                        player.sendMessage(ChatColor.GREEN + "Removed from protection listening.");
+                        player.sendMessage(Component.text("Removed from protection listening.", NamedTextColor.GREEN));
                         player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
                     } else {
                         TheGaffer.getListening().add(player);
-                        player.sendMessage(ChatColor.GREEN + "Added to protection listening, you will now be notified when someone tries to edit the map outside of a job.");
+                        player.sendMessage(Component.text("Added to protection listening, you will now be notified when someone tries to edit the map outside of a job.", NamedTextColor.GREEN));
                         player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.5f);
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You don't have permission.");
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -139,20 +145,20 @@ public class JobCommand implements TabExecutor {
                         player.getInventory().clear();
                         player.getInventory().setArmorContents(holder.getArmorContents());
                         player.getInventory().setContents(holder.getContents());
-                        player.sendMessage(ChatColor.GREEN + "Recovered previous inventory.");
+                        player.sendMessage(Component.text("Recovered previous inventory.", NamedTextColor.GREEN));
                         invs.remove(player);
                         player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
                         player.updateInventory();
                     } else {
                         invs.put(player, new InvHolder(player.getInventory()));
                         player.getInventory().clear();
-                        player.sendMessage(ChatColor.GREEN + "Stored your inventory.");
-                        player.sendMessage(ChatColor.GREEN + "When ready, run this command again to get your inventory back.");
+                        player.sendMessage(Component.text("Stored your inventory.", NamedTextColor.GREEN));
+                        player.sendMessage(Component.text("When ready, run this command again to get your inventory back.", NamedTextColor.GREEN));
                         player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.5f);
                         player.updateInventory();
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You don't have permission.");
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -162,33 +168,44 @@ public class JobCommand implements TabExecutor {
             }
             if (args[0].equalsIgnoreCase("debug")) {
                 if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
-                    StringBuilder out = new StringBuilder();
-                    out.append(ChatColor.DARK_PURPLE).append(ChatColor.BOLD).append("TheGaffer Debug").append("\n");
-                    out.append(ChatColor.GRAY).append("Number of active jobs: ").append(ChatColor.AQUA).append(JobDatabase.getActiveJobs().size()).append("\n");
-                    out.append(ChatColor.GRAY).append("Number of inactive jobs: ").append(ChatColor.AQUA).append(JobDatabase.getInactiveJobs().size()).append("\n");
-                    out.append(ChatColor.GRAY).append("Number of jobs timing out: ").append(ChatColor.AQUA).append(CleanupUtil.getWaiting().size()).append("\n");
-                    out.append(ChatColor.GRAY).append("Join permission: ").append(ChatColor.AQUA).append(PermissionsUtil.getJoinPermission().getName()).append("\n");
-                    out.append(ChatColor.GRAY).append("Ignore protection permission: ").append(ChatColor.AQUA).append(PermissionsUtil.getIgnoreWorldProtection().getName()).append("\n");
-                    out.append(ChatColor.GRAY).append("Create permission: ").append(ChatColor.AQUA).append(PermissionsUtil.getCreatePermission().getName()).append("\n");
-                    player.sendMessage(out.toString());
+                    player.sendMessage(Component.text("TheGaffer Debug", NamedTextColor.DARK_PURPLE, TextDecoration.BOLD)
+                            .append(Component.newline())
+                            .append(Component.text("Number of active jobs: ", NamedTextColor.GRAY))
+                            .append(Component.text(String.valueOf(JobDatabase.getActiveJobs().size()), NamedTextColor.AQUA))
+                            .append(Component.newline())
+                            .append(Component.text("Number of inactive jobs: ", NamedTextColor.GRAY))
+                            .append(Component.text(String.valueOf(JobDatabase.getInactiveJobs().size()), NamedTextColor.AQUA))
+                            .append(Component.newline())
+                            .append(Component.text("Number of jobs timing out: ", NamedTextColor.GRAY))
+                            .append(Component.text(String.valueOf(CleanupUtil.getWaiting().size()), NamedTextColor.AQUA))
+                            .append(Component.newline())
+                            .append(Component.text("Join permission: ", NamedTextColor.GRAY))
+                            .append(Component.text(PermissionsUtil.getJoinPermission().getName(), NamedTextColor.AQUA))
+                            .append(Component.newline())
+                            .append(Component.text("Ignore protection permission: ", NamedTextColor.GRAY))
+                            .append(Component.text(PermissionsUtil.getIgnoreWorldProtection().getName(), NamedTextColor.AQUA))
+                            .append(Component.newline())
+                            .append(Component.text("Create permission: ", NamedTextColor.GRAY))
+                            .append(Component.text(PermissionsUtil.getCreatePermission().getName(), NamedTextColor.AQUA)));
                 }
                 return true;
             }
             if (args[0].equalsIgnoreCase("check")) {
                 if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
                     if (JobDatabase.getActiveJobs().size() > 0) {
-                        StringBuilder out = new StringBuilder();
-                        out.append(ChatColor.GRAY).append("Running Jobs:");
+                        Component out = Component.text("Running Jobs:", NamedTextColor.GRAY);
                         for (String jobName : JobDatabase.getActiveJobs().keySet()) {
                             Job job = JobDatabase.getActiveJobs().get(jobName);
-                            out.append("\n").append(ChatColor.AQUA).append(jobName).append(ChatColor.GRAY).append(" with ").append(job.getOwner()).append(" (").append(job.getWorkers().size()).append(")");
+                            out = out.append(Component.newline())
+                                    .append(Msg.button(jobName, NamedTextColor.AQUA, "/job join " + jobName, "Click to join " + jobName))
+                                    .append(Component.text(" with " + job.getOwner() + " (" + job.getWorkers().size() + ")", NamedTextColor.GRAY));
                         }
-                        player.sendMessage(out.toString());
+                        player.sendMessage(out);
                     } else {
-                        player.sendMessage(ChatColor.GRAY + "No jobs currently running.");
+                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.GRAY));
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You don't have permission.");
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -203,21 +220,22 @@ public class JobCommand implements TabExecutor {
                                                  JobDatabase.getActiveJobs().firstEntry().getValue());
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
-                                    player.sendMessage(ChatColor.GRAY + "You have joined the job " + ChatColor.AQUA + jobToJoin.getName());
+                                    player.sendMessage(Component.text("You have joined the job ", NamedTextColor.GRAY)
+                                            .append(Component.text(jobToJoin.getName(), NamedTextColor.AQUA)));
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()));
+                                    player.sendMessage(Component.text("Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()), NamedTextColor.RED));
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "No job running by the name of `" + args[1] + "`");
+                                player.sendMessage(Component.text("No job running by the name of `" + args[1] + "`", NamedTextColor.RED));
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to join.");
+                            player.sendMessage(Component.text("You must provide the name of the job you would like to join.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You do not have permission.");
+                    player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -228,18 +246,19 @@ public class JobCommand implements TabExecutor {
                         if(jobToLeave != null) {
                             GafferResponse resp = jobToLeave.leaveJob(player);
                             if (resp.isSuccessful()) {
-                                player.sendMessage(ChatColor.GRAY + "You left the job " + ChatColor.AQUA + jobToLeave.getName());
+                                player.sendMessage(Component.text("You left the job ", NamedTextColor.GRAY)
+                                        .append(Component.text(jobToLeave.getName(), NamedTextColor.AQUA)));
                             } else {
-                                player.sendMessage(ChatColor.RED + "Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToLeave.getName()));
+                                player.sendMessage(Component.text("Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToLeave.getName()), NamedTextColor.RED));
                             }
                         }else{
-                            player.sendMessage(ChatColor.RED+"You are not part of a job.");
+                            player.sendMessage(Component.text("You are not part of a job.", NamedTextColor.RED));
                         }
                     }else {
-                        player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
                     }
                 }else{
-                    player.sendMessage(ChatColor.RED+"You do not have permission.");
+                    player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -252,10 +271,10 @@ public class JobCommand implements TabExecutor {
                         Job jobToJoin = JobDatabase.getInactiveJobs().get(args[1]);
                         player.sendMessage(jobToJoin.getInfo());
                     } else {
-                        player.sendMessage(ChatColor.RED + "No job found by the name of `" + args[1] + "`");
+                        player.sendMessage(Component.text("No job found by the name of `" + args[1] + "`", NamedTextColor.RED));
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "What job would you like to get info on?");
+                    player.sendMessage(Component.text("What job would you like to get info on?", NamedTextColor.RED));
                 }
                 return true;
             }
@@ -266,24 +285,27 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(args[1])) {
                                 Job jobToJoin = JobDatabase.getActiveJobs().get(args[1]);
                                 player.teleport(jobToJoin.getWarp().toBukkitLocation());
-                                player.sendMessage(ChatColor.GRAY + "Warped to " + ChatColor.AQUA + jobToJoin.getName());
+                                player.sendMessage(Component.text("Warped to ", NamedTextColor.GRAY)
+                                        .append(Component.text(jobToJoin.getName(), NamedTextColor.AQUA)));
                             } else {
-                                player.sendMessage(ChatColor.RED + "No job running by the name of `" + args[1] + "`");
+                                player.sendMessage(Component.text("No job running by the name of `" + args[1] + "`", NamedTextColor.RED));
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "You must provide the name of the job you would like to warp to.");
+                            player.sendMessage(Component.text("You must provide the name of the job you would like to warp to.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED + "No jobs currently running.");
+                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You do not have permission.");
+                    player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
             if (args[0].equalsIgnoreCase("archive")) {
                 if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
                     if (JobDatabase.getInactiveJobs().size() > 0) {
+                        // Archive uses ChatPaginator, which works on legacy strings, so this
+                        // listing stays ChatColor-based (paginated output, not interactive).
                         StringBuilder out = new StringBuilder();
                         int pageNum = 1;
                         boolean first = true;
@@ -308,10 +330,10 @@ public class JobCommand implements TabExecutor {
                         player.sendMessage(ChatColor.AQUA + "Job Archive Page: " + page.getPageNumber() + " of " + page.getTotalPages());
                         player.sendMessage(page.getLines());
                     } else {
-                        player.sendMessage(ChatColor.GRAY + "No jobs found in archive.");
+                        player.sendMessage(Component.text("No jobs found in archive.", NamedTextColor.GRAY));
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "You don't have permission.");
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                 }
                 return true;
             }
