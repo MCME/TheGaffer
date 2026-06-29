@@ -37,6 +37,9 @@ class JobStatsStorageTest {
         assertEquals("river", loaded.getName());
         assertEquals(owner, loaded.getOwner());
         assertEquals("nothing", loaded.getProject());
+        assertEquals("world", loaded.getWorld());
+        assertEquals(10, loaded.getCenterX());
+        assertEquals(-20, loaded.getCenterZ());
         assertEquals(100, loaded.getRadius());
         assertEquals(4000L, loaded.getDurationMillis());
         assertTrue(loaded.getParticipants().contains(builder));
