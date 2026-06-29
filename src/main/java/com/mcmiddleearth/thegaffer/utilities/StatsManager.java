@@ -2,6 +2,7 @@ package com.mcmiddleearth.thegaffer.utilities;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.storage.JobStatsStorage;
 
@@ -155,7 +156,7 @@ public class StatsManager {
      */
     public static void loadActive() {
         for (JobStats s : JobStatsStorage.readAll(activeDir())) {
-            if (com.mcmiddleearth.thegaffer.storage.JobDatabase.getActiveJobs().containsKey(s.getName())) {
+            if (JobDatabase.getActiveJobs().containsKey(s.getName())) {
                 live.put(s.getName(), s);
             }
         }

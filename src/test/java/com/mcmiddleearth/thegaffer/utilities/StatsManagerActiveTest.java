@@ -39,7 +39,7 @@ class StatsManagerActiveTest {
         StatsManager.recordPlace("river", builder);
 
         StatsManager.flushActive(false);   // sync write into tmp/active/river-0.yml
-        StatsManager.reset();              // simulates restart wiping memory (clears live, keeps override)
+        StatsManager.reset();              // wipe in-memory state (override is unaffected — it was set in setUp)
         StatsManager.loadActiveForTest("river");
 
         JobStats reloaded = StatsManager.getLive("river");
