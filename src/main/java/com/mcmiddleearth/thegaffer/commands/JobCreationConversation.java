@@ -24,6 +24,8 @@ import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.io.File;
 import java.util.ArrayList;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -63,8 +65,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             if (sender instanceof Player) {
                 Job current = JobDatabase.getJobWorking((Player) sender);
                 if (current != null) {
-                    sender.sendMessage(ChatColor.RED + "You are already in the job " + ChatColor.AQUA + current.getName()
-                            + ChatColor.RED + " - leave or stop it before creating a new one.");
+                    sender.sendMessage(Component.text("You are already in the job ", NamedTextColor.RED)
+                            .append(Component.text(current.getName(), NamedTextColor.AQUA))
+                            .append(Component.text(" - leave or stop it before creating a new one.", NamedTextColor.RED)));
                     return true;
                 }
             }
