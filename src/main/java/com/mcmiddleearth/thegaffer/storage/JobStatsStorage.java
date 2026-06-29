@@ -16,6 +16,11 @@ import java.util.UUID;
 /** Serializes JobStats to/from YAML and reads finished records from a folder. */
 public class JobStatsStorage {
 
+    /** Canonical filename for a record: {@code <name>-<endTime>.yml}. Active snapshots use endTime 0. */
+    public static String recordFileName(String jobName, long endTime) {
+        return jobName + "-" + endTime + TheGaffer.getFileExtension();
+    }
+
     public static YamlConfiguration toYaml(JobStats s) {
         YamlConfiguration c = new YamlConfiguration();
         c.set("name", s.getName());
@@ -64,7 +69,7 @@ public class JobStatsStorage {
     /** Builds the YAML on the calling (main) thread; writes async unless async==false. */
     public static void save(JobStats s, File dir, boolean async) {
         final YamlConfiguration config = toYaml(s);
-        final File target = new File(dir, s.getName() + "-" + s.getEndTime() + TheGaffer.getFileExtension());
+        final File target = new File(dir, recordFileName(s.getName(), s.getEndTime()));
         Runnable write = () -> {
             if (!dir.exists()) { dir.mkdirs(); }
             File tmp = new File(dir, target.getName() + ".new");
