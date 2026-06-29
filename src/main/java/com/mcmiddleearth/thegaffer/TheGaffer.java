@@ -27,6 +27,7 @@ import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import com.mcmiddleearth.thegaffer.utilities.Util;
@@ -54,7 +55,7 @@ public class TheGaffer extends JavaPlugin {
     static File pluginDataFolder;
     static String fileSeperator = System.getProperty("file.separator");
 
-    static String fileExtension = ".job";
+    static String fileExtension = ".yml";
     static boolean debug = false;
     //@Getter
     static Configuration pluginConfig;
@@ -78,16 +79,9 @@ public class TheGaffer extends JavaPlugin {
         pluginDataFolder = pluginInstance.getDataFolder();
         setupConfig();
 
+        int jobsLoaded = JobDatabase.loadJobs();
+        Util.info("Loaded " + jobsLoaded + " jobs.");
 
-        /*
-        try {
-            int jobsLoaded = JobDatabase.loadJobs();
-            Util.info("Loaded " + jobsLoaded + " jobs.");
-        } catch (IOException ex) {
-            Util.severe(ex.getMessage());
-        }
-        
-         */
         getCommand("createjob").setExecutor(new JobCreationConversation());
         getCommand("job").setExecutor(new JobCommand());
         getCommand("jobadmin").setExecutor(new JobAdminConversation());
@@ -113,6 +107,23 @@ public class TheGaffer extends JavaPlugin {
                 CleanupUtil.scheduledAbandonersCleanup();
             }
         }.runTaskTimer(this, 0, (5 * 60) * 20);
+
+        // Persist dirty jobs every 60s. The YAML snapshot is built on the main
+        // thread inside the task; only the file write itself runs off-thread.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                JobDatabase.saveAllDirty(true);
+            }
+        }.runTaskTimer(this, 60 * 20, 60 * 20);
+    }
+
+    @Override
+    public void onDisable() {
+        // Stop the scheduled tasks, then flush any unsaved jobs synchronously
+        // (the scheduler can no longer run async tasks during shutdown).
+        getServer().getScheduler().cancelTasks(this);
+        JobDatabase.saveAllDirty(false);
     }
 
     public static void setupConfig() {
