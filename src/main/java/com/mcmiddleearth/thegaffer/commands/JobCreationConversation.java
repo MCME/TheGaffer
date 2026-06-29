@@ -235,9 +235,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
     }
 
     public Prompt newTeamspeakOrDiscordOrFinishPrompt() {
-        if (TheGaffer.isTSenabled()) {
-            return new tsPrompt();
-        }
         if (TheGaffer.isDiscordEnabled()) {
             return new discordAnnouncePrompt();
         }
@@ -255,7 +252,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("setkit", input);
-            //return new tsPrompt();
             return newTeamspeakOrDiscordOrFinishPrompt();//new discordAnnouncePrompt();
         }
 
@@ -311,76 +307,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 return new GlowEffectPrompt();
             }
             return new finishedPrompt();
-        }
-
-    }
-
-    private class tsPrompt extends StringPrompt {
-
-        public ArrayList<String> Lobbies = new ArrayList<String>();
-
-        @Override
-        public Prompt acceptInput(ConversationContext context, String input) {
-            if (TheGaffer.isTSenabled()) {
-                if (Lobbies.contains(input) || input.equalsIgnoreCase("0")) {
-                    context.setSessionData("setTs", input);
-                    return newDiscordOrFinishedPrompt();
-                }
-                return new TSfailPrompt();
-            } else {
-                context.setSessionData("setTs", input);
-            }
-            return newDiscordOrFinishedPrompt();
-        }
-
-        private Prompt newDiscordOrFinishedPrompt() {
-            if (TheGaffer.isDiscordEnabled()) {
-                return new discordAnnouncePrompt();
-            } 
-            if (TheGaffer.isProjectsEnabled()) {
-                return new projectPrompt();
-            } 
-            if (TheGaffer.isGlowing()) {
-                return new GlowEffectPrompt();
-            }
-            return new finishedPrompt();
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            if (TheGaffer.isTSenabled()) {
-                try {
-                    String dbPath = System.getProperty("user.dir") + "/plugins/TheGaffer/LobbyDB";
-                    Scanner s;
-                    s = new Scanner(new File(dbPath + "/lobbies.txt"));
-                    while (s.hasNext()) {
-                        Lobbies.add(s.nextLine());
-                    }
-                    s.close();
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(JobCreationConversation.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                String returner = "What is the name of the TeamSpeak channel? (0 for none) \n Current lobbies: " + ChatColor.AQUA + "\n";
-                for (String channel : Lobbies) {
-                    returner += channel + ", ";
-                }
-                return returner;
-            }
-            return "What is the name of the TeamSpeak channel? (0 for none)";
-        }
-
-    }
-
-    private class TSfailPrompt extends MessagePrompt {
-
-        @Override
-        protected Prompt getNextPrompt(ConversationContext context) {
-            return new tsPrompt();
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            return "That TeamSpeak channel doesn't exist!";
         }
 
     }
@@ -441,11 +367,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            String ts = (context.getSessionData("setTS") != null ? (String) context.getSessionData("setTs") : "");
             String jobname = (String) context.getSessionData("jobname");
             String owner = ((Player) context.getForWhom()).getName();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
-            JobWarp tsWarp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
@@ -459,7 +383,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 glowing = (boolean) temp;
             }
             Job jerb = new Job(jobname, description, owner, true, warp, warp.getWorld(), Private, radius,
-                    discordSend, discordTags, ts, tsWarp, project);
+                    discordSend, discordTags, project);
             if (glowing) {
                 jerb.setGlowing();
             }

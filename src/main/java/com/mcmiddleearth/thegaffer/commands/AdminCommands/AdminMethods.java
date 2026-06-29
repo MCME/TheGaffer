@@ -61,8 +61,6 @@ public class AdminMethods {
         Methods.put("setradius", 1);
         Methods.put("setkit", 0);
         Methods.put("clearworkerinven", 0);
-        Methods.put("setTeamSpeakwarp", 0);
-        Methods.put("setTeamSpeakchannel", 1);
     }
 
     public GafferResponses.GafferResponse addhelper(String arg) {
@@ -159,18 +157,4 @@ public class AdminMethods {
         return true;
     }
 
-    public Object setteamspeakwarp() {
-        JobWarp tswarp = new JobWarp((p.getLocation()));
-        job.setTsWarp(tswarp);
-        job.setDirty(true);
-        //JobDatabase.saveJobs();
-        return true;
-    }
-
-    public Object setteamspeakchannel(String arg) {
-        if (TheGaffer.isTSenabled()) {
-            job.setTs(String.valueOf(arg));
-        }
-        return true;
-    }
 }

@@ -59,8 +59,6 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("setradius");
         actions.add("setkit");
         actions.add("clearworkerinven");
-        actions.add("setTeamSpeakwarp");
-        actions.add("setTeamSpeakchannel");
         Collections.sort(actions);
     }
 
@@ -224,12 +222,6 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 }
                 case "clearworkerinven": {
                     return new clearinven();
-                }
-                case "setTeamSpeakwarp": {
-                    return new setTeamSpeakwarp();
-                }
-                case "setTeamSpeakchannel": {
-                    return new setTSchannel();
                 }
                 default: {
                     return new whichActionPrompt();
@@ -432,35 +424,4 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             return "Cleared workers' inventories";
         }
     }
-    private class setTeamSpeakwarp extends MessagePrompt {
-
-        @Override
-        public Prompt getNextPrompt(ConversationContext context) {
-            AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.setteamspeakwarp();
-            return Prompt.END_OF_CONVERSATION;
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            return "Set the TeamSpeak warp:";
-        }
-    }
-    private class setTSchannel extends StringPrompt {
-        @Override
-        public Prompt acceptInput(ConversationContext context, String input) {
-            AdminMethods am = (AdminMethods) context.getSessionData("am");
-            return new responsePrompt(GenericResponse.SUCCESS, this);
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            if(TheGaffer.isTSenabled()){
-                return "Enter the name of the Channel, 0 for none";
-            }else{
-                return "Unavailable";
-            }
-        }
-    }
-
 }
