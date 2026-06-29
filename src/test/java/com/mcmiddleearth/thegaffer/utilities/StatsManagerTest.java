@@ -60,5 +60,13 @@ class StatsManagerTest {
         assertEquals(bob, top.get(1).getId());     //  50 placed
         assertEquals(125, StatsManager.getPlayerTotals(alice).getPlaced());
         assertEquals(2, StatsManager.getPlayerTotals(alice).getJobs());
+
+        // ACTIVE sort: alice is in 2 jobs, bob in 1
+        java.util.List<StatsManager.PlayerAggregate> byActive =
+                StatsManager.getLeaderboard(StatsManager.SortKey.ACTIVE, 10);
+        assertEquals(alice, byActive.get(0).getId());
+
+        // limit truncation
+        assertEquals(1, StatsManager.getLeaderboard(StatsManager.SortKey.PLACED, 1).size());
     }
 }
