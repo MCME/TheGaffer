@@ -35,7 +35,6 @@ import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
@@ -166,16 +165,6 @@ public class TheGaffer extends JavaPlugin {
             }
         }
         TheGaffer.getPluginInstance().saveDefaultConfig();
-    }
-
-    public static boolean isProjectsEnabled() {
-
-        if (Bukkit.getServer().getPluginManager().getPlugin("McMeProject") != null) {
-            return true;
-        } else {
-            return false;
-        }
-
     }
 
     public static void scheduleOwnerTimeout(Job job) {
