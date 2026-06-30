@@ -180,6 +180,54 @@ public class GafferResponses {
         }
     }
 
+    /**
+     * Carries the concrete radius value so confirmation messages can say
+     * "Job area radius set to N (a 2N×2N area)." rather than a generic phrase.
+     */
+    public static final class SetRadiusResponse implements GafferResponse {
+
+        private final int radius;
+
+        public SetRadiusResponse(int radius) {
+            this.radius = radius;
+        }
+
+        public int getRadius() {
+            return radius;
+        }
+
+        @Override
+        public String getMessage() {
+            int diam = radius * 2;
+            return "Job area radius set to " + radius + " (a " + diam + "×" + diam + " area).";
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return true;
+        }
+    }
+
+    /** A lightweight failure-only response for validation errors (no enum constant needed). */
+    public static final class ValidationFailureResponse implements GafferResponse {
+
+        private final String message;
+
+        public ValidationFailureResponse(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+    }
+
     public interface GafferResponse {
 
         String getMessage();

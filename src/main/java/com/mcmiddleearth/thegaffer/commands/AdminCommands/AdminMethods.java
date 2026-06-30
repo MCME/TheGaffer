@@ -156,9 +156,20 @@ public class AdminMethods {
         return job.uninviteWorker(ls);
     }
 
-    public Object setradius(String arg) {
-        job.updateJobRadius(Integer.parseInt(arg));
-        return true;
+    public GafferResponses.GafferResponse setradius(String arg) {
+        int radius;
+        try {
+            radius = Integer.parseInt(arg);
+        } catch (NumberFormatException e) {
+            return new GafferResponses.ValidationFailureResponse(
+                    "Radius must be a whole number between 1 and 1000.");
+        }
+        if (radius < 1 || radius > 1000) {
+            return new GafferResponses.ValidationFailureResponse(
+                    "Radius must be a whole number between 1 and 1000.");
+        }
+        job.updateJobRadius(radius);
+        return new GafferResponses.SetRadiusResponse(radius);
     }
 
     public Object clearworkerinven() {

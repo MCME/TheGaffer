@@ -16,7 +16,6 @@
 package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
-import com.mcmiddleearth.thegaffer.GafferResponses.GenericResponse;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
@@ -404,11 +403,24 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
     private class setRadiusPrompt extends NumericPrompt {
 
         @Override
+        public boolean isNumberValid(ConversationContext context, Number input) {
+            int v = input.intValue();
+            return v >= 1 && v <= 1000;
+        }
+
+        @Override
+        public String getFailedValidationText(ConversationContext context, String invalidInput) {
+            return PromptStyle.ERROR + "Radius must be a whole number between 1 and 1000.";
+        }
+
+        @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
+            int radius = input.intValue();
             context.setSessionData("jobradius", input);
             AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.setradius(String.valueOf(input));
-            return new responsePrompt(GenericResponse.SUCCESS, this);
+            // Use the validated AdminMethods path so the single shared validator runs.
+            GafferResponse result = am.setradius(String.valueOf(radius));
+            return new responsePrompt(result, this);
         }
 
         @Override
