@@ -61,10 +61,12 @@ public class JobAdminCommands implements TabExecutor{
         "clearworkerinven", "bringall", "listworkers"
     );
 
-    // Player-taking actions (Methods value == 1)
+    // Player-taking actions (Methods value == 1, arg is a player name). NOTE: setradius
+    // also takes one arg but it's a NUMBER, so it is deliberately excluded — its tab-complete
+    // should not offer player names.
     private static final List<String> PLAYER_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
-        "inviteworker", "uninviteworker", "setradius"
+        "inviteworker", "uninviteworker"
     );
 
     @Override
