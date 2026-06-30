@@ -25,16 +25,22 @@ class ProjectCommandTest {
         server = MockBukkit.mock();
         Field f = TheGaffer.class.getDeclaredField("serverInstance");
         f.setAccessible(true); f.set(null, server);
-        ProjectDatabase.projectsDirOverride = tmp;
+        setStorageField("projectsDirOverride", tmp);
         ProjectDatabase.getProjects().clear();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        ProjectDatabase.projectsDirOverride = null;
+        setStorageField("projectsDirOverride", null);
         Field f = TheGaffer.class.getDeclaredField("serverInstance");
         f.setAccessible(true); f.set(null, null);
         MockBukkit.unmock();
+    }
+
+    private static void setStorageField(String name, Object value) throws Exception {
+        Field f = ProjectDatabase.class.getDeclaredField(name);
+        f.setAccessible(true);
+        f.set(null, value);
     }
 
     @Test
