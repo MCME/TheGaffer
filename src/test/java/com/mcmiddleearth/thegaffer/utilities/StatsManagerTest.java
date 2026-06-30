@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StatsManagerTest {
 
@@ -72,11 +73,13 @@ class StatsManagerTest {
 
     @Test
     void discordSummaryContainsTotals() {
-        JobStats s = new JobStats("river", java.util.UUID.randomUUID(), "p", "world", 0, 0, 10, 0L, 3600000L);
-        s.recordPlace(java.util.UUID.randomUUID(), 1200);
+        JobStats s = new JobStats("river", UUID.randomUUID(), "p", "world", 0, 0, 10, 0L, 3600000L);
+        s.recordPlace(UUID.randomUUID(), 1200);
         String msg = StatsManager.buildDiscordSummary(s);
-        org.junit.jupiter.api.Assertions.assertTrue(msg.contains("river"));
-        org.junit.jupiter.api.Assertions.assertTrue(msg.contains("1200"));
-        org.junit.jupiter.api.Assertions.assertTrue(msg.contains("1h 0m"));
+        assertTrue(msg.contains("river"));
+        assertTrue(msg.contains("1200"));
+        assertTrue(msg.contains("1h 0m"));
+        assertTrue(msg.contains("Builders: 1")); // recordPlace adds the builder as a participant
+        assertTrue(msg.contains("0 broken"));    // no breaks recorded
     }
 }
