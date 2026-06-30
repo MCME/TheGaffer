@@ -249,6 +249,7 @@ public class StatsManager {
 
     /** Plain-text recap for the Discord job-end post. Pure (no Bukkit/JDA), so it's unit-testable. */
     public static String buildDiscordSummary(JobStats s) {
+        // Leading spaces match the onJobStart Discord recap layout.
         return "__**Recap:**__ **" + s.getName() + "**"
                 + "\n        Builders: " + s.getParticipants().size()
                 + "\n        Blocks: " + s.getTotalPlaced() + " placed, " + s.getTotalBroke() + " broken"
