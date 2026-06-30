@@ -18,6 +18,7 @@ package com.mcmiddleearth.thegaffer.listeners;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
+import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
@@ -31,8 +32,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +45,27 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        event.getPlayer().setGlowing(false);
-        if (!JobDatabase.getActiveJobs().isEmpty() && event.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
-            event.getPlayer().sendMessage(Component.text("There is a job running! ", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+        Player player = event.getPlayer();
+        player.setGlowing(false);
+        if (!JobDatabase.getActiveJobs().isEmpty() && player.hasPermission(PermissionsUtil.getJoinPermission())) {
+            player.sendMessage(Component.text("There is a job running! ", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
                     .append(Msg.button("[Click to check]", NamedTextColor.AQUA, "/job check", "Run /job check")));
-            event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
         }
+        // Restore the job border for players who relog while in a job.
+        JobBorderManager.refresh(player);
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        // Reapply (or clear) the job border when the player moves between worlds.
+        JobBorderManager.refresh(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        // The client-side border vanishes on disconnect; just clean up our tracking set.
+        JobBorderManager.forget(event.getPlayer().getUniqueId());
     }
 
     private List<UUID> playersSwitchedToCreative = new ArrayList<>();

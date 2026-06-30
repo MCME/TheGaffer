@@ -52,3 +52,7 @@ glowing:
   enabled: true
   workerColor: DARK_PURPLE
   helperColor: AQUA
+# Show players a client-side world border marking the job's build area while they are
+# in a job. Purely visual (no damage / no blocking). Players can also toggle it per-person
+# with /job border. Set false to disable the feature server-wide.
+showJobBorder: true

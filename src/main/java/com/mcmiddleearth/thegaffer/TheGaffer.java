@@ -70,6 +70,7 @@ public class TheGaffer extends JavaPlugin {
     static String discordJobEmoji;
     static boolean discordEnabled;
     static boolean jobKitsEnabled;
+    static boolean jobBorderEnabled;
     static boolean jobDescription;
     static boolean glowing;
     static String helperColor;
@@ -147,6 +148,7 @@ public class TheGaffer extends JavaPlugin {
         discordEnabled = pluginConfig.contains("discord");
         discordChannel = pluginConfig.getString("discord.channel", null);
         discordJobEmoji = pluginConfig.getString("discord.emoji", "");
+        jobBorderEnabled = pluginConfig.getBoolean("showJobBorder", true);
         glowing = pluginConfig.getBoolean("glowing.enabled", true);
         helperColor = pluginConfig.getString("glowing.helperColor", "AQUA");
         workerColor = pluginConfig.getString("glowing.workerColor", "LIGHT_PURPLE");
@@ -233,6 +235,10 @@ public class TheGaffer extends JavaPlugin {
 
     public static List<ExternalProtectionHandler> getExternalProtectionDenyHandlers() {
         return externalProtectionDenyHandlers;
+    }
+
+    public static boolean isJobBorderEnabled() {
+        return jobBorderEnabled;
     }
 
     public static String getDiscordChannel() {
