@@ -19,6 +19,7 @@
 
 package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 
+import com.mcmiddleearth.thegaffer.GafferResponses;
 import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
@@ -123,23 +124,36 @@ public class JobAdminCommands implements TabExecutor{
         Methods.put("clearworkerinven", 0);
     }
 
+    /** Sends a help line listing all known admin actions. */
+    private void sendAdminHelp(CommandSender cs) {
+        String actions = String.join(", ", ADMIN_ACTIONS);
+        cs.sendMessage(Component.text(
+                "Unknown admin action — try: " + actions + " · or /jobadmin for the guided version.",
+                NamedTextColor.YELLOW));
+    }
+
     @Override
     public boolean onCommand(CommandSender cs, Command cmd, String label, String[] args){
         if(cs instanceof Player){
             if(cs.hasPermission(PermissionsUtil.getCreatePermission())){
                 Player p = (Player) cs;
-                if(args.length <= 2 || !Methods.containsKey(args[2])){  //job admin <job> <command> <args...>
-                    return false;                                       //cmd arg 0 arg 1   arg 2    arg 3 -
-                }else if(!args[0].equalsIgnoreCase("admin")){
-                    return false;
-                }else if(args.length>=Methods.get(args[2])+3){
+                // Validate that arg[0] is "admin" (sanity-check: JobCommand routes this sub-command).
+                if (args.length >= 1 && !args[0].equalsIgnoreCase("admin")) {
+                    sendAdminHelp(p);
+                    return true;
+                }
+                // Need at least: admin <job> <action>
+                if (args.length <= 2 || !Methods.containsKey(args[2].toLowerCase())) {  //job admin <job> <command> <args...>
+                    sendAdminHelp(p);                                                    //cmd arg 0 arg 1   arg 2    arg 3 -
+                    return true;
+                } else if(args.length>=Methods.get(args[2].toLowerCase())+3){
                     Job j = JobDatabase.getActiveJobs().get(args[1]);
                     if(j == null){
                         p.sendMessage(Component.text("No active job by that name.", NamedTextColor.RED));
                         return true;
                     }
                     AdminMethods am = new AdminMethods(j, p);
-                    if(Methods.get(args[2]) == 0){
+                    if(Methods.get(args[2].toLowerCase()) == 0){
                         String action = args[2].toLowerCase();
 
                         // Gate destructive one-liners: require a trailing "confirm" token to
@@ -169,7 +183,7 @@ public class JobAdminCommands implements TabExecutor{
                             p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
                         }
                         return true;
-                    }else if(Methods.get(args[2]) == 1){
+                    }else if(Methods.get(args[2].toLowerCase()) == 1){
                         try {
                             Method m = am.getClass().getMethod(args[2].toLowerCase(), String.class);
                             Object result = m.invoke(am, args[3]);
@@ -181,8 +195,10 @@ public class JobAdminCommands implements TabExecutor{
                         }
                         return true;
                     }
-                }else{
-                    return false;
+                } else {
+                    // Not enough arguments for the given action — show help.
+                    sendAdminHelp(p);
+                    return true;
                 }
             } else {
                 cs.sendMessage(Component.text("You don't have permission to manage jobs.", NamedTextColor.RED));
@@ -192,7 +208,7 @@ public class JobAdminCommands implements TabExecutor{
             cs.sendMessage("You must be a player to send this command");
             return true;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -214,6 +230,9 @@ public class JobAdminCommands implements TabExecutor{
         if (result instanceof String s && !s.isBlank()) {
             // listworkers and any future String-returning methods: send raw text
             p.sendMessage(Component.text(s, NamedTextColor.AQUA));
+        } else if (result instanceof GafferResponses.SetRadiusResponse srr) {
+            // setradius: concrete confirmation without generic "Success:" prefix (#8)
+            p.sendMessage(Component.text(srr.getMessage(), NamedTextColor.GREEN));
         } else if (result instanceof GafferResponse gr) {
             // GafferResponse: mirror dialog's "Success: …" / "Failure: …" wording
             String msg = gr.getMessage()
@@ -225,7 +244,7 @@ public class JobAdminCommands implements TabExecutor{
                 p.sendMessage(Component.text("Failure: " + msg, NamedTextColor.RED));
             }
         } else {
-            // void / Boolean / other — generic confirmation (e.g. setwarp, setradius, bringall)
+            // void / Boolean / other — generic confirmation (e.g. setwarp, bringall)
             p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
         }
     }
