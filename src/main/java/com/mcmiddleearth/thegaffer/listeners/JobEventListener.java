@@ -20,6 +20,8 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobStats;
+import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
@@ -55,8 +57,12 @@ public class JobEventListener implements Listener {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
                           || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
-            sendDiscord(emoji+" __**Info:**__ The job " + job.getName() 
+            sendDiscord(emoji+" __**Info:**__ The job " + job.getName()
                            + " has ended at " + getLondonTime() + ".");
+            JobStats stats = StatsManager.findJobStats(job.getName());
+            if (stats != null) {
+                sendDiscord(StatsManager.buildDiscordSummary(stats));
+            }
         }
     }
 
