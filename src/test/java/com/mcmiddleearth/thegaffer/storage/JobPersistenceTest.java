@@ -1,18 +1,23 @@
 package com.mcmiddleearth.thegaffer.storage;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
+import be.seeseemelk.mockbukkit.ServerMock;
+import com.mcmiddleearth.thegaffer.TheGaffer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -22,14 +27,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class JobPersistenceTest {
 
+    private ServerMock server;
+
     @BeforeEach
-    void setUp() {
-        MockBukkit.mock();
+    void setUp() throws Exception {
+        server = MockBukkit.mock();
+        setTheGafferField("serverInstance", server);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
+        setTheGafferField("serverInstance", null);
         MockBukkit.unmock();
+    }
+
+    private static void setTheGafferField(String name, Object value) throws Exception {
+        Field f = TheGaffer.class.getDeclaredField(name);
+        f.setAccessible(true);
+        f.set(null, value);
     }
 
     private Job sampleJob(UUID owner, UUID helper, UUID worker) {
@@ -130,6 +145,81 @@ class JobPersistenceTest {
         Job loaded = roundTrip(job);
         assertTrue(loaded.isPaused(), "paused should survive the round-trip");
         assertTrue(loaded.isAutoPaused(), "autoPaused should survive the round-trip");
+    }
+
+    // --- creator field tests ---
+
+    /**
+     * The parameterised constructor sets creator to the owner UUID.
+     * Uses a world registered in MockBukkit so the warp lookup in the constructor succeeds.
+     */
+    @Test
+    void creatorDefaultsToOwnerInParameterisedConstructor() {
+        server.addSimpleWorld("world");
+        UUID owner = UUID.randomUUID();
+        JobWarp warp = new JobWarp();
+        warp.setWorld("world");
+        Job job = new Job("build", "desc", owner, true,
+                warp, "world", false, 100, false, "nothing");
+        assertEquals(owner, job.getCreator(), "creator must default to owner at construction");
+    }
+
+    /**
+     * After a takeover (setOwner), creator stays at the original value.
+     * Uses a world registered in MockBukkit so the warp lookup in the constructor succeeds.
+     */
+    @Test
+    void creatorUnchangedAfterSetOwner() {
+        server.addSimpleWorld("world");
+        UUID originalOwner = UUID.randomUUID();
+        JobWarp warp = new JobWarp();
+        warp.setWorld("world");
+        Job job = new Job("bridge", "desc", originalOwner, true,
+                warp, "world", false, 100, false, "nothing");
+        UUID newOwner = UUID.randomUUID();
+        job.setOwner(newOwner);
+        assertEquals(newOwner, job.getOwner(), "owner must be updated");
+        assertEquals(originalOwner, job.getCreator(), "creator must remain the original owner");
+    }
+
+    /** No-arg constructor leaves creator null; getCreator falls back to owner. */
+    @Test
+    void getCreatorFallsBackToOwnerWhenCreatorIsNull() {
+        UUID owner = UUID.randomUUID();
+        Job job = new Job();
+        job.setOwner(owner);
+        // creator is null (not set) — getCreator should fall back to owner
+        assertEquals(owner, job.getCreator(), "getCreator should fall back to owner when creator is null");
+    }
+
+    /** creator survives a toYaml → fromYaml round-trip. */
+    @Test
+    void creatorSurvivesRoundTrip() throws Exception {
+        UUID originalOwner = UUID.randomUUID();
+        UUID newOwner = UUID.randomUUID();
+        // Build via no-arg constructor and set creator explicitly to simulate a post-takeover job
+        Job job = sampleJob(newOwner, UUID.randomUUID(), UUID.randomUUID());
+        job.setCreator(originalOwner);
+        Job loaded = roundTrip(job);
+        assertEquals(newOwner, loaded.getOwner(), "owner must survive the round-trip");
+        assertEquals(originalOwner, loaded.getCreator(), "creator must survive the round-trip");
+    }
+
+    /** A YAML without a "creator" key loads cleanly; getCreator falls back to owner. */
+    @Test
+    void missingCreatorKeyInYamlFallsBackToOwner() throws Exception {
+        UUID owner = UUID.randomUUID();
+        Job job = sampleJob(owner, UUID.randomUUID(), UUID.randomUUID());
+        // Produce YAML, then remove the creator key to simulate an old file
+        String yaml = JobStorage.toYaml(job).saveToString();
+        yaml = yaml.lines()
+                .filter(line -> !line.trim().startsWith("creator:"))
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse(yaml);
+        YamlConfiguration reloaded = new YamlConfiguration();
+        reloaded.loadFromString(yaml);
+        Job loaded = JobStorage.fromYaml(reloaded);
+        assertEquals(owner, loaded.getCreator(), "getCreator must fall back to owner when creator key is absent");
     }
 
 }

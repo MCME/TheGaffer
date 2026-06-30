@@ -66,6 +66,8 @@ public class Job implements Listener {
     private boolean dirty;
     private String projectname;
 
+    private UUID creator;
+
     private boolean glowing;
 
     private Team helperTeam;
@@ -88,6 +90,7 @@ public class Job implements Listener {
         this.startTime = System.currentTimeMillis();
         this.discordSend = discordSend;
         this.projectname = project;
+        this.creator = owner;
         if (jr > 1000) {
             jr = 1000;
         }
@@ -209,8 +212,26 @@ public class Job implements Listener {
                         : Component.text("Public", NamedTextColor.GREEN))
                 .append(Component.text(")", NamedTextColor.GRAY))
                 .append(Component.newline())
-                .append(Component.text("Started by: ", NamedTextColor.GRAY))
+                .append(Component.text("Owner: ", NamedTextColor.GRAY))
                 .append(Component.text(Util.nameOf(owner), NamedTextColor.AQUA))
+                .append(Component.newline());
+        if (!getCreator().equals(owner)) {
+            info = info.append(Component.text("Started by: ", NamedTextColor.GRAY))
+                    .append(Component.text(Util.nameOf(getCreator()), NamedTextColor.AQUA))
+                    .append(Component.newline());
+        }
+        String helperNames = helpers.isEmpty()
+                ? "none"
+                : helpers.stream()
+                        .map(Util::nameOf)
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("none");
+        info = info
+                .append(Component.text("Helpers: ", NamedTextColor.GRAY))
+                .append(Component.text(helperNames, NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Workers: ", NamedTextColor.GRAY))
+                .append(Component.text(String.valueOf(getWorkers().size()), NamedTextColor.AQUA))
                 .append(Component.newline())
                 .append(Component.text("Started on: ", NamedTextColor.GRAY))
                 .append(Component.text(new Date(startTime).toGMTString(), NamedTextColor.AQUA))
@@ -583,6 +604,14 @@ public class Job implements Listener {
 
     public void setOwner(UUID owner) {
         this.owner = owner;
+    }
+
+    public UUID getCreator() {
+        return creator != null ? creator : owner;
+    }
+
+    public void setCreator(UUID creator) {
+        this.creator = creator;
     }
 
     public boolean isPaused() {

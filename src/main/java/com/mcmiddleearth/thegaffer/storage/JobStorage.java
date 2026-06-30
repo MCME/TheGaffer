@@ -33,6 +33,7 @@ public class JobStorage {
         YamlConfiguration c = new YamlConfiguration();
         c.set("name", job.getName());
         c.set("owner", job.getOwner() == null ? null : job.getOwner().toString());
+        c.set("creator", job.getCreator() == null ? null : job.getCreator().toString());
         c.set("running", job.isRunning());
         c.set("paused", job.isPaused());
         c.set("autoPaused", job.isAutoPaused());
@@ -69,6 +70,13 @@ public class JobStorage {
         if (ownerId != null) {
             try {
                 job.setOwner(UUID.fromString(ownerId));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        String creatorId = c.getString("creator");
+        if (creatorId != null) {
+            try {
+                job.setCreator(UUID.fromString(creatorId));
             } catch (IllegalArgumentException ignored) {
             }
         }
