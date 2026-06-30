@@ -25,6 +25,11 @@ public class ProjectDatabase {
         return new File(TheGaffer.getPluginDataFolder(), TheGaffer.getFileSeperator() + "projects");
     }
 
+    /**
+     * Loads every project file from {@code projects/} into memory, replacing the current map.
+     * Intended for startup (single-threaded); not safe to call while the plugin is serving
+     * requests, as it briefly clears the registry. Unreadable or unnamed files are skipped.
+     */
     public static int loadProjects() {
         projects.clear();
         File dir = projectsDir();
@@ -87,9 +92,16 @@ public class ProjectDatabase {
     }
 
     public static boolean hasActiveProjects() {
-        return !byStatus(Project.Status.ACTIVE).isEmpty();
+        for (Project p : projects.values()) {
+            if (p.getStatus() == Project.Status.ACTIVE) { return true; }
+        }
+        return false;
     }
 
+    /**
+     * Persists a single project; the file write happens off-thread. Caller must ensure the
+     * scheduler is still active — use {@link #saveAllDirty(boolean) saveAllDirty(false)} on shutdown.
+     */
     public static void saveProject(Project p) {
         writeProjectFile(p, true);
         p.setDirty(false);
