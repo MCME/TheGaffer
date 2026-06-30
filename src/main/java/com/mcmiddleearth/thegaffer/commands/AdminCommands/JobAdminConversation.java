@@ -1,5 +1,5 @@
 /*  This file is part of TheGaffer.
- * 
+ *
  *  TheGaffer is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -21,6 +21,7 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.PromptStyle;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -86,9 +87,11 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
         if (abandonedEvent.gracefulExit()) {
-            abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Jobadmin exited.");
+            abandonedEvent.getContext().getForWhom().sendRawMessage(
+                    PromptStyle.TAG + PromptStyle.HINT + "Jobadmin exited.");
         } else {
-            abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Jobadmin timed out");
+            abandonedEvent.getContext().getForWhom().sendRawMessage(
+                    PromptStyle.TAG + PromptStyle.HINT + "Jobadmin timed out.");
         }
     }
 
@@ -96,12 +99,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPrefix(ConversationContext context) {
-            String prefix = ChatColor.GRAY + "";
-            String jobname = (String) context.getSessionData("jobname");
-            if (jobname != null) {
-                prefix += "editing " + ChatColor.GOLD + jobname + ChatColor.AQUA + "\n";
-            }
-            return prefix;
+            return PromptStyle.TAG;
         }
 
     }
@@ -128,13 +126,15 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             if (response.isSuccessful()) {
-                return ChatColor.GREEN + "Success: " + response.getMessage().replaceAll("%name%", (String) context.getSessionData("inputname")).replaceAll("%job%", (String) context.getSessionData("jobname"));
+                return PromptStyle.OK + "Success: " + response.getMessage()
+                        .replaceAll("%name%", (String) context.getSessionData("inputname"))
+                        .replaceAll("%job%", (String) context.getSessionData("jobname"));
             } else {
-                return ChatColor.RED + "Failure: "
+                return PromptStyle.ERROR + "Failure: "
                         + response.getMessage()
                         .replaceAll("%name%", (String) context.getSessionData("inputname"))
                         .replaceAll("%job%", (String) context.getSessionData("jobname"))
-                        + "\n" + " Please try again or cancel with !cancel";
+                        + PromptStyle.hint("Please try again or cancel with !cancel");
             }
         }
     }
@@ -144,14 +144,23 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             if (context.getSessionData("jobname") == null) {
-                return "What job would you like to modify? \n" + formatSet() + "\n" + "or exit with !cancel";
+                return PromptStyle.ask("What job would you like to modify?")
+                        + PromptStyle.hint(formatSet())
+                        + PromptStyle.hint("type !cancel to exit");
             } else {
-                return "That job is not running, please try again.\n" + formatSet() + "\n" + "or exit with !cancel";
+                return PromptStyle.ERROR + "That job is not running — please try again."
+                        + PromptStyle.hint(formatSet())
+                        + PromptStyle.hint("type !cancel to exit");
             }
         }
 
         private String formatSet() {
-            return String.join(", ",JobDatabase.getActiveJobs().keySet());
+            StringBuilder sb = new StringBuilder("Running jobs: ");
+            for (String name : JobDatabase.getActiveJobs().keySet()) {
+                if (sb.length() > "Running jobs: ".length()) { sb.append(", "); }
+                sb.append(PromptStyle.VALUE).append(name).append(PromptStyle.HINT);
+            }
+            return sb.toString();
         }
 
         @Override
@@ -175,9 +184,11 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             if (context.getSessionData("action") != null) {
-                return "Please enter a valid action \n" + formatFixedSet();
+                return PromptStyle.ERROR + "Please enter a valid action."
+                        + PromptStyle.hint(formatFixedSet());
             } else {
-                return "What action would you like to perform? \n" + formatFixedSet();
+                return PromptStyle.ask("What action would you like to perform?")
+                        + PromptStyle.hint(formatFixedSet());
             }
         }
 
@@ -243,7 +254,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to add as a helper?";
+            return PromptStyle.ask("Who would you like to add as a helper?")
+                    + PromptStyle.hint("you may list multiple as player1, player2");
         }
     }
 
@@ -258,7 +270,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to remove as a helper?";
+            return PromptStyle.ask("Who would you like to remove as a helper?")
+                    + PromptStyle.hint("you may list multiple as player1, player2");
         }
     }
 
@@ -273,7 +286,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to kick from the job? (you may list multiple as player1, player2)";
+            return PromptStyle.ask("Who would you like to kick from the job?")
+                    + PromptStyle.hint("you may list multiple as player1, player2");
         }
     }
 
@@ -288,7 +302,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to ban from the job? (you may list multiple as player1, player2)";
+            return PromptStyle.ask("Who would you like to ban from the job?")
+                    + PromptStyle.hint("you may list multiple as player1, player2");
         }
     }
 
@@ -303,7 +318,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to unban from the job? (you may list multiple as player1, player2)";
+            return PromptStyle.ask("Who would you like to unban from the job?")
+                    + PromptStyle.hint("you may list multiple as player1, player2");
         }
     }
 
@@ -318,7 +334,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Successfully moved the warp to your location.";
+            return PromptStyle.OK + "Successfully moved the warp to your location.";
         }
     }
 
@@ -326,7 +342,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return ChatColor.YELLOW + "This will teleport all online workers to you. Type 'confirm' to proceed, or anything else to cancel.";
+            return PromptStyle.ask("This will teleport all online workers to you.") + PromptStyle.opts("confirm / cancel")
+                    + PromptStyle.hint("type 'confirm' to proceed, or anything else to cancel");
         }
 
         @Override
@@ -334,9 +351,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             if (input.equalsIgnoreCase("confirm")) {
                 AdminMethods am = (AdminMethods) context.getSessionData("am");
                 am.bringall();
-                context.getForWhom().sendRawMessage(ChatColor.GREEN + "Brought all online workers to your location.");
+                context.getForWhom().sendRawMessage(PromptStyle.OK + "Brought all online workers to your location.");
             } else {
-                context.getForWhom().sendRawMessage(ChatColor.AQUA + "Cancelled.");
+                context.getForWhom().sendRawMessage(PromptStyle.HINT + "Cancelled.");
             }
             return Prompt.END_OF_CONVERSATION;
         }
@@ -367,7 +384,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to invite to the job? (You may add multiple names with player1, player2)";
+            return PromptStyle.ask("Who would you like to invite to the job?")
+                    + PromptStyle.hint("you may add multiple names as player1, player2");
         }
     }
 
@@ -382,7 +400,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to uninvite from the job? (you may list multiple as player1, player2)";
+            return PromptStyle.ask("Who would you like to uninvite from the job?")
+                    + PromptStyle.hint("you may list multiple as player1, player2");
         }
     }
 
@@ -398,7 +417,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "How big should the job area be? (radius 1 - 1000)";
+            return PromptStyle.ask("How big should the job area be?") + PromptStyle.opts("radius 1 – 1000");
         }
     }
 
@@ -413,14 +432,16 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Successfully set the kit of the job to your inventory.";
+            return PromptStyle.OK + "Successfully set the kit of the job to your inventory.";
         }
     }
+
     private class clearinven extends StringPrompt {
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return ChatColor.RED + "This will clear all online workers' inventories. Type 'confirm' to proceed, or anything else to cancel.";
+            return PromptStyle.ask("This will clear all online workers' inventories.") + PromptStyle.opts("confirm / cancel")
+                    + PromptStyle.hint("type 'confirm' to proceed, or anything else to cancel");
         }
 
         @Override
@@ -428,9 +449,9 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             if (input.equalsIgnoreCase("confirm")) {
                 AdminMethods am = (AdminMethods) context.getSessionData("am");
                 am.clearworkerinven();
-                context.getForWhom().sendRawMessage(ChatColor.GREEN + "Cleared workers' inventories.");
+                context.getForWhom().sendRawMessage(PromptStyle.OK + "Cleared workers' inventories.");
             } else {
-                context.getForWhom().sendRawMessage(ChatColor.AQUA + "Cancelled.");
+                context.getForWhom().sendRawMessage(PromptStyle.HINT + "Cancelled.");
             }
             return Prompt.END_OF_CONVERSATION;
         }
