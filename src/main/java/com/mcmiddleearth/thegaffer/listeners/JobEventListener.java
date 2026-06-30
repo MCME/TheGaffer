@@ -111,10 +111,9 @@ public class JobEventListener implements Listener {
                           || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
            Guild guild = DiscordSRV.getPlugin().getMainGuild();
            String tag = "";
-           for(String name:job.getDiscordTags()) {
-               if(name!=null && !name.equals("")) {
-                String discTag = DiscordUtil.convertMentionsFromNames("@"+name, guild);
-                tag = tag + discTag+", ";
+           for (String role : TheGaffer.getAllowedPingRoles()) {
+               if (role != null && !role.isEmpty()) {
+                   tag = tag + DiscordUtil.convertMentionsFromNames("@" + role, guild) + " ";
                }
            }
            String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
