@@ -69,7 +69,6 @@ public class TheGaffer extends JavaPlugin {
     static String discordChannel;
     static String discordJobEmoji;
     static boolean discordEnabled;
-    static boolean jobKitsEnabled;
     static boolean jobBorderEnabled;
     static boolean jobDescription;
     static boolean glowing;
@@ -144,7 +143,6 @@ public class TheGaffer extends JavaPlugin {
     public static void setupConfig() {
         pluginConfig = TheGaffer.getPluginInstance().getConfig();
         jobDescription = pluginConfig.getBoolean("jobDescription", false);
-        jobKitsEnabled = pluginConfig.getBoolean("jobKits", false);
         discordEnabled = pluginConfig.contains("discord");
         discordChannel = pluginConfig.getString("discord.channel", null);
         discordJobEmoji = pluginConfig.getString("discord.emoji", "");
@@ -251,10 +249,6 @@ public class TheGaffer extends JavaPlugin {
 
     public static boolean isDiscordEnabled() {
         return discordEnabled;
-    }
-
-    public static boolean isJobKitsEnabled() {
-        return jobKitsEnabled;
     }
 
     public static boolean isJobDescription() {

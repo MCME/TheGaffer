@@ -65,7 +65,6 @@ public class Job implements Listener {
     private Rectangle2D bounds;
     private boolean dirty;
     private String projectname;
-    private JobKit kit;
 
     private boolean glowing;
 
@@ -312,9 +311,6 @@ public class Job implements Listener {
         addWorkerTeam(p.getName());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
-            if (kit != null) {
-                kit.replaceInventory(p.getPlayer());
-            }
         }
         setDirty(true);
         //  JobDatabase.saveJobs();
@@ -731,14 +727,6 @@ public class Job implements Listener {
 
     public void setProjectname(String projectname) {
         this.projectname = projectname;
-    }
-
-    public JobKit getKit() {
-        return kit;
-    }
-
-    public void setKit(JobKit kit) {
-        this.kit = kit;
     }
 
     public boolean isGlowing() {
