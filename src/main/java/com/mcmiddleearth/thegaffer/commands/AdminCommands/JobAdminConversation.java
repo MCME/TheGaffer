@@ -144,7 +144,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             if (context.getSessionData("jobname") == null) {
                 return "What job would you like to modify? \n" + formatSet() + "\n" + "or exit with !cancel";
             } else {
-                return "That job is not running, please try again.";
+                return "That job is not running, please try again.\n" + formatSet() + "\n" + "or exit with !cancel";
             }
         }
 
