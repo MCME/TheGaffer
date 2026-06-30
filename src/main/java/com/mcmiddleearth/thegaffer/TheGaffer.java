@@ -172,10 +172,18 @@ public class TheGaffer extends JavaPlugin {
         CleanupUtil.getWaiting().put(job, time);
     }
 
+    /**
+     * Reflective integration contract — <b>do not change this signature.</b> External plugins
+     * (PlotBuild, MCME-Architect) call this by reflection
+     * ({@code getMethod("hasBuildPermission", Player.class, Location.class)}). If the signature
+     * drifts, their lookup fails and at least PlotBuild falls <i>open</i> to "allowed", silently
+     * bypassing build protection. Pinned by {@code ProtectionApiContractTest}.
+     */
     public static boolean hasBuildPermission(Player player, Location location) {
         return getBuildProtection(player, location).equals(BuildProtection.ALLOWED);
     }
 
+    /** Reflective integration contract — keep the {@code (Player, Location) -> String} signature stable (see {@link #hasBuildPermission}). */
     public static String getBuildProtectionMessage(Player player, Location location) {
         return getBuildProtection(player, location).getMessage();
     }
