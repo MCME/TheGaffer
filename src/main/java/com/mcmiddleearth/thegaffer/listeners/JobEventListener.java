@@ -24,7 +24,10 @@ import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
+import github.scarsz.discordsrv.dependencies.jda.api.MessageBuilder;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Message;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import github.scarsz.discordsrv.util.DiscordUtil;
 import net.kyori.adventure.text.Component;
@@ -36,12 +39,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.awt.*;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import java.time.Instant;
 import java.util.logging.Logger;
 
 public class JobEventListener implements Listener {
@@ -58,7 +59,7 @@ public class JobEventListener implements Listener {
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
                           || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
             sendDiscord(emoji+" __**Info:**__ The job " + job.getName()
-                           + " has ended at " + getLondonTime() + ".");
+                           + " has ended " + discordTimestamp(System.currentTimeMillis(), 'R') + ".");
             JobStats stats = StatsManager.findJobStats(job.getName());
             if (stats != null) {
                 sendDiscord(StatsManager.buildDiscordSummary(stats));
@@ -105,36 +106,46 @@ public class JobEventListener implements Listener {
             // ENTITY_WITHER_DEATH was an alarming, full-volume blast for everyone).
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
         }
-        if(job.isDiscordSend()) {
+        if (job.isDiscordSend()) {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
-           String emoji =(TheGaffer.getDiscordJobEmoji()==null 
-                          || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
-           Guild guild = DiscordSRV.getPlugin().getMainGuild();
-           String tag = "";
-           for (String role : TheGaffer.getAllowedPingRoles()) {
-               if (role != null && !role.isEmpty()) {
-                   tag = tag + DiscordUtil.convertMentionsFromNames("@" + role, guild) + " ";
-               }
-           }
-           if (!tag.isEmpty()) { tag = tag.trim() + " "; }
-           String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
-                          +emoji+"\n        __**Leader:**__        " + Util.nameOf(job.getOwner()) 
-                   + "\n        __**Title:**__            " + job.getName()
-                   + "\n        __**World:**__            " + job.getBukkitWorld().getName()
-                   + "\n        __**Time Start:**__ " +getLondonTime() 
-                   + "\nTo join the job type in game chat: ```css\n/job join " + job.getName() + "```";
-           if(TheGaffer.isJobDescription()) {
-                   discordMessage = discordMessage + "__**Job Description:**__ "+job.getDescription();
-           }
-           sendDiscord(discordMessage);
+            if (channel != null) {
+                Guild guild = DiscordSRV.getPlugin().getMainGuild();
+                String ping = "";
+                for (String role : TheGaffer.getAllowedPingRoles()) {
+                    if (role != null && !role.isEmpty()) {
+                        ping = ping + DiscordUtil.convertMentionsFromNames("@" + role, guild) + " ";
+                    }
+                }
+                ping = ping.trim();
+                long startMillis = (job.getStartTime() != null && job.getStartTime() > 0)
+                        ? job.getStartTime() : System.currentTimeMillis();
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setColor(new java.awt.Color(46, 160, 90))
+                        .setTitle("🛠 New job: " + job.getName())
+                        .addField("Leader", Util.nameOf(job.getOwner()), true)
+                        .addField("World", job.getBukkitWorld().getName(), true)
+                        .addField("Started", discordTimestamp(startMillis, 'R'), true)
+                        .addField("Join in-game", "`/job join " + job.getName() + "`", false)
+                        .setFooter("MCME")
+                        .setTimestamp(Instant.ofEpochMilli(startMillis));
+                if (TheGaffer.isJobDescription() && job.getDescription() != null && !job.getDescription().isEmpty()) {
+                    embed.setDescription(job.getDescription());
+                }
+                final Message msg = new MessageBuilder().setContent(ping).setEmbed(embed.build()).build();
+                final TextChannel ch = channel;
+                // Send off the main thread: sendMessageBlocking does a synchronous Discord
+                // REST call and must not block the server tick.
+                new BukkitRunnable() {
+                    @Override
+                    public void run() { DiscordUtil.sendMessageBlocking(ch, msg, false); }
+                }.runTaskAsynchronously(TheGaffer.getPluginInstance());
+            }
         }
     }
 
-    private String getLondonTime() {
-        // Europe/London applies GMT/BST automatically. The old code forced a
-        // raw UTC offset, so the time was an hour off during British Summer Time.
-        return ZonedDateTime.now(ZoneId.of("Europe/London"))
-                .format(DateTimeFormatter.ofPattern("HH:mm z", Locale.UK));
+    /** A Discord timestamp token, e.g. {@code <t:1719774000:R>} (R = relative "x ago", f = full local). */
+    static String discordTimestamp(long epochMillis, char style) {
+        return "<t:" + (epochMillis / 1000L) + ":" + style + ">";
     }
 
     private void sendDiscord(String message) {
