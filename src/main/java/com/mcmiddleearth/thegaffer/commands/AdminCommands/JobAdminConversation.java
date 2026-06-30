@@ -58,7 +58,6 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("inviteworker");
         actions.add("uninviteworker");
         actions.add("setradius");
-        actions.add("setkit");
         actions.add("clearworkerinven");
         Collections.sort(actions);
     }
@@ -229,9 +228,6 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 }
                 case "setradius": {
                     return new setRadiusPrompt();
-                }
-                case "setkit": {
-                    return new setKitPrompt();
                 }
                 case "clearworkerinven": {
                     return new clearinven();
@@ -418,21 +414,6 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public String getPromptText(ConversationContext context) {
             return PromptStyle.ask("How big should the job area be?") + PromptStyle.opts("radius 1 – 1000");
-        }
-    }
-
-    private class setKitPrompt extends MessagePrompt {
-
-        @Override
-        public Prompt getNextPrompt(ConversationContext context) {
-            AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.setkit();
-            return Prompt.END_OF_CONVERSATION;
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            return PromptStyle.OK + "Successfully set the kit of the job to your inventory.";
         }
     }
 

@@ -21,7 +21,6 @@ package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 import com.mcmiddleearth.thegaffer.GafferResponses;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import net.kyori.adventure.text.Component;
@@ -62,7 +61,6 @@ public class AdminMethods {
         Methods.put("inviteworker", 1);
         Methods.put("uninviteworker", 1);
         Methods.put("setradius", 1);
-        Methods.put("setkit", 0);
         Methods.put("clearworkerinven", 0);
     }
 
@@ -160,17 +158,6 @@ public class AdminMethods {
 
     public Object setradius(String arg) {
         job.updateJobRadius(Integer.parseInt(arg));
-        return true;
-    }
-
-    public Object setkit() {
-        JobKit kit = new JobKit(p.getInventory());
-        job.setKit(kit);
-        for (UUID pname : job.getWorkers()) {
-            if (TheGaffer.getServerInstance().getOfflinePlayer(pname).isOnline()) {
-                job.getKit().replaceInventory(TheGaffer.getServerInstance().getOfflinePlayer(pname).getPlayer());
-            }
-        }
         return true;
     }
 

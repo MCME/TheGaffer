@@ -20,7 +20,6 @@ import com.mcmiddleearth.thegaffer.storage.Project;
 import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
-import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.PromptStyle;
@@ -221,12 +220,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
             context.setSessionData("jobradius", input);
-            if (TheGaffer.isJobKitsEnabled()) {
-                return new kitPrompt();
-            } else {
-                context.setSessionData("setkit", false);
-                return newDiscordOrFinishPrompt();
-            }
+            return newDiscordOrFinishPrompt();
         }
 
         @Override
@@ -262,23 +256,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             return new GlowEffectPrompt();
         }
         return new finishedPrompt();
-    }
-
-    private class kitPrompt extends BooleanPrompt {
-
-        @Override
-        protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
-            context.setSessionData("setkit", input);
-            return newDiscordOrFinishPrompt();
-        }
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            return PromptStyle.ask("Give workers a starter kit?") + PromptStyle.opts("true / false")
-                    + PromptStyle.hint("true = snapshot your CURRENT inventory as the kit every worker receives on join"
-                            + " · you can change it later with /jobadmin setkit");
-        }
-
     }
 
     private class discordAnnouncePrompt extends BooleanPrompt {
@@ -370,7 +347,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             UUID owner = ((Player) context.getForWhom()).getUniqueId();
             JobWarp warp = new JobWarp(((Player) context.getForWhom()).getLocation());
             boolean Private = (boolean) context.getSessionData("private");
-            boolean setKit = (boolean) context.getSessionData("setkit");
             boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
@@ -385,10 +361,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                     discordSend, project);
             if (glowing) {
                 jerb.setGlowing();
-            }
-            if (setKit) {
-                JobKit kit = new JobKit(((Player) context.getForWhom()).getInventory());
-                jerb.setKit(kit);
             }
             JobDatabase.activateJob(jerb);
             return PromptStyle.OK + "Successfully created the " + PromptStyle.VALUE + jobname + PromptStyle.OK + " job!";

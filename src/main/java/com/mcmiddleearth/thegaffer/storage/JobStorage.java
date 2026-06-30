@@ -16,7 +16,6 @@
 package com.mcmiddleearth.thegaffer.storage;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,14 +59,6 @@ public class JobStorage {
             c.set("warp.world", w.getWorld());
         }
 
-        JobKit kit = job.getKit();
-        if (kit != null) {
-            c.set("kit.contents", kit.getContents());
-            c.set("kit.helmet", kit.getHelmet());
-            c.set("kit.chestplate", kit.getChestplate());
-            c.set("kit.pants", kit.getPants());
-            c.set("kit.boots", kit.getBoots());
-        }
         return c;
     }
 
@@ -108,21 +99,6 @@ public class JobStorage {
             job.setWarp(w);
         }
 
-        if (c.contains("kit")) {
-            JobKit kit = new JobKit();
-            List<ItemStack> contents = new ArrayList<>();
-            for (Object o : c.getList("kit.contents", new ArrayList<>())) {
-                if (o instanceof ItemStack) {
-                    contents.add((ItemStack) o);
-                }
-            }
-            kit.setContents(contents);
-            kit.setHelmet(c.getItemStack("kit.helmet"));
-            kit.setChestplate(c.getItemStack("kit.chestplate"));
-            kit.setPants(c.getItemStack("kit.pants"));
-            kit.setBoots(c.getItemStack("kit.boots"));
-            job.setKit(kit);
-        }
         return job;
     }
 

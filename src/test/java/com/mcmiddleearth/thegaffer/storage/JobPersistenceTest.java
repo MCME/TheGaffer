@@ -1,9 +1,7 @@
 package com.mcmiddleearth.thegaffer.storage;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -134,24 +132,4 @@ class JobPersistenceTest {
         assertTrue(loaded.isAutoPaused(), "autoPaused should survive the round-trip");
     }
 
-    /**
-     * MockBukkit does not faithfully rebuild ItemStacks from a YAML string, so a
-     * full kit round-trip can't be asserted here — that part is verified by
-     * in-game QA on a real server. What we CAN (and must) verify is that our code
-     * writes the kit and its items to YAML; the ItemStack form itself is Bukkit's
-     * responsibility and works on a real server.
-     */
-    @Test
-    void kitIsSerializedToYaml() throws Exception {
-        Job job = sampleJob(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
-        JobKit kit = new JobKit();
-        kit.setContents(new ArrayList<>(Arrays.asList(new ItemStack(Material.DIAMOND, 5))));
-        kit.setHelmet(new ItemStack(Material.IRON_HELMET));
-        job.setKit(kit);
-
-        String yaml = JobStorage.toYaml(job).saveToString();
-        assertTrue(yaml.contains("kit:"), "kit section should be written");
-        assertTrue(yaml.contains("DIAMOND"), "kit contents should be serialized");
-        assertTrue(yaml.contains("IRON_HELMET"), "kit armor should be serialized");
-    }
 }

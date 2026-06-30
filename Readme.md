@@ -30,7 +30,7 @@ While a worker stands inside their job's area they are automatically switched to
 
 ## Jobs & roles
 
-A job is a named, bounded build session. It has an owner, an area (a centre point + radius), a world, an optional description/kit, and three kinds of participant:
+A job is a named, bounded build session. It has an owner, an area (a centre point + radius), a world, an optional description, and three kinds of participant:
 
 | Role | Who | What they can do |
 |---|---|---|
@@ -77,7 +77,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 
 ### `/job admin <job> <action>` subcommands
 
-`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `setwarp`, `setradius <n>`, `setkit`, `clearworkerinven`, `bringall`, `listworkers`.
+`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `setwarp`, `setradius <n>`, `clearworkerinven`, `bringall`, `listworkers`.
 
 ---
 
@@ -99,7 +99,6 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 |---|---|
 | `general.debug` | Verbose debug logging. |
 | `jobDescription` | Prompt for a job description during creation. |
-| `jobKits` | Enable per-job kits (handed to workers on join). |
 | `discord.channel` | DiscordSRV channel name for job announcements (omit to disable). |
 | `discord.emoji` | Emoji prefix for Discord messages. |
 | `allowRolePing` | Discord roles pinged when a job is announced (e.g. `Jobber`). Only these roles are pinged — never `@everyone` or individual players. Empty/omit = announce with no ping. |

@@ -48,7 +48,7 @@ public class JobAdminCommands implements TabExecutor{
     
     private static final List<String> ADMIN_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
-        "inviteworker", "uninviteworker", "setwarp", "setradius", "setkit",
+        "inviteworker", "uninviteworker", "setwarp", "setradius",
         "clearworkerinven", "bringall", "listworkers"
     );
 
@@ -106,7 +106,6 @@ public class JobAdminCommands implements TabExecutor{
         Methods.put("inviteworker", 1);
         Methods.put("uninviteworker", 1);
         Methods.put("setradius", 1);
-        Methods.put("setkit", 0);
         Methods.put("clearworkerinven", 0);
     }
 
