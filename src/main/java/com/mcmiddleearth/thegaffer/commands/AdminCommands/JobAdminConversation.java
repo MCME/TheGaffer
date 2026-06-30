@@ -415,7 +415,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         @Override
         public Prompt getNextPrompt(ConversationContext context) {
             AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.clearworkerinvens();
+            am.clearworkerinven();
             return Prompt.END_OF_CONVERSATION;
         }
 
