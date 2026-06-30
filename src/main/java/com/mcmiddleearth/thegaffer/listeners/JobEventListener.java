@@ -61,7 +61,6 @@ public class JobEventListener implements Listener {
             }
         }
         if(job.isDiscordSend()) {
-            TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
                           || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
             sendDiscord(emoji+" __**Info:**__ The job " + job.getName()
@@ -120,9 +119,15 @@ public class JobEventListener implements Listener {
             }
         }
         if (job.isDiscordSend()) {
-            TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
+            // discord.channel is a DiscordSRV game-channel NAME, not a raw snowflake ID, so
+            // getTextChannelById(...) returned null and the embed was silently skipped. Resolve it
+            // the SAME way sendDiscord (the job-end path) does — that's why the end message worked.
+            DiscordSRV discordPlugin = DiscordSRV.getPlugin();
+            TextChannel channel = (discordPlugin != null)
+                    ? discordPlugin.getDestinationTextChannelForGameChannelName(TheGaffer.getDiscordChannel())
+                    : null;
             if (channel != null) {
-                Guild guild = DiscordSRV.getPlugin().getMainGuild();
+                Guild guild = discordPlugin.getMainGuild();
                 String ping = "";
                 for (String role : TheGaffer.getAllowedPingRoles()) {
                     if (role != null && !role.isEmpty()) {
@@ -155,6 +160,9 @@ public class JobEventListener implements Listener {
                     @Override
                     public void run() { DiscordUtil.sendMessageBlocking(channel, msg, false); }
                 }.runTaskAsynchronously(TheGaffer.getPluginInstance());
+            } else {
+                Logger.getLogger("TheGaffer").warning("Discord channel '" + TheGaffer.getDiscordChannel()
+                        + "' not found — job-start embed not sent.");
             }
         }
     }
