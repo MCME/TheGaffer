@@ -402,6 +402,10 @@ public class Job implements Listener {
                 return BanWorkerResponse.ALREADY_BANNED;
             }
             bannedWorkers.add(p.getUniqueId());
+            // #7: Tell the target immediately if they are online (mirrors removeWorker's AQUA notice to all).
+            if (p.isOnline()) {
+                p.getPlayer().sendMessage(Component.text("You were banned from the " + name + " job.", NamedTextColor.RED));
+            }
         }
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -428,6 +432,10 @@ public class Job implements Listener {
             workers.remove(p.getUniqueId());
             removeWorkerTeam(p.getName());
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
+            // #7: Tell the target immediately if they are online (mirrors removeWorker's AQUA notice to all).
+            if (p.isOnline()) {
+                p.getPlayer().sendMessage(Component.text("You were removed from the " + name + " job.", NamedTextColor.RED));
+            }
         }
         setDirty(true);
         // JobDatabase.saveJobs();

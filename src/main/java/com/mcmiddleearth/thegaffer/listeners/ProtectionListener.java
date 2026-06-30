@@ -64,7 +64,7 @@ public class ProtectionListener implements Listener {
                 event.setBuild(false);
                 break;
         }
-        event.getPlayer().sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
+        event.getPlayer().sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.RED /* #11: standardised from DARK_RED */));
         jobEvent = new JobProtectionBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -87,7 +87,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        event.getPlayer().sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
+        event.getPlayer().sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.RED /* #11: standardised from DARK_RED */));
         jobEvent = new JobProtectionBlockBreakEvent(event.getPlayer(), event.getBlock().getLocation(), event.getBlock(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -114,7 +114,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
+        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.RED /* #11: standardised from DARK_RED */));
         jobEvent = new JobProtectionHangingBreakEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -138,7 +138,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
+        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.RED /* #11: standardised from DARK_RED */));
         jobEvent = new JobProtectionHangingPlaceEvent(player, event.getEntity().getLocation(), event.getEntity(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }
@@ -248,7 +248,7 @@ public class ProtectionListener implements Listener {
                 event.setCancelled(true);
                 break;
         }
-        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.DARK_RED));
+        player.sendMessage(Component.text(buildProtection.getMessage(), NamedTextColor.RED /* #11: standardised from DARK_RED */));
         jobEvent = new JobProtectionInteractEvent(player, event.getClickedBlock().getLocation(), event.getClickedBlock(), event.getItem(), true);
         TheGaffer.getServerInstance().getPluginManager().callEvent(jobEvent);
     }

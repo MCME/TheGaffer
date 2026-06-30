@@ -9,15 +9,18 @@ package com.mcmiddleearth.thegaffer.utilities;
  *
  * @author Eriol_Eandur
  */
+// #11: Messages use plain English with no developer jargon; recovery hints added to the
+//      actionable denials (PAUSED, OUT_OF_BOUNDS, NOT_IN_JOB, NO_JOB).
+//      Colour is standardised to RED in ProtectionListener (was DARK_RED).
 public enum BuildProtection {
-    
+
     ALLOWED         ("You are allowed to build."),
     LOC_DENIED      ("You are not allowed to build here."),
-    JOB_PAUSED      ("The job is currently paused."),
-    OUT_OF_BOUNDS   ("You have gone out of bounds for the job."),
-    NOT_IN_JOB      ("You are not part of any job (building event)."),
+    JOB_PAUSED      ("This job is paused — building is locked until staff resume it."),
+    OUT_OF_BOUNDS   ("You're outside the job area — /job border to see its edge."),
+    NOT_IN_JOB      ("You're not in a job here — /job check to find one."),
     WORLD_DENIED    ("You are not allowed to build in this world."),
-    NO_JOB          ("You are not allowed to build when there are no jobs (building events).");
+    NO_JOB          ("You're not in a job here — /job check to find one.");
 
     private final String message;
 

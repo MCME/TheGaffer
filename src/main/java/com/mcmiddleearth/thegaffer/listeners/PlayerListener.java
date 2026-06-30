@@ -111,6 +111,12 @@ public class PlayerListener implements Listener {
                     playersSwitchedToCreative.add(player.getUniqueId());
                 }
                 player.setGameMode(GameMode.CREATIVE);
+                // #4: Notify the worker once per transition into the build area (action bar, GREEN).
+                Job enteredJob = JobDatabase.getJobWorking(player);
+                String jobLabel = (enteredJob != null) ? enteredJob.getName() : "job";
+                player.sendActionBar(Component.text(
+                        "Entered the " + jobLabel + " build area — you can build here.",
+                        NamedTextColor.GREEN));
             }
         } else {
             if (playersSwitchedToCreative.contains(player.getUniqueId())) {
@@ -121,6 +127,11 @@ public class PlayerListener implements Listener {
                     player.setFlying(flying);
                 }
                 playersSwitchedToCreative.remove(player.getUniqueId());
+                // #4: Notify the worker once per transition out of the build area (action bar, GOLD).
+                // This is the critical cue — building silently drops off without it.
+                player.sendActionBar(Component.text(
+                        "You left the job build area — building is disabled out here.",
+                        NamedTextColor.GOLD));
             }
         }
     }
