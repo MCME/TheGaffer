@@ -5,6 +5,8 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.storage.JobStatsStorage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -178,5 +180,57 @@ public class StatsManager {
         for (JobStats s : JobStatsStorage.readAll(activeDir())) {
             if (s.getName().equals(name)) { live.put(s.getName(), s); }
         }
+    }
+
+    // ---- display / query helpers ----
+
+    /**
+     * Returns the live entry for {@code jobName} if one exists; otherwise reads finished
+     * records from disk and returns the one with the highest endTime (i.e. newest).
+     */
+    public static JobStats findJobStats(String jobName) {
+        JobStats liveEntry = live.get(jobName);
+        if (liveEntry != null) { return liveEntry; }
+        JobStats newest = null;
+        for (JobStats s : JobStatsStorage.readAll(statsDir())) {
+            if (s.getName().equals(jobName)
+                    && (newest == null || s.getEndTime() > newest.getEndTime())) {
+                newest = s;
+            }
+        }
+        return newest;
+    }
+
+    /** Renders a finished (or live) job's stats as a chat Component. */
+    public static Component renderJobStats(JobStats s) {
+        Component out = Component.text(s.getName(), NamedTextColor.AQUA)
+                .append(Component.text(" stats", NamedTextColor.GRAY))
+                .append(Component.newline())
+                .append(Component.text("Owner: ", NamedTextColor.GRAY))
+                .append(Component.text(Util.nameOf(s.getOwner()), NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Participants: ", NamedTextColor.GRAY))
+                .append(Component.text(String.valueOf(s.getParticipants().size()), NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Duration: ", NamedTextColor.GRAY))
+                .append(Component.text(formatDuration(s.getDurationMillis()), NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Location: ", NamedTextColor.GRAY))
+                .append(Component.text(s.getWorld() + " (" + s.getCenterX() + ", " + s.getCenterZ() + ")", NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Blocks: ", NamedTextColor.GRAY))
+                .append(Component.text(s.getTotalPlaced() + " placed, " + s.getTotalBroke() + " broken", NamedTextColor.AQUA));
+        for (Map.Entry<UUID, JobStats.BuilderStat> e : s.getBuilders().entrySet()) {
+            out = out.append(Component.newline())
+                    .append(Component.text("  " + Util.nameOf(e.getKey()) + ": ", NamedTextColor.GRAY))
+                    .append(Component.text(e.getValue().getPlaced() + " / " + e.getValue().getBroke(), NamedTextColor.AQUA));
+        }
+        return out;
+    }
+
+    /** Converts a millisecond duration to a human-readable {@code Xh Ym} string. */
+    public static String formatDuration(long millis) {
+        long mins = millis / 60000;
+        return (mins / 60) + "h " + (mins % 60) + "m";
     }
 }
