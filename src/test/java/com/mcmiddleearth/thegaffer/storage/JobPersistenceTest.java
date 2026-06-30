@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -106,6 +107,31 @@ class JobPersistenceTest {
         assertEquals(-200.5, w.getZ());
         assertEquals(90.0f, w.getYaw());
         assertEquals("world", w.getWorld());
+    }
+
+    /**
+     * The autoPaused flag (QA item 4) defaults to false, and set/clear is a plain
+     * field toggle — no Bukkit involved.
+     */
+    @Test
+    void autoPausedDefaultsFalseAndTogglesCleanly() {
+        Job job = new Job();
+        assertFalse(job.isAutoPaused(), "autoPaused must default to false");
+        job.setAutoPaused(true);
+        assertTrue(job.isAutoPaused(), "setAutoPaused(true) should take effect");
+        job.setAutoPaused(false);
+        assertFalse(job.isAutoPaused(), "setAutoPaused(false) should clear the flag");
+    }
+
+    /** autoPaused is persisted next to paused, so it must survive the round-trip. */
+    @Test
+    void autoPausedSurvivesRoundTrip() throws Exception {
+        Job job = sampleJob(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+        job.setPaused(true);
+        job.setAutoPaused(true);
+        Job loaded = roundTrip(job);
+        assertTrue(loaded.isPaused(), "paused should survive the round-trip");
+        assertTrue(loaded.isAutoPaused(), "autoPaused should survive the round-trip");
     }
 
     /**

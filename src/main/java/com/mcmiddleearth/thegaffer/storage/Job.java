@@ -45,6 +45,10 @@ public class Job implements Listener {
     private UUID owner;
     private boolean running;
     private boolean paused;
+    // True only when the pause was applied automatically because the owner went
+    // offline with no helper online (see CleanupUtil.selectNewOwner). A manual
+    // /job pause clears this so an unrelated rejoin can never auto-resume it.
+    private boolean autoPaused;
     private JobWarp warp;
     private boolean discordSend;
     private String description;
@@ -591,6 +595,14 @@ public class Job implements Listener {
 
     public void setPaused(boolean paused) {
         this.paused = paused;
+    }
+
+    public boolean isAutoPaused() {
+        return autoPaused;
+    }
+
+    public void setAutoPaused(boolean autoPaused) {
+        this.autoPaused = autoPaused;
     }
 
     public JobWarp getWarp() {

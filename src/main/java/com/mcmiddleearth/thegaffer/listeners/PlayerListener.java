@@ -16,6 +16,7 @@
 package com.mcmiddleearth.thegaffer.listeners;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
@@ -51,6 +52,20 @@ public class PlayerListener implements Listener {
             player.sendMessage(Component.text("There is a job running! ", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
                     .append(Msg.button("[Click to check]", NamedTextColor.AQUA, "/job check", "Run /job check")));
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
+        }
+        // Auto-resume: if this player is the owner (or a helper) of an active job that was
+        // auto-paused because everyone left (see CleanupUtil.selectNewOwner), un-pause it.
+        // A manually paused job has autoPaused == false, so it is never resumed here.
+        UUID uuid = player.getUniqueId();
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            if (job.isAutoPaused()
+                    && (uuid.equals(job.getOwner()) || job.getHelpers().contains(uuid))) {
+                job.setPaused(false);
+                job.setAutoPaused(false);
+                job.setDirty(true);
+                job.sendToAll(Component.text(player.getName() + " is back — the job has resumed.",
+                        NamedTextColor.GREEN, TextDecoration.BOLD));
+            }
         }
         // Restore the job border for players who relog while in a job.
         JobBorderManager.refresh(player);
