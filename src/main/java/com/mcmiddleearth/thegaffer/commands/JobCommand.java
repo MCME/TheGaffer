@@ -348,6 +348,17 @@ public class JobCommand implements TabExecutor {
                     player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                     return true;
                 }
+                if (args.length > 1 && args[1].equalsIgnoreCase("export")) {
+                    if (!player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                        return true;
+                    }
+                    java.io.File f = StatsManager.exportAll(System.currentTimeMillis());
+                    player.sendMessage(f != null
+                            ? Component.text("Exported to " + f.getName(), NamedTextColor.GREEN)
+                            : Component.text("Export failed (see console).", NamedTextColor.RED));
+                    return true;
+                }
                 if (args.length > 1) {
                     // Try to find a job by that name first; if not found treat as a player name
                     JobStats js = StatsManager.findJobStats(args[1]);

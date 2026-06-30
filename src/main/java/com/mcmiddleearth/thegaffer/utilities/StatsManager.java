@@ -247,6 +247,50 @@ public class StatsManager {
         return (mins / 60) + "h " + (mins % 60) + "m";
     }
 
+    // ---- CSV export ----
+
+    /**
+     * Renders a list of finished (or live) job stats as a CSV string.
+     * One row per (job, builder); jobs with no builder rows are omitted.
+     * Header: job,owner,project,world,centerX,centerZ,startTime,endTime,builder,placed,broke
+     */
+    public static String toCsv(List<JobStats> all) {
+        StringBuilder sb = new StringBuilder("job,owner,project,world,centerX,centerZ,startTime,endTime,builder,placed,broke");
+        for (JobStats s : all) {
+            for (Map.Entry<UUID, JobStats.BuilderStat> e : s.getBuilders().entrySet()) {
+                sb.append("\n")
+                  .append(csv(s.getName())).append(",").append(csv(Util.nameOf(s.getOwner()))).append(",")
+                  .append(csv(s.getProject())).append(",").append(csv(s.getWorld())).append(",")
+                  .append(s.getCenterX()).append(",").append(s.getCenterZ()).append(",")
+                  .append(s.getStartTime()).append(",").append(s.getEndTime()).append(",")
+                  .append(csv(Util.nameOf(e.getKey()))).append(",")
+                  .append(e.getValue().getPlaced()).append(",").append(e.getValue().getBroke());
+            }
+        }
+        return sb.toString();
+    }
+
+    /** RFC-4180 minimal CSV escape: wraps in quotes only when the value contains a comma or quote. */
+    private static String csv(String v) {
+        if (v == null) { return ""; }
+        return v.contains(",") || v.contains("\"") ? "\"" + v.replace("\"", "\"\"") + "\"" : v;
+    }
+
+    /**
+     * Writes all finished records to {@code stats/export-<stamp>.csv} and returns the file.
+     * Returns {@code null} if the write fails (error already logged).
+     */
+    public static File exportAll(long stamp) {
+        File out = new File(statsDir(), "export-" + stamp + ".csv");
+        try (java.io.FileWriter w = new java.io.FileWriter(out)) {
+            w.write(toCsv(JobStatsStorage.readAll(statsDir())));
+        } catch (java.io.IOException ex) {
+            Util.severe("Stats export failed: " + ex.getMessage());
+            return null;
+        }
+        return out;
+    }
+
     /** Plain-text recap for the Discord job-end post. Pure (no Bukkit/JDA), so it's unit-testable. */
     public static String buildDiscordSummary(JobStats s) {
         // Leading spaces match the onJobStart Discord recap layout.
