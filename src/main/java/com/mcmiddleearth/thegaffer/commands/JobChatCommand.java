@@ -58,7 +58,9 @@ public class JobChatCommand implements CommandExecutor {
         }
         boolean on = JobChat.toggle(player.getName());
         if (on) {
-            player.sendMessage(Component.text("Job chat enabled - your messages now go to your job. Use /jc again to turn it off.", NamedTextColor.GREEN));
+            player.sendMessage(Component.text("Job chat enabled — your messages now go to job ", NamedTextColor.GREEN)
+                    .append(Component.text(job.getName(), NamedTextColor.AQUA))
+                    .append(Component.text(". Use /jc again to turn it off.", NamedTextColor.GREEN)));
         } else {
             player.sendMessage(Component.text("Job chat disabled.", NamedTextColor.GREEN));
         }

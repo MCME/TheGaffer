@@ -111,11 +111,30 @@ public class AdminMethods {
     }
 
     public String listworkers() {
-        List<String> names = new ArrayList<>();
-        for (UUID id : job.getWorkers()) {
-            names.add(Util.nameOf(id));
+        List<UUID> workers = job.getWorkers();
+        List<UUID> helpers = job.getHelpers();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Workers (").append(workers.size()).append("):");
+        if (workers.isEmpty()) {
+            sb.append("\n  none");
+        } else {
+            for (UUID id : workers) {
+                org.bukkit.OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(id);
+                sb.append("\n  ").append(Util.nameOf(id))
+                  .append(" [").append(op.isOnline() ? "online" : "offline").append("]");
+            }
         }
-        return String.join("\n", names);
+        sb.append("\nHelpers (").append(helpers.size()).append("):");
+        if (helpers.isEmpty()) {
+            sb.append("\n  none");
+        } else {
+            for (UUID id : helpers) {
+                org.bukkit.OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(id);
+                sb.append("\n  ").append(Util.nameOf(id))
+                  .append(" [").append(op.isOnline() ? "online" : "offline").append("]");
+            }
+        }
+        return sb.toString();
     }
 
     public GafferResponses.GafferResponse inviteworker(String arg) {
