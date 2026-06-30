@@ -119,9 +119,11 @@ public class JobEventListener implements Listener {
                 ping = ping.trim();
                 long startMillis = (job.getStartTime() != null && job.getStartTime() > 0)
                         ? job.getStartTime() : System.currentTimeMillis();
+                String title = "🛠 New job: " + job.getName();
+                if (title.length() > 256) { title = title.substring(0, 256); }
                 EmbedBuilder embed = new EmbedBuilder()
                         .setColor(new java.awt.Color(46, 160, 90))
-                        .setTitle("🛠 New job: " + job.getName())
+                        .setTitle(title)
                         .addField("Leader", Util.nameOf(job.getOwner()), true)
                         .addField("World", job.getBukkitWorld().getName(), true)
                         .addField("Started", discordTimestamp(startMillis, 'R'), true)
@@ -129,15 +131,16 @@ public class JobEventListener implements Listener {
                         .setFooter("MCME")
                         .setTimestamp(Instant.ofEpochMilli(startMillis));
                 if (TheGaffer.isJobDescription() && job.getDescription() != null && !job.getDescription().isEmpty()) {
-                    embed.setDescription(job.getDescription());
+                    String desc = job.getDescription();
+                    if (desc.length() > 4096) { desc = desc.substring(0, 4096); }
+                    embed.setDescription(desc);
                 }
                 final Message msg = new MessageBuilder().setContent(ping).setEmbed(embed.build()).build();
-                final TextChannel ch = channel;
                 // Send off the main thread: sendMessageBlocking does a synchronous Discord
                 // REST call and must not block the server tick.
                 new BukkitRunnable() {
                     @Override
-                    public void run() { DiscordUtil.sendMessageBlocking(ch, msg, false); }
+                    public void run() { DiscordUtil.sendMessageBlocking(channel, msg, false); }
                 }.runTaskAsynchronously(TheGaffer.getPluginInstance());
             }
         }
