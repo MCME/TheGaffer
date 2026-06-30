@@ -5,6 +5,9 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.storage.JobStatsStorage;
+import com.mcmiddleearth.thegaffer.storage.Project;
+import java.util.HashSet;
+import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -39,6 +42,31 @@ public class StatsManager {
         public long getBroke() { return broke; }
         public int getJobs() { return jobs; }
         public long getDurationMillis() { return durationMillis; }
+    }
+
+    public static class ProjectAggregate {
+        private final String project;
+        private int jobCount;
+        private final Set<UUID> builders = new HashSet<>();
+        private long placed;
+        private long broke;
+        private long durationMillis;
+        private long firstStart = Long.MAX_VALUE;
+        private long lastEnd;
+        private final Map<UUID, JobStats.BuilderStat> perBuilder = new HashMap<>();
+
+        public ProjectAggregate(String project) { this.project = project; }
+
+        public String getProject() { return project; }
+        public int getJobCount() { return jobCount; }
+        public int getBuilderCount() { return builders.size(); }
+        public long getPlaced() { return placed; }
+        public long getBroke() { return broke; }
+        public long getDurationMillis() { return durationMillis; }
+        public long getFirstStart() { return firstStart == Long.MAX_VALUE ? 0L : firstStart; }
+        public long getLastEnd() { return lastEnd; }
+        public Map<UUID, JobStats.BuilderStat> getPerBuilder() { return perBuilder; }
+        public boolean isEmpty() { return jobCount == 0; }
     }
 
     private static final Map<UUID, PlayerAggregate> aggregate = new HashMap<>();
@@ -161,6 +189,39 @@ public class StatsManager {
         return all.size() > limit ? all.subList(0, limit) : all;
     }
 
+    /**
+     * Rolls up every job belonging to {@code project} (canonical match) — finished
+     * records on disk plus in-progress live entries — into a single aggregate.
+     * Returns an empty aggregate (all zeros) when no job matches; this also serves
+     * the orphan case (a name with stats but no registry record).
+     */
+    public static ProjectAggregate getProjectAggregate(String project) {
+        String canon = Project.canonical(project);
+        ProjectAggregate agg = new ProjectAggregate(project);
+        List<JobStats> all = new ArrayList<>(JobStatsStorage.readAll(statsDir()));
+        all.addAll(live.values());
+        for (JobStats s : all) {
+            if (!Project.canonical(s.getProject()).equals(canon)) { continue; }
+            foldIntoProject(agg, s);
+        }
+        return agg;
+    }
+
+    private static void foldIntoProject(ProjectAggregate agg, JobStats s) {
+        agg.jobCount += 1;
+        agg.builders.addAll(s.getParticipants());
+        agg.placed += s.getTotalPlaced();
+        agg.broke += s.getTotalBroke();
+        agg.durationMillis += s.getDurationMillis();
+        if (s.getStartTime() > 0 && s.getStartTime() < agg.firstStart) { agg.firstStart = s.getStartTime(); }
+        if (s.getEndTime() > agg.lastEnd) { agg.lastEnd = s.getEndTime(); }
+        for (Map.Entry<UUID, JobStats.BuilderStat> e : s.getBuilders().entrySet()) {
+            JobStats.BuilderStat acc = agg.perBuilder.computeIfAbsent(e.getKey(), k -> new JobStats.BuilderStat());
+            acc.addPlaced(e.getValue().getPlaced());
+            acc.addBroke(e.getValue().getBroke());
+        }
+    }
+
     // ---- active snapshot (flush / reload) ----
 
     /** Snapshots every live job's counters to stats/active/{@code <job>-0.yml}. */
@@ -247,6 +308,64 @@ public class StatsManager {
                 .append(Component.text("Blocks: ", NamedTextColor.GRAY))
                 .append(Component.text(s.getTotalPlaced() + " placed, " + s.getTotalBroke() + " broken", NamedTextColor.AQUA));
         for (Map.Entry<UUID, JobStats.BuilderStat> e : s.getBuilders().entrySet()) {
+            out = out.append(Component.newline())
+                    .append(Component.text("  " + Util.nameOf(e.getKey()) + ": ", NamedTextColor.GRAY))
+                    .append(Component.text(e.getValue().getPlaced() + " / " + e.getValue().getBroke(), NamedTextColor.AQUA));
+        }
+        return out;
+    }
+
+    /** Renders a registered project's metadata + rolled-up stats as a chat Component. */
+    public static Component renderProjectStats(Project p, ProjectAggregate a) {
+        Component out = Component.text(p.getName(), NamedTextColor.GOLD)
+                .append(Component.text(" [" + p.getStatus().name().toLowerCase() + "]", NamedTextColor.GRAY));
+        if (p.getDescription() != null && !p.getDescription().isEmpty()) {
+            out = out.append(Component.newline())
+                    .append(Component.text("Description: ", NamedTextColor.GRAY))
+                    .append(Component.text(p.getDescription(), NamedTextColor.WHITE));
+        }
+        if (p.getGoal() != null && !p.getGoal().isEmpty()) {
+            out = out.append(Component.newline())
+                    .append(Component.text("Goal: ", NamedTextColor.GRAY))
+                    .append(Component.text(p.getGoal(), NamedTextColor.WHITE));
+        }
+        out = out.append(Component.newline())
+                .append(Component.text("Lead: ", NamedTextColor.GRAY))
+                .append(Component.text(Util.nameOf(p.getLead()), NamedTextColor.AQUA));
+        if (!p.getManagers().isEmpty()) {
+            StringBuilder mgrs = new StringBuilder();
+            for (UUID m : p.getManagers()) { mgrs.append(Util.nameOf(m)).append(" "); }
+            out = out.append(Component.newline())
+                    .append(Component.text("Managers: ", NamedTextColor.GRAY))
+                    .append(Component.text(mgrs.toString().trim(), NamedTextColor.AQUA));
+        }
+        return out.append(Component.newline()).append(renderProjectTotals(a));
+    }
+
+    /** Renders stats for a project name that has records but no registry entry. */
+    public static Component renderOrphanProjectStats(String name, ProjectAggregate a) {
+        return Component.text(name, NamedTextColor.GOLD)
+                .append(Component.text(" (no project record)", NamedTextColor.DARK_GRAY))
+                .append(Component.newline())
+                .append(renderProjectTotals(a));
+    }
+
+    private static Component renderProjectTotals(ProjectAggregate a) {
+        Component out = Component.text("Jobs: ", NamedTextColor.GRAY)
+                .append(Component.text(String.valueOf(a.getJobCount()), NamedTextColor.AQUA))
+                .append(Component.text("   Builders: ", NamedTextColor.GRAY))
+                .append(Component.text(String.valueOf(a.getBuilderCount()), NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Blocks: ", NamedTextColor.GRAY))
+                .append(Component.text(a.getPlaced() + " placed, " + a.getBroke() + " broken", NamedTextColor.AQUA))
+                .append(Component.newline())
+                .append(Component.text("Total build time: ", NamedTextColor.GRAY))
+                .append(Component.text(formatDuration(a.getDurationMillis()), NamedTextColor.AQUA));
+        List<Map.Entry<UUID, JobStats.BuilderStat>> top = new ArrayList<>(a.getPerBuilder().entrySet());
+        top.sort(Comparator.comparingInt((Map.Entry<UUID, JobStats.BuilderStat> e) -> e.getValue().getPlaced()).reversed());
+        int shown = 0;
+        for (Map.Entry<UUID, JobStats.BuilderStat> e : top) {
+            if (shown++ >= 5) { break; }
             out = out.append(Component.newline())
                     .append(Component.text("  " + Util.nameOf(e.getKey()) + ": ", NamedTextColor.GRAY))
                     .append(Component.text(e.getValue().getPlaced() + " / " + e.getValue().getBroke(), NamedTextColor.AQUA));
