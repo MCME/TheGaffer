@@ -328,12 +328,14 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public Prompt acceptInput(ConversationContext context, String input) {
             if (input.equalsIgnoreCase("nothing")) {
                 context.setSessionData("project", "nothing");
-                return new GlowEffectPrompt();
+                if (TheGaffer.isGlowing()) { return new GlowEffectPrompt(); }
+                return new finishedPrompt();
             }
             Project p = ProjectDatabase.get(input);
             if (p != null && p.getStatus() == Project.Status.ACTIVE) {
                 context.setSessionData("project", p.getName()); // store the canonical display name
-                return new GlowEffectPrompt();
+                if (TheGaffer.isGlowing()) { return new GlowEffectPrompt(); }
+                return new finishedPrompt();
             }
             return new projectNotExistsPrompt();
         }
@@ -376,6 +378,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             boolean glowing = false;
             Object temp = context.getSessionData("glowEffect");
             String project = (String) context.getSessionData("project");
+            if (project == null) { project = "nothing"; }
             if (temp != null) {
                 glowing = (boolean) temp;
             }
