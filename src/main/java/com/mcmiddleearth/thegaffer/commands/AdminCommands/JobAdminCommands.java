@@ -24,6 +24,9 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,9 +46,52 @@ public class JobAdminCommands implements TabExecutor{
     
     private static HashMap<String, Integer> Methods = new HashMap<>();
     
+    private static final List<String> ADMIN_ACTIONS = Arrays.asList(
+        "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
+        "inviteworker", "uninviteworker", "setwarp", "setradius", "setkit",
+        "clearworkerinven", "bringall", "listworkers"
+    );
+
+    // Player-taking actions (Methods value == 1)
+    private static final List<String> PLAYER_ACTIONS = Arrays.asList(
+        "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
+        "inviteworker", "uninviteworker", "setradius"
+    );
+
     @Override
-    public List<String> onTabComplete(CommandSender cs, Command cmd, String label, String[] args){
-        return null;//nothing to see here
+    public List<String> onTabComplete(CommandSender cs, Command cmd, String label, String[] args) {
+        // args[0]="admin", args[1]=<job>, args[2]=<action>, args[3]=<player>
+        // When called via /job admin …, args.length >= 1.
+        if (args.length == 2) {
+            // Completing the job name (args[1])
+            String prefix = args[1];
+            List<String> matches = new ArrayList<>();
+            for (String name : JobDatabase.getActiveJobs().keySet()) {
+                if (name.startsWith(prefix)) {
+                    matches.add(name);
+                }
+            }
+            return matches;
+        }
+        if (args.length == 3) {
+            // Completing the admin action (args[2])
+            String prefix = args[2].toLowerCase();
+            List<String> matches = new ArrayList<>();
+            for (String action : ADMIN_ACTIONS) {
+                if (action.startsWith(prefix)) {
+                    matches.add(action);
+                }
+            }
+            return matches;
+        }
+        if (args.length == 4) {
+            // Completing the player name (args[3]) — only for player-taking actions
+            if (args.length > 2 && PLAYER_ACTIONS.contains(args[2].toLowerCase())) {
+                return null; // let Bukkit supply online player names
+            }
+            return Collections.emptyList();
+        }
+        return Collections.emptyList();
     }
     
     public JobAdminCommands(){
