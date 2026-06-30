@@ -19,6 +19,7 @@
 
 package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 
+import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
@@ -45,7 +47,13 @@ import org.bukkit.entity.Player;
 public class JobAdminCommands implements TabExecutor{
     
     private static HashMap<String, Integer> Methods = new HashMap<>();
-    
+
+    /**
+     * Actions that are destructive and require the trailing "confirm" token in the one-liner.
+     * These mirror the dialog's typed-confirm step for bringall and clearworkerinven.
+     */
+    private static final Set<String> CONFIRM_ACTIONS = Set.of("bringall", "clearworkerinven");
+
     private static final List<String> ADMIN_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
         "inviteworker", "uninviteworker", "setwarp", "setradius",
@@ -85,9 +93,15 @@ public class JobAdminCommands implements TabExecutor{
             return matches;
         }
         if (args.length == 4) {
-            // Completing the player name (args[3]) — only for player-taking actions
-            if (args.length > 2 && PLAYER_ACTIONS.contains(args[2].toLowerCase())) {
-                return null; // let Bukkit supply online player names
+            String action = args[2].toLowerCase();
+            // Destructive actions: suggest "confirm" as the next token
+            if (CONFIRM_ACTIONS.contains(action)) {
+                String prefix = args[3].toLowerCase();
+                return "confirm".startsWith(prefix) ? Arrays.asList("confirm") : Collections.emptyList();
+            }
+            // Player-taking actions: let Bukkit supply online player names
+            if (PLAYER_ACTIONS.contains(action)) {
+                return null;
             }
             return Collections.emptyList();
         }
@@ -126,35 +140,44 @@ public class JobAdminCommands implements TabExecutor{
                     }
                     AdminMethods am = new AdminMethods(j, p);
                     if(Methods.get(args[2]) == 0){
-                        boolean success = true;
-                        try {
-                            Method m = am.getClass().getMethod(args[2].toLowerCase());
-                            m.invoke(am);
-                        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                            success = false;
-                            Logger.getLogger(JobAdminCommands.class.getName()).log(Level.SEVERE, null, ex);
-                        }finally{
-                            if(success){
-                                p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
-                            }else{
-                                p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
+                        String action = args[2].toLowerCase();
+
+                        // Gate destructive one-liners: require a trailing "confirm" token to
+                        // mirror the dialog's typed-confirm step. Without it, explain and abort.
+                        if (CONFIRM_ACTIONS.contains(action)) {
+                            boolean hasConfirm = args.length >= 4
+                                    && "confirm".equalsIgnoreCase(args[3]);
+                            if (!hasConfirm) {
+                                String msg = action + " wipes every worker's inventory."
+                                        + " Re-run: /job admin " + args[1] + " " + action + " confirm";
+                                if (action.equals("bringall")) {
+                                    msg = action + " teleports all online workers to your location."
+                                            + " Re-run: /job admin " + args[1] + " " + action + " confirm";
+                                }
+                                p.sendMessage(Component.text(msg, NamedTextColor.YELLOW));
+                                return true;
                             }
+                        }
+
+                        try {
+                            Method m = am.getClass().getMethod(action);
+                            Object result = m.invoke(am);
+                            // Surface the real result instead of a generic "Job Edited!" message.
+                            sendResult(p, result, args[1], null);
+                        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                            Logger.getLogger(JobAdminCommands.class.getName()).log(Level.SEVERE, null, ex);
+                            p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
                         }
                         return true;
                     }else if(Methods.get(args[2]) == 1){
-                        boolean success = true;
                         try {
                             Method m = am.getClass().getMethod(args[2].toLowerCase(), String.class);
-                            m.invoke(am, args[3]);
+                            Object result = m.invoke(am, args[3]);
+                            // Surface the real result instead of a generic "Job Edited!" message.
+                            sendResult(p, result, args[1], args[3]);
                         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
-                            success = false;
                             Logger.getLogger(JobAdminCommands.class.getName()).log(Level.SEVERE, null, ex);
-                        }finally{
-                            if(success){
-                                p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
-                            }else{
-                                p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
-                            }
+                            p.sendMessage(Component.text("Job Edit Failed!", NamedTextColor.RED));
                         }
                         return true;
                     }
@@ -170,5 +193,40 @@ public class JobAdminCommands implements TabExecutor{
             return true;
         }
         return false;
+    }
+
+    /**
+     * Surfaces the return value of an AdminMethods call to the player, mirroring
+     * the dialog's responsePrompt logic:
+     * <ul>
+     *   <li>{@link String} (non-blank) → send the text in AQUA (e.g. listworkers output).</li>
+     *   <li>{@link GafferResponse} → GREEN "Success: &lt;msg&gt;" or RED "Failure: &lt;msg&gt;",
+     *       with %job% and %name% substituted.</li>
+     *   <li>null / other → fall back to the generic "Job Edited!" confirmation.</li>
+     * </ul>
+     *
+     * @param p        the admin player to message
+     * @param result   the reflective return value (may be null)
+     * @param jobName  the job name, substituted for {@code %job%} in response messages
+     * @param nameArg  the player-name argument (args[3]), substituted for {@code %name%}; may be null
+     */
+    private void sendResult(Player p, Object result, String jobName, String nameArg) {
+        if (result instanceof String s && !s.isBlank()) {
+            // listworkers and any future String-returning methods: send raw text
+            p.sendMessage(Component.text(s, NamedTextColor.AQUA));
+        } else if (result instanceof GafferResponse gr) {
+            // GafferResponse: mirror dialog's "Success: …" / "Failure: …" wording
+            String msg = gr.getMessage()
+                    .replaceAll("%job%", jobName)
+                    .replaceAll("%name%", nameArg != null ? nameArg : "");
+            if (gr.isSuccessful()) {
+                p.sendMessage(Component.text("Success: " + msg, NamedTextColor.GREEN));
+            } else {
+                p.sendMessage(Component.text("Failure: " + msg, NamedTextColor.RED));
+            }
+        } else {
+            // void / Boolean / other — generic confirmation (e.g. setwarp, setradius, bringall)
+            p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
+        }
     }
 }
