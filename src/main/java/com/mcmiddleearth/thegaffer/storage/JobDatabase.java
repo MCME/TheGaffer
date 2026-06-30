@@ -18,6 +18,7 @@ package com.mcmiddleearth.thegaffer.storage;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.JobEndEvent;
 import com.mcmiddleearth.thegaffer.events.JobStartEvent;
+import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -146,6 +147,7 @@ public class JobDatabase {
         activeJobs.put(j.getName(), j);
         TheGaffer.getServerInstance().getPluginManager().registerEvents(j, TheGaffer.getPluginInstance());
         j.setDirty(true);
+        StatsManager.begin(j);
         saveJob(j);
         TheGaffer.getServerInstance().getPluginManager().callEvent(new JobStartEvent(j));
         return true;
@@ -161,6 +163,7 @@ public class JobDatabase {
         activeJobs.remove(j.getName());
         inactiveJobs.put(j.getName(), j);
         HandlerList.unregisterAll(j);
+        StatsManager.finish(j);
         saveJob(j);
         new BukkitRunnable() {
             @Override

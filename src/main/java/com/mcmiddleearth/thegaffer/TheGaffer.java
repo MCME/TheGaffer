@@ -26,10 +26,12 @@ import com.mcmiddleearth.thegaffer.listeners.JobChatListener;
 import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
+import com.mcmiddleearth.thegaffer.listeners.StatsListener;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
+import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -81,6 +83,8 @@ public class TheGaffer extends JavaPlugin {
 
         int jobsLoaded = JobDatabase.loadJobs();
         Util.info("Loaded " + jobsLoaded + " jobs.");
+        StatsManager.loadAggregate();
+        StatsManager.loadActive();
 
         getCommand("createjob").setExecutor(new JobCreationConversation());
         getCommand("job").setExecutor(new JobCommand());
@@ -91,8 +95,16 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
         serverInstance.getPluginManager().registerEvents(new CraftingListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobChatListener(), this);
+        serverInstance.getPluginManager().registerEvents(new StatsListener(), this);
 
-        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        // MockBukkit does not implement the Messenger API, so guard against NPE/
+        // UnsupportedOperationException during integration tests. On a real server
+        // this call succeeds normally and registers the outgoing channel.
+        try {
+            this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        } catch (Throwable ignored) {
+            // No-op in test environments where the Messenger is unavailable.
+        }
 
         // Runs SYNC (main thread): the cleanup reassigns job owners and removes
         // abandoned workers, which call the Bukkit API (scoreboards/teams, player
@@ -114,6 +126,7 @@ public class TheGaffer extends JavaPlugin {
             @Override
             public void run() {
                 JobDatabase.saveAllDirty(true);
+                StatsManager.flushActive(true);
             }
         }.runTaskTimer(this, 60 * 20, 60 * 20);
     }
@@ -124,6 +137,7 @@ public class TheGaffer extends JavaPlugin {
         // (the scheduler can no longer run async tasks during shutdown).
         getServer().getScheduler().cancelTasks(this);
         JobDatabase.saveAllDirty(false);
+        StatsManager.flushActive(false);
     }
 
     public static void setupConfig() {

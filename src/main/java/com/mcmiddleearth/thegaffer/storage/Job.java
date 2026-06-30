@@ -18,6 +18,7 @@ package com.mcmiddleearth.thegaffer.storage;
 import com.mcmiddleearth.thegaffer.GafferResponses.*;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -261,6 +262,7 @@ public class Job implements Listener {
             return HelperResponse.NO_PERMISSIONS;
         }
         helpers.add(p.getUniqueId());
+        StatsManager.onJoin(name, p.getUniqueId());
         addHelperTeam(p.getName());
         setDirty(true);
         // JobDatabase.saveJobs();
@@ -301,6 +303,7 @@ public class Job implements Listener {
             return WorkerResponse.NOT_INVITED;
         }
         workers.add(p.getUniqueId());
+        StatsManager.onJoin(name, p.getUniqueId());
         addWorkerTeam(p.getName());
         if (p.isOnline()) {
             p.getPlayer().teleport(warp.toBukkitLocation());
