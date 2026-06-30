@@ -23,6 +23,7 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.PromptStyle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -91,9 +92,11 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
     @Override
     public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
         if (abandonedEvent.gracefulExit()) {
-            abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Create job exited.");
+            abandonedEvent.getContext().getForWhom().sendRawMessage(
+                    PromptStyle.TAG + PromptStyle.HINT + "Create job exited. No job was created.");
         } else {
-            abandonedEvent.getContext().getForWhom().sendRawMessage(ChatColor.AQUA + "Create job timed out");
+            abandonedEvent.getContext().getForWhom().sendRawMessage(
+                    PromptStyle.TAG + PromptStyle.HINT + "Create job timed out. No job was created.");
         }
     }
 
@@ -101,12 +104,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPrefix(ConversationContext context) {
-            String prefix = ChatColor.GRAY + "";
-            String jobname = (String) context.getSessionData("jobname");
-            if (jobname != null) {
-                prefix += "creating " + ChatColor.GOLD + jobname + ChatColor.AQUA + "\n";
-            }
-            return prefix;
+            return PromptStyle.TAG;
         }
 
     }
@@ -115,8 +113,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "What would you like the name of the job to be?"
-                    + "\n" + "or exit with !cancel";
+            return PromptStyle.ask("What would you like the name of the job to be?")
+                    + PromptStyle.hint("Spaces will be replaced with underscores · type !cancel to exit");
         }
 
         @Override
@@ -131,7 +129,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             if (!JobDatabase.getActiveJobs().containsKey(input)) {
                 context.setSessionData("jobname", input);
                 if (!original.equals(input)) {
-                    context.getForWhom().sendRawMessage(ChatColor.YELLOW + "Name set to " + ChatColor.GOLD + input + ChatColor.YELLOW + " (spaces were replaced with underscores).");
+                    context.getForWhom().sendRawMessage(
+                            PromptStyle.OK + "Name set to " + PromptStyle.VALUE + input
+                            + PromptStyle.OK + " (spaces were replaced with underscores).");
                 }
                 if (TheGaffer.isJobDescription()) {
                     return new descriptionPrompt();
@@ -150,7 +150,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Enter a short job description (shown in the job-start message and Discord). Keep it brief.";
+            return PromptStyle.ask("Enter a short job description.")
+                    + PromptStyle.hint("Shown in the job-start message and Discord · keep it brief");
         }
 
         @Override
@@ -170,7 +171,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "A job by that name has been run in the past, please pick a different name.";
+            return PromptStyle.ERROR + "A job by that name has been run in the past — please pick a different name.";
         }
 
     }
@@ -184,7 +185,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "A job by that name is already running, pick another name.";
+            return PromptStyle.ERROR + "A job by that name is already running — pick another name.";
         }
 
     }
@@ -199,7 +200,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should this job be private? Private = only players you invite can join; public (false) = anyone with permission can join. (true/false)";
+            return PromptStyle.ask("Should this job be private?") + PromptStyle.opts("true / false")
+                    + PromptStyle.hint("private = invite-only · public (false) = anyone with permission can join");
         }
 
     }
@@ -213,7 +215,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getFailedValidationText(ConversationContext context, String invalidInput) {
-            return "Radius must be at least 1. Please enter a number between 1 and 1000.";
+            return PromptStyle.ERROR + "Radius must be at least 1. Please enter a number between 1 and 1000.";
         }
 
         @Override
@@ -229,7 +231,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "How large should the build area be? Enter a block radius from 1 to 1000 — e.g. 50 makes a 100×100 area centred on you. (over 1000 is capped)";
+            return PromptStyle.ask("How large should the build area be?") + PromptStyle.opts("radius 1 – 1000")
+                    + PromptStyle.hint("e.g. " + PromptStyle.VALUE + "50" + PromptStyle.HINT + " makes a 100×100 area centred on you · over 1000 is capped");
         }
 
     }
@@ -243,7 +246,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "No active project by that name. Try again, or type 'nothing'.";
+            return PromptStyle.ERROR + "No active project by that name — try again, or type 'nothing'.";
         }
 
     }
@@ -271,7 +274,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Give workers a starter kit? Type 'true' to snapshot your CURRENT inventory as the kit every worker receives on join (you can change it later with /jobadmin setkit), or 'false' to skip. (true/false)";
+            return PromptStyle.ask("Give workers a starter kit?") + PromptStyle.opts("true / false")
+                    + PromptStyle.hint("true = snapshot your CURRENT inventory as the kit every worker receives on join"
+                            + " · you can change it later with /jobadmin setkit");
         }
 
     }
@@ -295,11 +300,12 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             java.util.List<String> roles = TheGaffer.getAllowedPingRoles();
             String roleInfo;
             if (roles != null && !roles.isEmpty()) {
-                roleInfo = "will ping: " + String.join(", ", roles) + ".";
+                roleInfo = "will ping: " + PromptStyle.VALUE + String.join(", ", roles) + PromptStyle.HINT;
             } else {
-                roleInfo = "(no roles are configured to ping).";
+                roleInfo = "(no roles are configured to ping)";
             }
-            return "Should this job be announced on Discord? The configured notification roles " + roleInfo + " (true/false)";
+            return PromptStyle.ask("Should this job be announced on Discord?") + PromptStyle.opts("true / false")
+                    + PromptStyle.hint("The configured notification roles " + roleInfo);
         }
 
     }
@@ -311,10 +317,10 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             StringBuilder names = new StringBuilder();
             for (Project p : ProjectDatabase.byStatus(Project.Status.ACTIVE)) {
                 if (names.length() > 0) { names.append(", "); }
-                names.append(p.getName());
+                names.append(PromptStyle.VALUE + p.getName() + PromptStyle.HINT);
             }
-            return "Link this job to a project. Active projects: " + names
-                    + ". Type one of those names, or 'nothing'.";
+            return PromptStyle.ask("Link this job to a project, or type 'nothing'.")
+                    + PromptStyle.hint("Active projects: " + names);
         }
 
         @Override
@@ -345,7 +351,8 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should workers and helpers in this job glow (a coloured outline visible through walls)? (true/false)";
+            return PromptStyle.ask("Should workers and helpers in this job glow?") + PromptStyle.opts("true / false")
+                    + PromptStyle.hint("a coloured outline visible through walls");
         }
 
     }
@@ -384,7 +391,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 jerb.setKit(kit);
             }
             JobDatabase.activateJob(jerb);
-            return "Successfully created the " + jobname + " job!";
+            return PromptStyle.OK + "Successfully created the " + PromptStyle.VALUE + jobname + PromptStyle.OK + " job!";
         }
 
     }
