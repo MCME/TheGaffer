@@ -65,7 +65,7 @@ public class StatsManager {
         public long getDurationMillis() { return durationMillis; }
         public long getFirstStart() { return firstStart == Long.MAX_VALUE ? 0L : firstStart; }
         public long getLastEnd() { return lastEnd; }
-        public Map<UUID, JobStats.BuilderStat> getPerBuilder() { return perBuilder; }
+        public Map<UUID, JobStats.BuilderStat> getPerBuilder() { return java.util.Collections.unmodifiableMap(perBuilder); }
         public boolean isEmpty() { return jobCount == 0; }
     }
 
@@ -198,7 +198,10 @@ public class StatsManager {
     public static ProjectAggregate getProjectAggregate(String project) {
         String canon = Project.canonical(project);
         ProjectAggregate agg = new ProjectAggregate(project);
-        List<JobStats> all = new ArrayList<>(JobStatsStorage.readAll(statsDir()));
+        // Finished records live directly in statsDir(); readAll() does not recurse into the
+        // active/ subdir, and finish() removes a job from `live` before writing its record,
+        // so no job is folded twice.
+        List<JobStats> all = JobStatsStorage.readAll(statsDir());
         all.addAll(live.values());
         for (JobStats s : all) {
             if (!Project.canonical(s.getProject()).equals(canon)) { continue; }
@@ -315,7 +318,7 @@ public class StatsManager {
         return out;
     }
 
-    /** Renders a registered project's metadata + rolled-up stats as a chat Component. */
+    /** Renders a registered project's metadata and rolled-up stats as a chat Component. */
     public static Component renderProjectStats(Project p, ProjectAggregate a) {
         Component out = Component.text(p.getName(), NamedTextColor.GOLD)
                 .append(Component.text(" [" + p.getStatus().name().toLowerCase() + "]", NamedTextColor.GRAY));
