@@ -87,6 +87,8 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `thegaffer.join` | `true` | Join and use jobs; view stats/leaderboard. |
 | `thegaffer.create` | `op` | Create, manage, stop jobs; export stats; admin commands. |
 | `thegaffer.ignoreprotection` | `op` | Bypass build protection — build anywhere. |
+| `thegaffer.project.create` | `op` | Create and lead projects. |
+| `thegaffer.project.admin` | `op` | Manage any project (head-builder bypass). |
 
 ---
 
@@ -125,6 +127,30 @@ TheGaffer records what happens during each job and exposes it four ways.
 - **`/job stats export`** — writes every record to `plugins/TheGaffer/stats/export-<timestamp>.csv` (UTF-8) for spreadsheets or dashboards.
 
 Live counts survive a restart (they ride the same periodic save as jobs), so stats aren't lost if the server cycles mid-job.
+
+---
+
+## Projects
+
+A **Project** (e.g. "Minas Tirith") is a named, managed collection of jobs, run with `/project` (alias `/pj`). Stats from every job in a project roll up to the project level, so you can see total blocks, builders, and build time across an entire effort.
+
+- **What it holds:** a description, a goal, a **lead** + optional **managers**, and a lifecycle status (active / completed / archived). Stored as plain YAML under `plugins/TheGaffer/projects/<name>.yml`.
+- **Membership** is by name: a job belongs to a project when it's created under it (picked at `/createjob`) or attached with `/project attach`. Project names match case-insensitively, so "Minas Tirith" and "minas tirith" are the same project.
+- **Ownership is enforced:** only a project's lead/managers may edit it, change its status, or attach jobs — except a holder of `thegaffer.project.admin` (the head-builder bypass), who may manage any project.
+
+| Command | Who | Description |
+|---|---|---|
+| `/project list [active\|completed\|archived]` | everyone | List projects (click a name for details). |
+| `/project info <name>` | everyone | Description, goal, lead, managers, status, and rolled-up stats. |
+| `/project create <name>` | `thegaffer.project.create` | Create a project; you become its lead. |
+| `/project setdescription\|setgoal <name> <text>` | lead/manager | Edit details. |
+| `/project setlead <name> <player>` | lead / admin | Reassign the lead. |
+| `/project addmanager\|removemanager <name> <player>` | lead/manager | Manage the manager list. |
+| `/project complete\|archive\|reopen <name>` | lead/manager | Change lifecycle status. |
+| `/project attach <name> <job>` / `/project detach <job>` | lead/manager | Link / unlink a job. |
+| `/project delete <name>` | lead / admin | Remove the project record (job & stats history keep the name). |
+
+At `/createjob`, if any active projects exist you'll be asked which one this job belongs to (or `nothing`).
 
 ---
 
@@ -174,6 +200,7 @@ This branch is a substantial overhaul focused on stability, performance, securit
 - **Performance** — the build-protection hot path and the player-move handler were optimised.
 - **Security & cleanup** — dead TeamSpeak code and a hard-coded password removed; the build is dependency-clean and reproducible from public repositories.
 - **Tests & CI** — the project's first automated test suite (MockBukkit) plus GitHub Actions.
+- **Projects** — jobs can be grouped into managed, owned **projects** with rolled-up stats; this replaces the old (defunct) McMeProject integration with a native, self-contained system.
 
 ---
 
