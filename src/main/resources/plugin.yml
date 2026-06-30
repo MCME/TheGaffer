@@ -21,6 +21,8 @@ commands:
             /job leave
             /job warpto <jobname>
             /job info <jobname>
+            /job stats <job|player>
+            /job leaderboard [placed|broke|active]
             /job create
             /job start
             /jobadmin
