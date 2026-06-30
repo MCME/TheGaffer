@@ -22,6 +22,7 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
+import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
@@ -224,6 +225,8 @@ public class JobCommand implements TabExecutor {
                                 if (resp.isSuccessful()) {
                                     player.sendMessage(Component.text("You have joined the job ", NamedTextColor.GRAY)
                                             .append(Component.text(jobToJoin.getName(), NamedTextColor.AQUA)));
+                                    // Show the job boundary border now that the player is a worker.
+                                    JobBorderManager.refresh(player);
                                 } else {
                                     player.sendMessage(Component.text("Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()), NamedTextColor.RED));
                                 }
@@ -254,6 +257,8 @@ public class JobCommand implements TabExecutor {
                             if (resp.isSuccessful()) {
                                 player.sendMessage(Component.text("You left the job ", NamedTextColor.GRAY)
                                         .append(Component.text(jobToLeave.getName(), NamedTextColor.AQUA)));
+                                // Remove the job boundary border now that the player has left.
+                                JobBorderManager.clear(player);
                             } else {
                                 player.sendMessage(Component.text("Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToLeave.getName()), NamedTextColor.RED));
                             }
@@ -419,6 +424,19 @@ public class JobCommand implements TabExecutor {
                 JobAdminCommands jAC = new JobAdminCommands();
                 return jAC.onCommand(sender, command, label, args);
             }
+            if (args[0].equalsIgnoreCase("border")) {
+                if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
+                    boolean on = JobBorderManager.toggle(player);
+                    if (on) {
+                        player.sendMessage(Component.text("Job boundary shown.", NamedTextColor.GREEN));
+                    } else {
+                        player.sendMessage(Component.text("Job boundary hidden.", NamedTextColor.GRAY));
+                    }
+                } else {
+                    player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
+                }
+                return true;
+            }
             // B8 — unknown subcommand
             player.sendMessage(Component.text("Unknown subcommand. Type ", NamedTextColor.RED)
                     .append(Component.text("/job", NamedTextColor.AQUA))
@@ -430,7 +448,7 @@ public class JobCommand implements TabExecutor {
             Player player = (Player) sender;
             Component help = Component.text("Job commands:", NamedTextColor.GRAY)
                     .append(Component.newline())
-                    .append(Component.text("  check, join, leave, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
+                    .append(Component.text("  check, join, leave, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
             if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                 help = help.append(Component.newline())
                         .append(Component.text("  stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
@@ -446,6 +464,7 @@ public class JobCommand implements TabExecutor {
         // B4 — no-arg subcommands: return empty list so Bukkit doesn't show player names
         if (args[0].equalsIgnoreCase("check")
                 || args[0].equalsIgnoreCase("leave")
+                || args[0].equalsIgnoreCase("border")
                 || args[0].equalsIgnoreCase("listen")
                 || args[0].equalsIgnoreCase("prep")) {
             return Collections.emptyList();
@@ -533,6 +552,7 @@ public class JobCommand implements TabExecutor {
         // Root tab-complete: subcommand list — B2 adds admin + listen
         List<String> actions = new ArrayList<>();
         actions.add("archive");
+        actions.add("border");
         actions.add("warpto");
         actions.add("info");
         actions.add("join");

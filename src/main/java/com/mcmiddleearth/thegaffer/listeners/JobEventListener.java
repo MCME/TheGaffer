@@ -19,6 +19,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
+import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
@@ -51,6 +52,8 @@ public class JobEventListener implements Listener {
     @EventHandler
     public void onJobEnd(JobEndEvent event) {
         Job job = event.getJob();
+        // Clear job borders for all participants before the job is deregistered.
+        JobBorderManager.clearAll(job);
         job.sendToAll(Component.text("The " + job.getName() + " job has ended.", NamedTextColor.GRAY));
         for (Player p : job.getAllAsPlayersArray()) {
             // Guarded (see onJobStart): a third-party sound-packet listener must not abort
