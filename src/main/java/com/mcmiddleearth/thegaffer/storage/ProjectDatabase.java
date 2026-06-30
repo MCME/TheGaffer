@@ -18,7 +18,7 @@ public class ProjectDatabase {
     private static final TreeMap<String, Project> projects = new TreeMap<>(); // canonical -> Project
 
     /** Test seam: when non-null, used instead of the real plugin data folder. */
-    public static File projectsDirOverride = null;
+    static File projectsDirOverride = null;
 
     private static File projectsDir() {
         if (projectsDirOverride != null) { return projectsDirOverride; }
