@@ -40,7 +40,7 @@ A job is a named, bounded build session. It has an owner, an area (a centre poin
 
 A player can be in **only one job at a time** (enforced). Jobs may be **private** (invite-only) and support **banned** and **invited** lists. Optionally, helpers and workers can be given a coloured **glow** (scoreboard teams) so everyone can see who's on the job.
 
-**Why helpers matter:** if the owner logs off, after a short grace period TheGaffer promotes an online **helper** to keep the job running. If no helper is online, the job is paused and moved to the archive. Workers who stay offline too long are removed automatically.
+**Why helpers matter:** if the owner logs off, after a short grace period TheGaffer promotes an online **helper** to keep the job running. If no helper is online, the job is paused and moved to the archive. Workers who stay offline too long are removed automatically. A helper-takeover changes who is listed as **Owner** in `/job info`, but the original starter is recorded separately and shown as "Started by" whenever it differs from the current owner.
 
 **Lifecycle:** a job is created → started (broadcast in-game, and optionally to Discord and across the network) → run → stopped, at which point it moves to the **archive**. Jobs are **persisted to disk** and reload when the server restarts.
 
@@ -55,7 +55,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job check` | List the running jobs (click a name to join). |
 | `/job join <job>` | Join a running job (or the only one running). |
 | `/job leave` | Leave your current job. |
-| `/job info <job>` | Show a job's details (owner, location, status). |
+| `/job info <job>` | Show a job's details: current owner, helpers (by name), worker count, location, and status. If the job was taken over by a helper, also shows the original starter ("Started by"). |
 | `/job warpto <job>` | Teleport to a job's warp point. |
 | `/job archive [page]` | Browse finished (archived) jobs. |
 | `/job stats <job\|player>` | Show a job's recap, or a player's lifetime totals. |
