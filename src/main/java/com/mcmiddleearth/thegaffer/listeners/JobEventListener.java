@@ -21,6 +21,7 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import github.scarsz.discordsrv.DiscordSRV;
@@ -106,12 +107,18 @@ public class JobEventListener implements Listener {
             TheGaffer.getServerInstance().broadcastMessage(message);
         }
         
+        // A clickable join button + a gentle audio cue for players on THIS server. The text
+        // announcement above is delivered network-wide as legacy text via the MCME-Connect proxy,
+        // which strips Adventure click data — so the clickable button is sent locally here, to the
+        // only players who can act on it in one click (remote players must switch servers first).
+        Component joinButton = Component.text("» ", NamedTextColor.DARK_GREEN)
+                .append(Msg.button("Click here to join " + job.getName(), NamedTextColor.GREEN,
+                        "/job join " + job.getName(), "Join " + job.getName()));
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
-            // A gentle server-wide cue for the new-job broadcast (the old
-            // ENTITY_WITHER_DEATH was an alarming, full-volume blast for everyone).
-            // Guarded: a third-party outbound-packet listener (e.g. PremiumVanish's
-            // NamedSoundEffect module via ProtocolLib) can throw when the sound packet is
-            // sent — a COSMETIC cue must not abort the Discord announcement that follows.
+            p.sendMessage(joinButton);
+            // Guarded: a third-party outbound-packet listener (e.g. PremiumVanish's NamedSoundEffect
+            // module via ProtocolLib) can throw when the sound packet is sent — a COSMETIC cue must
+            // not abort the rest of this handler.
             try {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
             } catch (Exception ex) {
