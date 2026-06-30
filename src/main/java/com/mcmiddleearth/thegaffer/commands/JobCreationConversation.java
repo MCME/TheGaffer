@@ -16,7 +16,8 @@
 package com.mcmiddleearth.thegaffer.commands;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
-import com.mcmiddleearth.thegaffer.ext.ExternalProjectHandler;
+import com.mcmiddleearth.thegaffer.storage.Project;
+import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobKit;
@@ -27,7 +28,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -229,7 +229,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "A project with that name doesn't exists";
+            return "No active project by that name. Try again, or type 'nothing'.";
         }
 
     }
@@ -238,9 +238,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         if (TheGaffer.isDiscordEnabled()) {
             return new discordAnnouncePrompt();
         }
-        if (TheGaffer.isProjectsEnabled() == true) {
+        if (ProjectDatabase.hasActiveProjects()) {
             return new projectPrompt();
-        } 
+        }
         if (TheGaffer.isGlowing()) {
             return new GlowEffectPrompt();
         }
@@ -271,7 +271,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             if (input) {
                 return new discordTagPrompt();
             }
-            if (TheGaffer.isProjectsEnabled() == true) {
+            if (ProjectDatabase.hasActiveProjects()) {
                 return new projectPrompt();
             } 
             if (TheGaffer.isGlowing()) {
@@ -300,7 +300,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         public Prompt acceptInput(ConversationContext context, String input) {
             input = input.replace(" ", "");
             context.setSessionData("discordTag", input);
-            if (TheGaffer.isProjectsEnabled() == true) {
+            if (ProjectDatabase.hasActiveProjects()) {
                 return new projectPrompt();
             } 
             if (TheGaffer.isGlowing()) {
@@ -313,33 +313,29 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
     private class projectPrompt extends StringPrompt {
 
-        ExternalProjectHandler mcproject =
-                (Bukkit.getPluginManager().getPlugin("McMeProject") instanceof ExternalProjectHandler h) ? h : null;
-
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Please give the name of the project linked to this job(if not type 'nothing')";
-
+            StringBuilder names = new StringBuilder();
+            for (Project p : ProjectDatabase.byStatus(Project.Status.ACTIVE)) {
+                if (names.length() > 0) { names.append(", "); }
+                names.append(p.getName());
+            }
+            return "Link this job to a project. Active projects: " + names
+                    + ". Type one of those names, or 'nothing'.";
         }
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
-
-            if (mcproject != null && mcproject.getProjectNames().contains(input)) {
-
-                context.setSessionData("project", input);
-                String jobname = (String) context.getSessionData("jobname");
-
-                return new GlowEffectPrompt();
-            } else if (mcproject == null || input.equalsIgnoreCase("nothing")) {
-
+            if (input.equalsIgnoreCase("nothing")) {
                 context.setSessionData("project", "nothing");
-
                 return new GlowEffectPrompt();
-            } else {
-                return new projectNotExistsPrompt();
             }
-
+            Project p = ProjectDatabase.get(input);
+            if (p != null && p.getStatus() == Project.Status.ACTIVE) {
+                context.setSessionData("project", p.getName()); // store the canonical display name
+                return new GlowEffectPrompt();
+            }
+            return new projectNotExistsPrompt();
         }
 
     }
