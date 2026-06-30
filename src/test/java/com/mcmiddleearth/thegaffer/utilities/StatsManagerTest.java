@@ -109,6 +109,7 @@ class StatsManagerTest {
 
             assertEquals("job,owner,project,world,centerX,centerZ,startTime,endTime,builder,placed,broke",
                     lines[0], "First line must be the CSV header");
+            assertEquals(2, lines.length, "One builder => header + exactly one data row");
             // The data row must contain the job name and the placed/broke counts
             assertTrue(csv.contains("river,"), "CSV must contain the job name");
             assertTrue(csv.contains(",5,2"), "CSV must contain placed=5 and broke=2 as last two columns");

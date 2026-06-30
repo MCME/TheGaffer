@@ -9,6 +9,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -270,10 +275,11 @@ public class StatsManager {
         return sb.toString();
     }
 
-    /** RFC-4180 minimal CSV escape: wraps in quotes only when the value contains a comma or quote. */
+    /** RFC-4180 minimal CSV escape: wraps in quotes when the value contains a comma, quote, or line break. */
     private static String csv(String v) {
         if (v == null) { return ""; }
-        return v.contains(",") || v.contains("\"") ? "\"" + v.replace("\"", "\"\"") + "\"" : v;
+        return v.contains(",") || v.contains("\"") || v.contains("\n") || v.contains("\r")
+                ? "\"" + v.replace("\"", "\"\"") + "\"" : v;
     }
 
     /**
@@ -282,9 +288,12 @@ public class StatsManager {
      */
     public static File exportAll(long stamp) {
         File out = new File(statsDir(), "export-" + stamp + ".csv");
-        try (java.io.FileWriter w = new java.io.FileWriter(out)) {
+        out.getParentFile().mkdirs(); // no-op if it already exists; avoids a misleading "export failed" on a fresh install
+        // Explicit UTF-8 so non-ASCII player/project names survive on a Windows server
+        // (the platform-default FileWriter would use windows-1252).
+        try (Writer w = new OutputStreamWriter(new FileOutputStream(out), StandardCharsets.UTF_8)) {
             w.write(toCsv(JobStatsStorage.readAll(statsDir())));
-        } catch (java.io.IOException ex) {
+        } catch (IOException ex) {
             Util.severe("Stats export failed: " + ex.getMessage());
             return null;
         }
