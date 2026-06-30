@@ -35,6 +35,11 @@ commands:
     usage: |
            /jobchat [message]
     aliases: [jc]
+  project:
+    description: Manage build projects (collections of jobs)
+    usage: |
+           /project <create|list|info|setdescription|setgoal|setlead|addmanager|removemanager|complete|archive|reopen|attach|detach|delete>
+    aliases: [pj]
 permissions:
   thegaffer.join:
     description: Allows a player to join and use jobs
@@ -44,4 +49,10 @@ permissions:
     default: op
   thegaffer.ignoreprotection:
     description: Bypass build protection (build anywhere)
+    default: op
+  thegaffer.project.create:
+    description: Create and lead build projects
+    default: op
+  thegaffer.project.admin:
+    description: Manage any build project regardless of lead/managers
     default: op
