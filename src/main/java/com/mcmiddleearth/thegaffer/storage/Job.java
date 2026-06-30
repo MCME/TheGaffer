@@ -47,7 +47,6 @@ public class Job implements Listener {
     private boolean paused;
     private JobWarp warp;
     private boolean discordSend;
-    private String[] discordTags;
     private String description;
     private ArrayList<UUID> helpers = new ArrayList();
     private ArrayList<UUID> workers = new ArrayList();
@@ -75,7 +74,7 @@ public class Job implements Listener {
     private HashMap<UUID, Long> left = new HashMap<>();
 
     public Job(String name, String description, UUID owner, boolean running, JobWarp warp, String world, boolean Private, int jr,
-            boolean discordSend, String[] discordTags, String project) {
+            boolean discordSend, String project) {
         this.name = name;
         this.description = description;
         this.owner = owner;
@@ -85,7 +84,6 @@ public class Job implements Listener {
         this.Private = Private;
         this.startTime = System.currentTimeMillis();
         this.discordSend = discordSend;
-        this.discordTags = discordTags;
         this.projectname = project;
         if (jr > 1000) {
             jr = 1000;
@@ -606,14 +604,6 @@ public class Job implements Listener {
 
     public void setDiscordSend(boolean discordSend) {
         this.discordSend = discordSend;
-    }
-
-    public String[] getDiscordTags() {
-        return discordTags;
-    }
-
-    public void setDiscordTags(String[] discordTags) {
-        this.discordTags = discordTags;
     }
 
     public String getDescription() {

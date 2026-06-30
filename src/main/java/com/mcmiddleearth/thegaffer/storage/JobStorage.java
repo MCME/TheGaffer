@@ -19,7 +19,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,9 +43,6 @@ public class JobStorage {
         c.set("endTime", job.getEndTime());
         c.set("description", job.getDescription());
         c.set("discordSend", job.isDiscordSend());
-        if (job.getDiscordTags() != null) {
-            c.set("discordTags", new ArrayList<>(Arrays.asList(job.getDiscordTags())));
-        }
         c.set("project", job.getProjectname());
         c.set("helpers", toStrings(job.getHelpers()));
         c.set("workers", toStrings(job.getWorkers()));
@@ -93,9 +89,6 @@ public class JobStorage {
         job.setEndTime(c.getLong("endTime"));
         job.setDescription(c.getString("description"));
         job.setDiscordSend(c.getBoolean("discordSend"));
-        if (c.contains("discordTags")) {
-            job.setDiscordTags(c.getStringList("discordTags").toArray(new String[0]));
-        }
         job.setProjectname(c.getString("project"));
         job.setHelpers(toUuids(c.getStringList("helpers")));
         job.setWorkers(toUuids(c.getStringList("workers")));

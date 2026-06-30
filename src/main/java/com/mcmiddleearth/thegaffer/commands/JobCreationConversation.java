@@ -268,12 +268,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("discordSend", input);
-            if (input) {
-                return new discordTagPrompt();
-            }
             if (ProjectDatabase.hasActiveProjects()) {
                 return new projectPrompt();
-            } 
+            }
             if (TheGaffer.isGlowing()) {
                 return new GlowEffectPrompt();
             }
@@ -283,30 +280,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         public String getPromptText(ConversationContext context) {
             return "Should this job be announced on Discord? (true or false)";
-        }
-
-    }
-
-    private class discordTagPrompt extends StringPrompt {
-
-        @Override
-        public String getPromptText(ConversationContext context) {
-            return "who should be notified at discord about the job?"
-                    + "\n" + "May be player names separated by \",\" or roles like \"Commoner\" or \"everyone\""
-                    + "\n" + "Example: Eriol_Eandur, Commoner";
-        }
-
-        @Override
-        public Prompt acceptInput(ConversationContext context, String input) {
-            input = input.replace(" ", "");
-            context.setSessionData("discordTag", input);
-            if (ProjectDatabase.hasActiveProjects()) {
-                return new projectPrompt();
-            } 
-            if (TheGaffer.isGlowing()) {
-                return new GlowEffectPrompt();
-            }
-            return new finishedPrompt();
         }
 
     }
@@ -372,7 +345,6 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             boolean Private = (boolean) context.getSessionData("private");
             boolean setKit = (boolean) context.getSessionData("setkit");
             boolean discordSend = (context.getSessionData("discordSend") != null && (boolean) context.getSessionData("discordSend"));
-            String[] discordTags = (context.getSessionData("discordTag") != null ? ((String) context.getSessionData("discordTag")).split(",") : new String[0]);
             String description = (String) context.getSessionData("description");
             int radius = ((Number) context.getSessionData("jobradius")).intValue();
             boolean glowing = false;
@@ -383,7 +355,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
                 glowing = (boolean) temp;
             }
             Job jerb = new Job(jobname, description, owner, true, warp, warp.getWorld(), Private, radius,
-                    discordSend, discordTags, project);
+                    discordSend, project);
             if (glowing) {
                 jerb.setGlowing();
             }

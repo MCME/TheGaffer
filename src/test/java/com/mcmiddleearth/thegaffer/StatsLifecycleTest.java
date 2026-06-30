@@ -97,7 +97,7 @@ class StatsLifecycleTest {
         JobWarp warp = new JobWarp();
         warp.setX(0); warp.setY(64); warp.setZ(0); warp.setWorld("world");
         Job job = new Job("river", "", owner.getUniqueId(), true, warp, "world", false, 50,
-                false, new String[0], "p");
+                false, "p");
 
         // Simulate activateJob's wired call: StatsManager.begin(job)
         StatsManager.begin(job);

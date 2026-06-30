@@ -74,6 +74,7 @@ public class TheGaffer extends JavaPlugin {
     static boolean glowing;
     static String helperColor;
     static String workerColor;
+    static List<String> allowedPingRoles = new ArrayList<>();
 
     @Override
     public synchronized void onEnable() {
@@ -151,6 +152,7 @@ public class TheGaffer extends JavaPlugin {
         workerColor = pluginConfig.getString("glowing.workerColor", "LIGHT_PURPLE");
         debug = pluginConfig.getBoolean("general.debug");
         unprotectedWorlds = pluginConfig.getStringList("unprotectedworlds");
+        allowedPingRoles = pluginConfig.getStringList("allowRolePing");
         if (pluginConfig.contains("externalProtectionHandlers")) {
             ConfigurationSection section = pluginConfig.getConfigurationSection("externalProtectionHandlers");
             Set<String> handlers = section.getKeys(false);
@@ -263,5 +265,9 @@ public class TheGaffer extends JavaPlugin {
 
     public static String getWorkerColor() {
         return workerColor;
+    }
+
+    public static List<String> getAllowedPingRoles() {
+        return allowedPingRoles;
     }
 }
