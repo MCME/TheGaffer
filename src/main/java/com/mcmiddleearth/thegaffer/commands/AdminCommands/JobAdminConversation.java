@@ -320,19 +320,23 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         }
     }
 
-    private class bringallWorkersPrompt extends MessagePrompt {
-
-        @Override
-        public Prompt getNextPrompt(ConversationContext context) {
-             
-            AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.bringall();
-            return Prompt.END_OF_CONVERSATION;
-        }
+    private class bringallWorkersPrompt extends StringPrompt {
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Brought all online workers to your location.";
+            return ChatColor.YELLOW + "This will teleport all online workers to you. Type 'confirm' to proceed, or anything else to cancel.";
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            if (input.equalsIgnoreCase("confirm")) {
+                AdminMethods am = (AdminMethods) context.getSessionData("am");
+                am.bringall();
+                context.getForWhom().sendRawMessage(ChatColor.GREEN + "Brought all online workers to your location.");
+            } else {
+                context.getForWhom().sendRawMessage(ChatColor.AQUA + "Cancelled.");
+            }
+            return Prompt.END_OF_CONVERSATION;
         }
     }
 
@@ -410,18 +414,23 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             return "Successfully set the kit of the job to your inventory.";
         }
     }
-    private class clearinven extends MessagePrompt {
-
-        @Override
-        public Prompt getNextPrompt(ConversationContext context) {
-            AdminMethods am = (AdminMethods) context.getSessionData("am");
-            am.clearworkerinven();
-            return Prompt.END_OF_CONVERSATION;
-        }
+    private class clearinven extends StringPrompt {
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Cleared workers' inventories";
+            return ChatColor.RED + "This will clear all online workers' inventories. Type 'confirm' to proceed, or anything else to cancel.";
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            if (input.equalsIgnoreCase("confirm")) {
+                AdminMethods am = (AdminMethods) context.getSessionData("am");
+                am.clearworkerinven();
+                context.getForWhom().sendRawMessage(ChatColor.GREEN + "Cleared workers' inventories.");
+            } else {
+                context.getForWhom().sendRawMessage(ChatColor.AQUA + "Cancelled.");
+            }
+            return Prompt.END_OF_CONVERSATION;
         }
     }
 }

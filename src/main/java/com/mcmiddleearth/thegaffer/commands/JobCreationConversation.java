@@ -121,6 +121,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public Prompt acceptInput(ConversationContext context, String input) {
+            String original = input;
             input = input.replaceAll(" ", "_");
             File newJob = new File(TheGaffer.getPluginDataFolder() + TheGaffer.getFileSeperator() + "jobs"
                     + TheGaffer.getFileSeperator() + input + TheGaffer.getFileExtension());
@@ -129,6 +130,9 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             }
             if (!JobDatabase.getActiveJobs().containsKey(input)) {
                 context.setSessionData("jobname", input);
+                if (!original.equals(input)) {
+                    context.getForWhom().sendRawMessage(ChatColor.YELLOW + "Name set to " + ChatColor.GOLD + input + ChatColor.YELLOW + " (spaces were replaced with underscores).");
+                }
                 if (TheGaffer.isJobDescription()) {
                     return new descriptionPrompt();
                 } else {
@@ -146,7 +150,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Please give a short job description.";
+            return "Enter a short job description (shown in the job-start message and Discord). Keep it brief.";
         }
 
         @Override
@@ -195,12 +199,22 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should this job be private? (true or false)";
+            return "Should this job be private? Private = only players you invite can join; public (false) = anyone with permission can join. (true/false)";
         }
 
     }
 
     private class howBigPrompt extends NumericPrompt {
+
+        @Override
+        public boolean isNumberValid(ConversationContext context, Number input) {
+            return input.intValue() >= 1;
+        }
+
+        @Override
+        public String getFailedValidationText(ConversationContext context, String invalidInput) {
+            return "Radius must be at least 1. Please enter a number between 1 and 1000.";
+        }
 
         @Override
         public Prompt acceptValidatedInput(ConversationContext context, Number input) {
@@ -215,7 +229,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "How big should the job area be? (radius 0 - 1000)";
+            return "How large should the build area be? Enter a block radius from 1 to 1000 — e.g. 50 makes a 100×100 area centred on you. (over 1000 is capped)";
         }
 
     }
@@ -257,8 +271,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-
-            return "Set the kit of the job now? (true or false)";
+            return "Give workers a starter kit? Type 'true' to snapshot your CURRENT inventory as the kit every worker receives on join (you can change it later with /jobadmin setkit), or 'false' to skip. (true/false)";
         }
 
     }
@@ -279,7 +292,14 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should this job be announced on Discord? The configured notification roles will be pinged. (true or false)";
+            java.util.List<String> roles = TheGaffer.getAllowedPingRoles();
+            String roleInfo;
+            if (roles != null && !roles.isEmpty()) {
+                roleInfo = "will ping: " + String.join(", ", roles) + ".";
+            } else {
+                roleInfo = "(no roles are configured to ping).";
+            }
+            return "Should this job be announced on Discord? The configured notification roles " + roleInfo + " (true/false)";
         }
 
     }
@@ -325,7 +345,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should people in this job get a glow effect? (true or false)";
+            return "Should workers and helpers in this job glow (a coloured outline visible through walls)? (true/false)";
         }
 
     }
