@@ -51,7 +51,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             case "detach":          return detach(sender, args);
             case "delete":          return delete(sender, args);
             default:
-                sender.sendMessage(Component.text("Unknown subcommand: " + sub, NamedTextColor.RED));
+                sender.sendMessage(Component.text("Unknown subcommand: " + sub + " — type /project for the list.", NamedTextColor.RED));
                 return true;
         }
     }
@@ -136,7 +136,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         } else if (!agg.isEmpty()) {
             sender.sendMessage(StatsManager.renderOrphanProjectStats(name, agg));
         } else {
-            sender.sendMessage(Component.text("No project by that name.", NamedTextColor.RED));
+            sender.sendMessage(Component.text("No project by that name. Try /project list to see existing projects.", NamedTextColor.RED));
         }
         return true;
     }
@@ -333,7 +333,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean noProject(CommandSender s) {
-        s.sendMessage(Component.text("No project by that name.", NamedTextColor.RED));
+        s.sendMessage(Component.text("No project by that name. Try /project list to see existing projects.", NamedTextColor.RED));
         return true;
     }
 
@@ -371,6 +371,9 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
                 for (String jobName : JobDatabase.getActiveJobs().keySet()) {
                     if (jobName.startsWith(args[1])) { out.add(jobName); }
                 }
+                for (String jobName : JobDatabase.getInactiveJobs().keySet()) {
+                    if (jobName.startsWith(args[1]) && !out.contains(jobName)) { out.add(jobName); }
+                }
                 return out;
             }
             for (Project p : ProjectDatabase.all()) {
@@ -383,6 +386,9 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         if (args.length == 3 && sub.equals("attach")) {
             for (String jobName : JobDatabase.getActiveJobs().keySet()) {
                 if (jobName.startsWith(args[2])) { out.add(jobName); }
+            }
+            for (String jobName : JobDatabase.getInactiveJobs().keySet()) {
+                if (jobName.startsWith(args[2]) && !out.contains(jobName)) { out.add(jobName); }
             }
             return out;
         }
