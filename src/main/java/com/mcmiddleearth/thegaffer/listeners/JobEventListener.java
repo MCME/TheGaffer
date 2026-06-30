@@ -116,6 +116,7 @@ public class JobEventListener implements Listener {
                    tag = tag + DiscordUtil.convertMentionsFromNames("@" + role, guild) + " ";
                }
            }
+           if (!tag.isEmpty()) { tag = tag.trim() + " "; }
            String discordMessage = emoji+" ***"+tag+"there is a new job!!!*** "
                           +emoji+"\n        __**Leader:**__        " + Util.nameOf(job.getOwner()) 
                    + "\n        __**Title:**__            " + job.getName()
@@ -126,11 +127,6 @@ public class JobEventListener implements Listener {
                    discordMessage = discordMessage + "__**Job Description:**__ "+job.getDescription();
            }
            sendDiscord(discordMessage);
-           /*sendDiscord(":ring1 @everyone, there is a new job!!! :ring1"
-                                    +"\n         __**Leader:**__      "+Util.nameOf(job.getOwner())
-                                    +"\n         __**Title:**__          "+job.getName()
-                                    +"\n         __**Time Start:**__ "+getLondonTime()
-                                    +"\n         To join the job typ in game chat: ```css\n/job join "+job.getName());*/
         }
     }
 

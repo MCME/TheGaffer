@@ -252,7 +252,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
         @Override
         protected Prompt acceptValidatedInput(ConversationContext context, boolean input) {
             context.setSessionData("setkit", input);
-            return newDiscordOrFinishPrompt();//new discordAnnouncePrompt();
+            return newDiscordOrFinishPrompt();
         }
 
         @Override
@@ -279,7 +279,7 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should this job be announced on Discord? (true or false)";
+            return "Should this job be announced on Discord? The configured notification roles will be pinged. (true or false)";
         }
 
     }
