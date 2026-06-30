@@ -43,6 +43,11 @@ jobKits: false
 discord:
   channel: job-general
   emoji: ringmcme
+# Discord roles that may be pinged when a job is announced (e.g. a "Jobber" role
+# players opt into for job notifications). ONLY these roles are pinged — @everyone
+# and arbitrary players cannot be. Leave empty or remove to announce with no ping.
+allowRolePing:
+  - Jobber
 glowing:
   enabled: true
   workerColor: DARK_PURPLE

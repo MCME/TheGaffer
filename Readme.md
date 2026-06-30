@@ -101,6 +101,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `jobKits` | Enable per-job kits (handed to workers on join). |
 | `discord.channel` | DiscordSRV channel name for job announcements (omit to disable). |
 | `discord.emoji` | Emoji prefix for Discord messages. |
+| `allowRolePing` | Discord roles pinged when a job is announced (e.g. `Jobber`). Only these roles are pinged — never `@everyone` or individual players. Empty/omit = announce with no ping. |
 | `glowing.enabled` / `glowing.helperColor` / `glowing.workerColor` | Team-glow toggle and colours. |
 | `unprotectedworlds` | Worlds where the map protection does not apply. |
 | `externalProtectionHandlers` | Allow/deny hooks for integrating other protection plugins. |
@@ -111,7 +112,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 
 Both are **soft dependencies** — TheGaffer runs fine without them; the relevant feature simply no-ops if the plugin is absent.
 
-- **DiscordSRV** — posts a call-to-action to a Discord channel when a job **starts** (with optional role pings), and a **recap** when it ends (builders, blocks placed/broken, duration). Controlled per-job by the "send to Discord" flag and globally by `discord.channel`.
+- **DiscordSRV** — posts a call-to-action to a Discord channel when a job **starts** (pinging the roles in `allowRolePing` — e.g. a `Jobber` opt-in role — never `@everyone`), and a **recap** when it ends (builders, blocks placed/broken, duration). Controlled per-job by the "send to Discord" flag and globally by `discord.channel`.
 - **MCME-Connect** — broadcasts job-start announcements **across the BungeeCord network**, so players on other servers see that a job has started. Falls back to a local broadcast when not present.
 
 ---
