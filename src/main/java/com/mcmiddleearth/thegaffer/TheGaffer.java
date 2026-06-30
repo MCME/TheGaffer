@@ -97,14 +97,7 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new JobChatListener(), this);
         serverInstance.getPluginManager().registerEvents(new StatsListener(), this);
 
-        // MockBukkit does not implement the Messenger API, so guard against NPE/
-        // UnsupportedOperationException during integration tests. On a real server
-        // this call succeeds normally and registers the outgoing channel.
-        try {
-            this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        } catch (Throwable ignored) {
-            // No-op in test environments where the Messenger is unavailable.
-        }
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         // Runs SYNC (main thread): the cleanup reassigns job owners and removes
         // abandoned workers, which call the Bukkit API (scoreboards/teams, player
