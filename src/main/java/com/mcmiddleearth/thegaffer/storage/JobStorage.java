@@ -36,6 +36,7 @@ public class JobStorage {
         c.set("owner", job.getOwner() == null ? null : job.getOwner().toString());
         c.set("running", job.isRunning());
         c.set("paused", job.isPaused());
+        c.set("autoPaused", job.isAutoPaused());
         c.set("private", job.isPrivate());
         c.set("world", job.getWorld());
         c.set("radius", job.getJobRadius());
@@ -82,6 +83,7 @@ public class JobStorage {
         }
         job.setRunning(c.getBoolean("running"));
         job.setPaused(c.getBoolean("paused"));
+        job.setAutoPaused(c.getBoolean("autoPaused"));
         job.setPrivate(c.getBoolean("private"));
         job.setWorld(c.getString("world"));
         job.setJobRadius(c.getInt("radius"));

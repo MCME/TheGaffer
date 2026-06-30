@@ -93,6 +93,9 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
                                 target.pauseJob(player.getName());
+                                // Manual pause: clear the auto-pause flag so an unrelated rejoin
+                                // never auto-resumes a job an admin deliberately paused.
+                                target.setAutoPaused(false);
                                 player.sendMessage(Component.text("Paused " + target.getName(), NamedTextColor.GREEN));
                             } else {
                                 player.sendMessage(Component.text("No job found by that name.", NamedTextColor.RED));
@@ -112,6 +115,9 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
                                 target.unpauseJob(player.getName());
+                                // Clear the auto-pause flag too: a manual unpause is an explicit
+                                // resume, so there is nothing left for the auto-resume path to do.
+                                target.setAutoPaused(false);
                                 player.sendMessage(Component.text("Unpaused " + target.getName(), NamedTextColor.GREEN));
                             } else {
                                 player.sendMessage(Component.text("No job found by that name.", NamedTextColor.RED));

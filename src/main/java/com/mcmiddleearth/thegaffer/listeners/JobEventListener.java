@@ -202,6 +202,66 @@ public class JobEventListener implements Listener {
         }
     }
     
+    // ---- /job listen protection warnings (QA item 1) ---------------------------------
+    // /job listen fills TheGaffer.getListening(); these two handlers are what finally read
+    // it. On a protection VIOLATION (event.isBlocked() == true) every online listener is
+    // told who tried to build outside a job and where. Throttled per-offender so a held
+    // click can't flood the listeners.
+
+    /** Per-offender timestamp (ms) of the last listen warning we broadcast, for throttling. */
+    private final java.util.Map<java.util.UUID, Long> lastListenWarn = new java.util.HashMap<>();
+
+    /** Min gap between listen warnings for the same offender. */
+    private static final long LISTEN_WARN_THROTTLE_MS = 3000L;
+
+    @EventHandler
+    public void onProtectionBlockPlace(JobProtectionBlockPlaceEvent event) {
+        if (event.isBlocked()) {
+            warnListeners(event.getPlayer(), event.getLocation(), "place");
+        }
+    }
+
+    @EventHandler
+    public void onProtectionBlockBreak(JobProtectionBlockBreakEvent event) {
+        if (event.isBlocked()) {
+            warnListeners(event.getPlayer(), event.getLocation(), "break");
+        }
+    }
+
+    /**
+     * Notifies every online /job listen subscriber that {@code offender} hit protection at
+     * {@code loc}. Skips the offender themselves (they already get the deny message) and
+     * throttles to one warning per offender per {@link #LISTEN_WARN_THROTTLE_MS}.
+     */
+    private void warnListeners(Player offender, org.bukkit.Location loc, String action) {
+        if (offender == null || loc == null) {
+            return;
+        }
+        if (TheGaffer.getListening().isEmpty()) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        Long last = lastListenWarn.get(offender.getUniqueId());
+        if (last != null && (now - last) < LISTEN_WARN_THROTTLE_MS) {
+            return;
+        }
+        lastListenWarn.put(offender.getUniqueId(), now);
+
+        String worldName = (loc.getWorld() != null) ? loc.getWorld().getName() : "?";
+        Component message = Component.text("[Listen] ", NamedTextColor.GOLD)
+                .append(Component.text(offender.getName(), NamedTextColor.YELLOW))
+                .append(Component.text(" tried to " + action + " at " + worldName + " "
+                        + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ(),
+                        NamedTextColor.GRAY));
+        for (Player listener : TheGaffer.getListening()) {
+            // Only online listeners, and never the offender themselves.
+            if (listener != null && listener.isOnline()
+                    && !listener.getUniqueId().equals(offender.getUniqueId())) {
+                listener.sendMessage(message);
+            }
+        }
+    }
+
     // NOTE: The five empty onJobProtection handlers that were here have been removed.
     // StatsListener now handles JobProtectionBlockPlace/BreakEvent for stats counting
     // (closes audit item H3 — dead handler stubs replaced by real behaviour).

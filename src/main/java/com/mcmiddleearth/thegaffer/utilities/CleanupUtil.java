@@ -18,6 +18,8 @@ package com.mcmiddleearth.thegaffer.utilities;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -91,17 +93,24 @@ public class CleanupUtil {
             }
         }
         if (possibles.size() > 0) {
-            int Min = 0;
-            int Max = possibles.size() - 1;
-            int index = Min + (int) (Math.random() * ((Max - Min) + 1));
+            // A real shuffle randomises order in place, so the first element is a uniformly
+            // random pick. (The old code computed a random index against the UNSHUFFLED length
+            // and then shuffled — needlessly indirect; .get(0) after the shuffle is enough.)
             Collections.shuffle(possibles);
-            OfflinePlayer choice = possibles.get(index);
+            OfflinePlayer choice = possibles.get(0);
             job.addHelper(TheGaffer.getServerInstance().getOfflinePlayer(job.getOwner()));
             job.setOwner(choice.getUniqueId());
             Util.debug("Selecting " + choice.getName() + " as " + job.getName() + "'s new owner.");
         } else {
-            Util.debug("No new owner found for " + job.getName() + ". Disabling job.");
-            JobDatabase.deactivateJob(job);
+            // No helper online to promote: instead of archiving the job (the old behaviour),
+            // pause it and flag the pause as automatic. The job stays ACTIVE so it can be
+            // auto-resumed when the owner or a helper rejoins (see PlayerListener.onJoin).
+            Util.debug("No new owner found for " + job.getName() + ". Auto-pausing job until owner/helper returns.");
+            job.setPaused(true);
+            job.setAutoPaused(true);
+            job.setDirty(true);
+            job.sendToAll(Component.text("The job has been paused because no owner or helper is online. "
+                    + "It will resume automatically when one returns.", NamedTextColor.YELLOW));
         }
     }
 
