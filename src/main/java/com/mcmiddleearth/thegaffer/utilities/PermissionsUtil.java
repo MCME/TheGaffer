@@ -26,6 +26,10 @@ public class PermissionsUtil {
     
     private static final Permission ignoreWorldProtection = new Permission("thegaffer.ignoreprotection", PermissionDefault.OP);
 
+    private static final Permission projectCreatePermission = new Permission("thegaffer.project.create", PermissionDefault.OP);
+
+    private static final Permission projectAdminPermission = new Permission("thegaffer.project.admin", PermissionDefault.OP);
+
     public static Permission getJoinPermission() {
         return joinPermission;
     }
@@ -36,5 +40,13 @@ public class PermissionsUtil {
 
     public static Permission getIgnoreWorldProtection() {
         return ignoreWorldProtection;
+    }
+
+    public static Permission getProjectCreatePermission() {
+        return projectCreatePermission;
+    }
+
+    public static Permission getProjectAdminPermission() {
+        return projectAdminPermission;
     }
 }

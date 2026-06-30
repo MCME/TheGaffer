@@ -20,6 +20,7 @@ import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobChatCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
+import com.mcmiddleearth.thegaffer.commands.ProjectCommand;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
 import com.mcmiddleearth.thegaffer.listeners.CraftingListener;
 import com.mcmiddleearth.thegaffer.listeners.JobChatListener;
@@ -93,6 +94,7 @@ public class TheGaffer extends JavaPlugin {
         getCommand("job").setExecutor(new JobCommand());
         getCommand("jobadmin").setExecutor(new JobAdminConversation());
         getCommand("jobchat").setExecutor(new JobChatCommand());
+        getCommand("project").setExecutor(new ProjectCommand());
         serverInstance.getPluginManager().registerEvents(new PlayerListener(), this);
         serverInstance.getPluginManager().registerEvents(new ProtectionListener(), this);
         serverInstance.getPluginManager().registerEvents(new JobEventListener(), this);
