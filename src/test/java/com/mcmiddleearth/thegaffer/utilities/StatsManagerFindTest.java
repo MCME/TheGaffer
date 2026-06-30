@@ -2,6 +2,7 @@ package com.mcmiddleearth.thegaffer.utilities;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
+import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.storage.JobStatsStorage;
@@ -79,6 +80,28 @@ class StatsManagerFindTest {
         JobStats found = StatsManager.findJobStats("river");
         assertNotNull(found, "findJobStats must return non-null when finished records exist");
         assertEquals(200L, found.getEndTime(), "Should return the newest finished record (endTime 200)");
+    }
+
+    /** findPlayerTotalsByName resolves a player by case-insensitive name, and returns null for unknown names. */
+    @Test
+    void findPlayerTotalsByNameResolvesKnownAndRejectsUnknown() {
+        // addPlayer() registers the name->UUID mapping so Util.nameOf resolves it.
+        PlayerMock builder = server.addPlayer();
+
+        JobStats s = new JobStats("river", builder.getUniqueId(), "p", "world", 0, 0, 10, 0L, 1000L);
+        s.recordPlace(builder.getUniqueId(), 5);
+        StatsManager.ingest(s);
+
+        StatsManager.PlayerAggregate found = StatsManager.findPlayerTotalsByName(builder.getName());
+        assertNotNull(found, "findPlayerTotalsByName must resolve a known player name");
+        assertEquals(builder.getUniqueId(), found.getId(), "Resolved aggregate must be the matching player's");
+
+        // case-insensitive
+        assertNotNull(StatsManager.findPlayerTotalsByName(builder.getName().toUpperCase()),
+                "Name lookup must be case-insensitive");
+
+        assertNull(StatsManager.findPlayerTotalsByName("nobody"),
+                "Unknown names must return null");
     }
 
     /** Optional light check: renderJobStats returns a non-null Component for a sample JobStats. */
