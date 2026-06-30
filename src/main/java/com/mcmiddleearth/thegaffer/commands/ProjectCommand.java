@@ -1,5 +1,6 @@
 package com.mcmiddleearth.thegaffer.commands;
 
+import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.Project;
@@ -14,8 +15,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-
-import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -92,6 +91,8 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // list and info are intentionally open (view-only) to anyone who can run /project;
+    // only create and the management subcommands are permission-gated.
     private boolean list(CommandSender sender, String[] args) {
         Project.Status filter = Project.Status.ACTIVE;
         if (args.length > 1) {
@@ -158,12 +159,12 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     /** Resolves a player name to a UUID (cached/offline), matching the existing admin-command pattern. */
     private UUID resolve(String playerName) {
-        return Bukkit.getOfflinePlayer(playerName).getUniqueId();
+        return TheGaffer.getServerInstance().getOfflinePlayer(playerName).getUniqueId();
     }
 
     private Project require(CommandSender sender, String name) {
         Project p = ProjectDatabase.get(name);
-        if (p == null) { sender.sendMessage(Component.text("No project by that name.", NamedTextColor.RED)); }
+        if (p == null) { noProject(sender); }
         return p;
     }
 
@@ -207,7 +208,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     private boolean setText(CommandSender sender, String[] args, boolean goal) {
         Match m = matchProject(args, 1);
-        if (m == null) { sender.sendMessage(Component.text("No project by that name.", NamedTextColor.RED)); return true; }
+        if (m == null) { return noProject(sender); }
         if (!canManage(sender, m.project)) { return deny(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project " + (goal ? "setgoal" : "setdescription") + " <name> <text>", NamedTextColor.RED));
@@ -222,7 +223,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     private boolean setLead(CommandSender sender, String[] args) {
         Match m = matchProject(args, 1);
-        if (m == null) { sender.sendMessage(Component.text("No project by that name.", NamedTextColor.RED)); return true; }
+        if (m == null) { return noProject(sender); }
         if (!canAdminister(sender, m.project)) { return deny(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project setlead <name> <player>", NamedTextColor.RED));
@@ -237,7 +238,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     private boolean manager(CommandSender sender, String[] args, boolean add) {
         Match m = matchProject(args, 1);
-        if (m == null) { sender.sendMessage(Component.text("No project by that name.", NamedTextColor.RED)); return true; }
+        if (m == null) { return noProject(sender); }
         if (!canManage(sender, m.project)) { return deny(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project " + (add ? "addmanager" : "removemanager") + " <name> <player>", NamedTextColor.RED));
@@ -247,7 +248,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         UUID id = resolve(player);
         if (add) { m.project.addManager(id); } else { m.project.removeManager(id); }
         ProjectDatabase.saveProject(m.project);
-        sender.sendMessage(Component.text((add ? "Added " : "Removed ") + player + (add ? " as a manager of " : " from managers of ") + m.project.getName() + ".", NamedTextColor.GREEN));
+        sender.sendMessage(Component.text((add ? "Added " : "Removed ") + player + " as a manager of " + m.project.getName() + ".", NamedTextColor.GREEN));
         return true;
     }
 
@@ -261,6 +262,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         if (!canManage(sender, p)) { return deny(sender); }
         p.setStatus(status);
         if (status == Project.Status.COMPLETED) { p.setCompletedTime(System.currentTimeMillis()); }
+        else if (status == Project.Status.ACTIVE) { p.setCompletedTime(0L); } // reopen clears the completion stamp
         ProjectDatabase.saveProject(p);
         sender.sendMessage(Component.text(p.getName() + " is now " + status.name().toLowerCase() + ".", NamedTextColor.GREEN));
         return true;
@@ -268,7 +270,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     private boolean attach(CommandSender sender, String[] args) {
         Match m = matchProject(args, 1);
-        if (m == null) { sender.sendMessage(Component.text("No project by that name.", NamedTextColor.RED)); return true; }
+        if (m == null) { return noProject(sender); }
         if (!canManage(sender, m.project)) { return deny(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project attach <name> <job>", NamedTextColor.RED));
@@ -298,7 +300,11 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         Project p = ProjectDatabase.get(current);
-        if (p != null && !canManage(sender, p)) { return deny(sender); }
+        if (p == null) {
+            if (!isAdmin(sender)) { return deny(sender); } // dangling label: only admins may detach
+        } else if (!canManage(sender, p)) {
+            return deny(sender);
+        }
         job.setProjectname("nothing");
         job.setDirty(true);
         JobDatabase.saveJob(job);
@@ -323,6 +329,11 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     private boolean deny(CommandSender s) {
         s.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+        return true;
+    }
+
+    private boolean noProject(CommandSender s) {
+        s.sendMessage(Component.text("No project by that name.", NamedTextColor.RED));
         return true;
     }
 
@@ -367,6 +378,8 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             }
             return out;
         }
+        // NOTE: assumes a single-word project name; job-name completion won't trigger for a
+        // multi-word project (e.g. "Minas Tirith"). Cosmetic — the command itself still works.
         if (args.length == 3 && sub.equals("attach")) {
             for (String jobName : JobDatabase.getActiveJobs().keySet()) {
                 if (jobName.startsWith(args[2])) { out.add(jobName); }
