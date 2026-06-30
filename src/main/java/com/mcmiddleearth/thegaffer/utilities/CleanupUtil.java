@@ -39,6 +39,10 @@ public class CleanupUtil {
                 if (For >= max) {
                     Util.debug("Job: " + job.getName() + " awaiting new owner for " + For / 1000 + " seconds. Selecting new owner now.");
                     selectNewOwner(job);
+                    // Its fate is now decided (helper promoted, or auto-paused) — drop it from the
+                    // wait queue so the timer doesn't re-process it (and re-pause / re-announce it)
+                    // every tick. If a promoted owner later leaves, onLeave re-queues it.
+                    removeList.add(job);
                 } else {
                      Util.debug("Job: " + job.getName() + " awaiting new owner for " + For / 1000 + " seconds. Selecting new owner in " + (max - For) / 1000 + " seconds.");
                 }

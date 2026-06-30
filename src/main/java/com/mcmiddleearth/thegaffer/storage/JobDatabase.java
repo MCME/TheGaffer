@@ -68,7 +68,12 @@ public class JobDatabase {
                     activeJobs.put(job.getName(), job);
                     TheGaffer.getServerInstance().getPluginManager()
                             .registerEvents(job, TheGaffer.getPluginInstance());
-                    TheGaffer.scheduleOwnerTimeout(job);
+                    // An auto-paused job is already paused, waiting for an owner/helper to rejoin
+                    // (auto-resume handles it). Don't re-arm the owner timeout, which would just
+                    // re-pause and re-announce it ~4 min after every restart.
+                    if (!job.isAutoPaused()) {
+                        TheGaffer.scheduleOwnerTimeout(job);
+                    }
                 } else {
                     inactiveJobs.put(job.getName(), job);
                 }
