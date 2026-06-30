@@ -37,18 +37,22 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.util.ChatPaginator;
 
 public class JobCommand implements TabExecutor {
 
     private HashMap<Player, InvHolder> invs = new HashMap<>();
+
+    /** Number of archive pages for {@code inactiveCount} jobs at page-size 8. */
+    static int archivePageCount(int inactiveCount) {
+        if (inactiveCount <= 0) return 1;
+        return (int) Math.ceil(inactiveCount / 8.0);
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -328,35 +332,37 @@ public class JobCommand implements TabExecutor {
             }
             if (args[0].equalsIgnoreCase("archive")) {
                 if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
-                    if (JobDatabase.getInactiveJobs().size() > 0) {
-                        // Archive uses ChatPaginator, which works on legacy strings, so this
-                        // listing stays ChatColor-based (paginated output, not interactive).
-                        StringBuilder out = new StringBuilder();
-                        int pageNum = 1;
-                        boolean first = true;
-                        for (String jobName : JobDatabase.getInactiveJobs().keySet()) {
-                            Job job = JobDatabase.getInactiveJobs().get(jobName);
-                            if (!first) {
-                                out.append("\n");
-                            }
-                            out.append(ChatColor.AQUA).append(job.getName()).append(ChatColor.GRAY).append(" with ").append(Util.nameOf(job.getOwner())).append(" (").append(job.getWorkers().size()).append(")");
-                            if (first) {
-                                first = false;
-                            }
-                        }
-                        if (args.length > 1) {
-                            try {
-                                pageNum = Integer.parseInt(args[1]);
-                            } catch (NumberFormatException ex) {
-                                pageNum = 1;
-                            }
-                        }
-                        ChatPaginator.ChatPage page = ChatPaginator.paginate(out.toString(), pageNum, ChatPaginator.AVERAGE_CHAT_PAGE_WIDTH, 8);
-                        player.sendMessage(ChatColor.AQUA + "Job Archive Page: " + page.getPageNumber() + " of " + page.getTotalPages());
-                        player.sendMessage(page.getLines());
-                    } else {
-                        player.sendMessage(Component.text("No jobs found in archive.", NamedTextColor.GRAY));
+                    if (JobDatabase.getInactiveJobs().isEmpty()) {
+                        player.sendMessage(Component.text("No archived jobs yet.", NamedTextColor.GRAY));
+                        return true;
                     }
+                    List<String> names = new ArrayList<>(JobDatabase.getInactiveJobs().keySet());
+                    int totalPages = archivePageCount(names.size());
+                    int pageNum = 1;
+                    if (args.length > 1) {
+                        try {
+                            pageNum = Integer.parseInt(args[1]);
+                        } catch (NumberFormatException ex) {
+                            pageNum = 1;
+                        }
+                    }
+                    if (pageNum < 1 || pageNum > totalPages) {
+                        player.sendMessage(Component.text("No page " + pageNum + " — the archive has " + totalPages + " page(s).", NamedTextColor.RED));
+                        return true;
+                    }
+                    // Slice the page (8 entries per page, 0-indexed offset)
+                    int fromIdx = (pageNum - 1) * 8;
+                    int toIdx = Math.min(fromIdx + 8, names.size());
+                    Component out = Component.text("Job Archive — page " + pageNum + " of " + totalPages, NamedTextColor.AQUA);
+                    for (int i = fromIdx; i < toIdx; i++) {
+                        String name = names.get(i);
+                        Job job = JobDatabase.getInactiveJobs().get(name);
+                        out = out.append(Component.newline())
+                                .append(Msg.button(name, NamedTextColor.AQUA, "/job info " + name, "View " + name))
+                                .append(Component.text(" — " + Util.nameOf(job.getOwner())
+                                        + " (" + job.getWorkers().size() + " workers)", NamedTextColor.GRAY));
+                    }
+                    player.sendMessage(out);
                 } else {
                     player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
                 }
@@ -483,17 +489,10 @@ public class JobCommand implements TabExecutor {
             }
             return Collections.emptyList();
         }
-        // B4 — archive takes a page number; return page numbers or empty
+        // archive takes a page number; suggest 1..totalPages
         if (args[0].equalsIgnoreCase("archive")) {
             if (args.length > 1) {
-                // Only complete when user has started typing the second arg
-                int totalPages = 1;
-                if (!JobDatabase.getInactiveJobs().isEmpty()) {
-                    // ChatPaginator uses AVERAGE_CHAT_PAGE_WIDTH columns, 8 lines per page
-                    int lineCount = JobDatabase.getInactiveJobs().size();
-                    totalPages = (int) Math.ceil(lineCount / 8.0);
-                    if (totalPages < 1) totalPages = 1;
-                }
+                int totalPages = archivePageCount(JobDatabase.getInactiveJobs().size());
                 List<String> pages = new ArrayList<>();
                 String prefix = args[1];
                 for (int i = 1; i <= totalPages; i++) {
@@ -503,6 +502,45 @@ public class JobCommand implements TabExecutor {
                     }
                 }
                 return pages.isEmpty() ? Collections.emptyList() : pages;
+            }
+            return Collections.emptyList();
+        }
+        // stats: suggest export + active/inactive job names + online player names
+        if (args[0].equalsIgnoreCase("stats")) {
+            if (args.length == 2) {
+                String prefix = args[1];
+                List<String> suggestions = new ArrayList<>();
+                // "export" is a valid second arg
+                if ("export".startsWith(prefix)) {
+                    suggestions.add("export");
+                }
+                // active job names
+                for (String s : JobDatabase.getActiveJobs().keySet()) {
+                    if (s.startsWith(prefix)) {
+                        suggestions.add(s);
+                    }
+                }
+                // inactive job names
+                for (String s : JobDatabase.getInactiveJobs().keySet()) {
+                    if (s.startsWith(prefix)) {
+                        suggestions.add(s);
+                    }
+                }
+                // online player names
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.getName().startsWith(prefix)) {
+                        suggestions.add(p.getName());
+                    }
+                }
+                // deduplicate while preserving order
+                Set<String> seen = new HashSet<>();
+                List<String> unique = new ArrayList<>();
+                for (String s : suggestions) {
+                    if (seen.add(s)) {
+                        unique.add(s);
+                    }
+                }
+                return unique;
             }
             return Collections.emptyList();
         }
