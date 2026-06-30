@@ -68,16 +68,18 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;
         } else {
-            return false;
+            sender.sendMessage(ChatColor.RED + "You don't have permission to manage jobs.");
+            return true;
         }
     }
-    
+
     public boolean Start(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;
         } else {
-            return false;
+            sender.sendMessage(ChatColor.RED + "You don't have permission to manage jobs.");
+            return true;
         }
     }
 
@@ -271,7 +273,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to kick from the job?";
+            return "Who would you like to kick from the job? (you may list multiple as player1, player2)";
         }
     }
 
@@ -286,7 +288,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to ban from the job?";
+            return "Who would you like to ban from the job? (you may list multiple as player1, player2)";
         }
     }
 
@@ -301,7 +303,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to unban from the job?";
+            return "Who would you like to unban from the job? (you may list multiple as player1, player2)";
         }
     }
 
@@ -380,7 +382,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Who would you like to uninvite from the job?";
+            return "Who would you like to uninvite from the job? (you may list multiple as player1, player2)";
         }
     }
 
@@ -396,7 +398,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
         @Override
         public String getPromptText(ConversationContext context) {
-            return "Should big should the job area be? (radius 0 - 1000)";
+            return "How big should the job area be? (radius 1 - 1000)";
         }
     }
 

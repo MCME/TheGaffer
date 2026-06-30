@@ -162,10 +162,11 @@ public class JobAdminCommands implements TabExecutor{
                 }else{
                     return false;
                 }
-            }else{
-                return false;
+            } else {
+                cs.sendMessage(Component.text("You don't have permission to manage jobs.", NamedTextColor.RED));
+                return true;
             }
-        }else{
+        } else {
             cs.sendMessage("You must be a player to send this command");
             return true;
         }

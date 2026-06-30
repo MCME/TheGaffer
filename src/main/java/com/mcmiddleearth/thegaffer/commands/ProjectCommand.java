@@ -209,7 +209,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
     private boolean setText(CommandSender sender, String[] args, boolean goal) {
         Match m = matchProject(args, 1);
         if (m == null) { return noProject(sender); }
-        if (!canManage(sender, m.project)) { return deny(sender); }
+        if (!canManage(sender, m.project)) { return denyManage(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project " + (goal ? "setgoal" : "setdescription") + " <name> <text>", NamedTextColor.RED));
             return true;
@@ -224,7 +224,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
     private boolean setLead(CommandSender sender, String[] args) {
         Match m = matchProject(args, 1);
         if (m == null) { return noProject(sender); }
-        if (!canAdminister(sender, m.project)) { return deny(sender); }
+        if (!canAdminister(sender, m.project)) { return denyAdminister(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project setlead <name> <player>", NamedTextColor.RED));
             return true;
@@ -239,7 +239,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
     private boolean manager(CommandSender sender, String[] args, boolean add) {
         Match m = matchProject(args, 1);
         if (m == null) { return noProject(sender); }
-        if (!canManage(sender, m.project)) { return deny(sender); }
+        if (!canManage(sender, m.project)) { return denyManage(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project " + (add ? "addmanager" : "removemanager") + " <name> <player>", NamedTextColor.RED));
             return true;
@@ -259,7 +259,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         }
         Project p = require(sender, joinFrom(args, 1));
         if (p == null) { return true; }
-        if (!canManage(sender, p)) { return deny(sender); }
+        if (!canManage(sender, p)) { return denyManage(sender); }
         p.setStatus(status);
         if (status == Project.Status.COMPLETED) { p.setCompletedTime(System.currentTimeMillis()); }
         else if (status == Project.Status.ACTIVE) { p.setCompletedTime(0L); } // reopen clears the completion stamp
@@ -271,7 +271,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
     private boolean attach(CommandSender sender, String[] args) {
         Match m = matchProject(args, 1);
         if (m == null) { return noProject(sender); }
-        if (!canManage(sender, m.project)) { return deny(sender); }
+        if (!canManage(sender, m.project)) { return denyManage(sender); }
         if (m.next >= args.length) {
             sender.sendMessage(Component.text("Usage: /project attach <name> <job>", NamedTextColor.RED));
             return true;
@@ -301,9 +301,9 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         }
         Project p = ProjectDatabase.get(current);
         if (p == null) {
-            if (!isAdmin(sender)) { return deny(sender); } // dangling label: only admins may detach
+            if (!isAdmin(sender)) { return denyManage(sender); } // dangling label: only admins may detach
         } else if (!canManage(sender, p)) {
-            return deny(sender);
+            return denyManage(sender);
         }
         job.setProjectname("nothing");
         job.setDirty(true);
@@ -319,7 +319,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         }
         Project p = require(sender, joinFrom(args, 1));
         if (p == null) { return true; }
-        if (!canAdminister(sender, p)) { return deny(sender); }
+        if (!canAdminister(sender, p)) { return denyAdminister(sender); }
         ProjectDatabase.delete(p.getName());
         sender.sendMessage(Component.text("Deleted project " + p.getName() + ". Job and stats history keep the name.", NamedTextColor.GREEN));
         return true;
@@ -329,6 +329,16 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     private boolean deny(CommandSender s) {
         s.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+        return true;
+    }
+
+    private boolean denyManage(CommandSender s) {
+        s.sendMessage(Component.text("Only the project lead or a manager can do that.", NamedTextColor.RED));
+        return true;
+    }
+
+    private boolean denyAdminister(CommandSender s) {
+        s.sendMessage(Component.text("Only the project lead can do that (or an admin).", NamedTextColor.RED));
         return true;
     }
 

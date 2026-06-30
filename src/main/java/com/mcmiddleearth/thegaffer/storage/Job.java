@@ -226,7 +226,10 @@ public class Job implements Listener {
                 .append(Component.text("Status: ", NamedTextColor.GRAY))
                 .append(running
                         ? Component.text("OPEN", NamedTextColor.GREEN)
-                        : Component.text("CLOSED", NamedTextColor.RED));
+                        : Component.text("CLOSED", NamedTextColor.RED))
+                .append(paused
+                        ? Component.text(" (PAUSED)", NamedTextColor.YELLOW)
+                        : Component.empty());
     }
 
     public void pauseJob(String pauser) {

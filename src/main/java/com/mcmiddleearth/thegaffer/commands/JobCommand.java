@@ -111,7 +111,7 @@ public class JobCommand implements TabExecutor {
                             if (JobDatabase.getActiveJobs().containsKey(jobname)) {
                                 Job target = JobDatabase.getActiveJobs().get(jobname);
                                 target.unpauseJob(player.getName());
-                                player.sendMessage(Component.text("Un paused " + target.getName(), NamedTextColor.GREEN));
+                                player.sendMessage(Component.text("Unpaused " + target.getName(), NamedTextColor.GREEN));
                             } else {
                                 player.sendMessage(Component.text("No job found by that name.", NamedTextColor.RED));
                             }
@@ -228,7 +228,9 @@ public class JobCommand implements TabExecutor {
                                     player.sendMessage(Component.text("Error: " + resp.getMessage().replaceAll("%name%", player.getName()).replaceAll("%job%", jobToJoin.getName()), NamedTextColor.RED));
                                 }
                             } else {
-                                player.sendMessage(Component.text("No job running by the name of `" + args[1] + "`", NamedTextColor.RED));
+                                player.sendMessage(Component.text("No job running by the name of ", NamedTextColor.RED)
+                                        .append(Component.text(args[1], NamedTextColor.AQUA))
+                                        .append(Component.text(".", NamedTextColor.RED)));
                             }
                         } else {
                             player.sendMessage(Component.text("You must provide the name of the job you would like to join — use ", NamedTextColor.RED)
@@ -267,6 +269,10 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("info")) {
+                if (!player.hasPermission(PermissionsUtil.getJoinPermission())) {
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    return true;
+                }
                 if (args.length > 1) {
                     if (JobDatabase.getActiveJobs().containsKey(args[1])) {
                         Job jobToJoin = JobDatabase.getActiveJobs().get(args[1]);
@@ -275,10 +281,12 @@ public class JobCommand implements TabExecutor {
                         Job jobToJoin = JobDatabase.getInactiveJobs().get(args[1]);
                         player.sendMessage(jobToJoin.getInfo());
                     } else {
-                        player.sendMessage(Component.text("No job found by the name of `" + args[1] + "`", NamedTextColor.RED));
+                        player.sendMessage(Component.text("No job found by the name of ", NamedTextColor.RED)
+                                .append(Component.text(args[1], NamedTextColor.AQUA))
+                                .append(Component.text(".", NamedTextColor.RED)));
                     }
                 } else {
-                    player.sendMessage(Component.text("What job would you like to get info on?", NamedTextColor.RED));
+                    player.sendMessage(Component.text("Usage: /job info <job>", NamedTextColor.GRAY));
                 }
                 return true;
             }
@@ -292,7 +300,9 @@ public class JobCommand implements TabExecutor {
                                 player.sendMessage(Component.text("Warped to ", NamedTextColor.GRAY)
                                         .append(Component.text(jobToJoin.getName(), NamedTextColor.AQUA)));
                             } else {
-                                player.sendMessage(Component.text("No job running by the name of `" + args[1] + "`", NamedTextColor.RED));
+                                player.sendMessage(Component.text("No job running by the name of ", NamedTextColor.RED)
+                                        .append(Component.text(args[1], NamedTextColor.AQUA))
+                                        .append(Component.text(".", NamedTextColor.RED)));
                             }
                         } else {
                             player.sendMessage(Component.text("You must provide the name of the job you would like to warp to.", NamedTextColor.RED));
@@ -377,7 +387,7 @@ public class JobCommand implements TabExecutor {
                         }
                     }
                 } else {
-                    player.sendMessage(Component.text("Usage: /job stats <job|player>", NamedTextColor.RED));
+                    player.sendMessage(Component.text("Usage: /job stats <job|player>", NamedTextColor.GRAY));
                 }
                 return true;
             }
