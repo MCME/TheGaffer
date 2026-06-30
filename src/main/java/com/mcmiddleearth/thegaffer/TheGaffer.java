@@ -29,6 +29,7 @@ import com.mcmiddleearth.thegaffer.listeners.ProtectionListener;
 import com.mcmiddleearth.thegaffer.listeners.StatsListener;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
+import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
@@ -83,6 +84,8 @@ public class TheGaffer extends JavaPlugin {
 
         int jobsLoaded = JobDatabase.loadJobs();
         Util.info("Loaded " + jobsLoaded + " jobs.");
+        int projectsLoaded = ProjectDatabase.loadProjects();
+        Util.info("Loaded " + projectsLoaded + " projects.");
         StatsManager.loadAggregate();
         StatsManager.loadActive();
 
@@ -119,6 +122,7 @@ public class TheGaffer extends JavaPlugin {
             @Override
             public void run() {
                 JobDatabase.saveAllDirty(true);
+                ProjectDatabase.saveAllDirty(true);
                 StatsManager.flushActive(true);
             }
         }.runTaskTimer(this, 60 * 20, 60 * 20);
@@ -130,6 +134,7 @@ public class TheGaffer extends JavaPlugin {
         // (the scheduler can no longer run async tasks during shutdown).
         getServer().getScheduler().cancelTasks(this);
         JobDatabase.saveAllDirty(false);
+        ProjectDatabase.saveAllDirty(false);
         StatsManager.flushActive(false);
     }
 
