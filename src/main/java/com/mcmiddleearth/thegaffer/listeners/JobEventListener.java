@@ -156,28 +156,7 @@ public class JobEventListener implements Listener {
         }
     }
     
-    @EventHandler
-    public void onJobProtection(JobProtectionInteractEvent event) {
-       //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
-    }
-
-    @EventHandler
-    public void onJobProtection(JobProtectionBlockPlaceEvent event) {
-        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
-    }
-
-    @EventHandler
-    public void onJobProtection(JobProtectionBlockBreakEvent event) {
-        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
-    }
-
-    @EventHandler
-    public void onJobProtection(JobProtectionHangingBreakEvent event) {
-        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
-    }
-
-    @EventHandler
-    public void onJobProtection(JobProtectionHangingPlaceEvent event) {
-        //Util.info("Got event: " + event.getEventName() + "blocked: " + event.isBlocked());
-    }
+    // NOTE: The five empty onJobProtection handlers that were here have been removed.
+    // StatsListener now handles JobProtectionBlockPlace/BreakEvent for stats counting
+    // (closes audit item H3 — dead handler stubs replaced by real behaviour).
 }
