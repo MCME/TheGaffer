@@ -231,7 +231,9 @@ public class JobCommand implements TabExecutor {
                                 player.sendMessage(Component.text("No job running by the name of `" + args[1] + "`", NamedTextColor.RED));
                             }
                         } else {
-                            player.sendMessage(Component.text("You must provide the name of the job you would like to join.", NamedTextColor.RED));
+                            player.sendMessage(Component.text("You must provide the name of the job you would like to join — use ", NamedTextColor.RED)
+                                    .append(Component.text("/job check", NamedTextColor.AQUA))
+                                    .append(Component.text(" to see running jobs.", NamedTextColor.RED)));
                         }
                     } else {
                         player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
@@ -407,68 +409,118 @@ public class JobCommand implements TabExecutor {
                 JobAdminCommands jAC = new JobAdminCommands();
                 return jAC.onCommand(sender, command, label, args);
             }
-            return false;
+            // B8 — unknown subcommand
+            player.sendMessage(Component.text("Unknown subcommand. Type ", NamedTextColor.RED)
+                    .append(Component.text("/job", NamedTextColor.AQUA))
+                    .append(Component.text(" for the list.", NamedTextColor.RED)));
+            return true;
+        }
+        // B8 — bare /job: send subcommand list
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            Component help = Component.text("Job commands:", NamedTextColor.GRAY)
+                    .append(Component.newline())
+                    .append(Component.text("  check, join, leave, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
+            if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                help = help.append(Component.newline())
+                        .append(Component.text("  stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
+            }
+            player.sendMessage(help);
+            return true;
         }
         return false;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        // B4 — no-arg subcommands: return empty list so Bukkit doesn't show player names
+        if (args[0].equalsIgnoreCase("check")
+                || args[0].equalsIgnoreCase("leave")
+                || args[0].equalsIgnoreCase("listen")
+                || args[0].equalsIgnoreCase("prep")) {
+            return Collections.emptyList();
+        }
+        // B1 — route /job admin … tab-complete to JobAdminCommands
+        if (args[0].equalsIgnoreCase("admin")) {
+            if (args.length > 1) {
+                JobAdminCommands jAC = new JobAdminCommands();
+                return jAC.onTabComplete(sender, command, alias, args);
+            }
+            return Collections.emptyList();
+        }
+        // B4 — archive takes a page number; return page numbers or empty
         if (args[0].equalsIgnoreCase("archive")) {
-            return null;
+            if (args.length > 1) {
+                // Only complete when user has started typing the second arg
+                int totalPages = 1;
+                if (!JobDatabase.getInactiveJobs().isEmpty()) {
+                    // ChatPaginator uses AVERAGE_CHAT_PAGE_WIDTH columns, 8 lines per page
+                    int lineCount = JobDatabase.getInactiveJobs().size();
+                    totalPages = (int) Math.ceil(lineCount / 8.0);
+                    if (totalPages < 1) totalPages = 1;
+                }
+                List<String> pages = new ArrayList<>();
+                String prefix = args[1];
+                for (int i = 1; i <= totalPages; i++) {
+                    String num = String.valueOf(i);
+                    if (num.startsWith(prefix)) {
+                        pages.add(num);
+                    }
+                }
+                return pages.isEmpty() ? Collections.emptyList() : pages;
+            }
+            return Collections.emptyList();
         }
-        if (args[0].equalsIgnoreCase("check")) {
-            return null;
-        }
+        // B3 + info: complete job names even when no space typed yet (args.length == 1)
         if (args[0].equalsIgnoreCase("info")) {
             List<String> jobs = new ArrayList<>();
-            if (args[1] == null) {
-                jobs.addAll(JobDatabase.getActiveJobs().keySet());
-                jobs.addAll(JobDatabase.getInactiveJobs().keySet());
-            } else {
-                for (String s : JobDatabase.getActiveJobs().keySet()) {
-                    if (s.startsWith(args[1])) {
-                        jobs.add(s);
-                    }
+            String prefix = args.length > 1 ? args[1] : "";
+            for (String s : JobDatabase.getActiveJobs().keySet()) {
+                if (s.startsWith(prefix)) {
+                    jobs.add(s);
                 }
-                for (String s : JobDatabase.getInactiveJobs().keySet()) {
-                    if (s.startsWith(args[1])) {
-                        jobs.add(s);
-                    }
-                }
-                if (jobs.isEmpty()) {
-                    return null;
+            }
+            for (String s : JobDatabase.getInactiveJobs().keySet()) {
+                if (s.startsWith(prefix)) {
+                    jobs.add(s);
                 }
             }
             Set<String> jobsUnique = new HashSet<>(jobs);
-            jobs.removeAll(jobs);
+            jobs.clear();
             jobs.addAll(jobsUnique);
             return jobs;
         }
+        // B3 — active-job completions for join/stop/pause/unpause/warpto
         if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")
                 || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")
                 || args[0].equalsIgnoreCase("warpto")) {
+            String prefix = args.length > 1 ? args[1] : "";
             List<String> jobs = new ArrayList<>();
-
+            for (String s : JobDatabase.getActiveJobs().keySet()) {
+                if (s.startsWith(prefix)) {
+                    jobs.add(s);
+                }
+            }
+            Set<String> jobsUnique = new HashSet<>(jobs);
+            jobs.clear();
+            jobs.addAll(jobsUnique);
+            return jobs;
+        }
+        // B5 — leaderboard/top sort key
+        if (args[0].equalsIgnoreCase("leaderboard") || args[0].equalsIgnoreCase("top")) {
             if (args.length > 1) {
-                if (args[1] == null) {
-                    jobs.addAll(JobDatabase.getActiveJobs().keySet());
-                } else {
-                    for (String s : JobDatabase.getActiveJobs().keySet()) {
-                        if (s.startsWith(args[1])) {
-                            jobs.add(s);
-                        }
-                    }
-                    if (jobs.isEmpty()) {
-                        return null;
+                String prefix = args[1];
+                List<String> keys = new ArrayList<>();
+                for (String k : new String[]{"placed", "broke", "active"}) {
+                    if (k.startsWith(prefix)) {
+                        keys.add(k);
                     }
                 }
-                Set<String> jobsUnique = new HashSet<>(jobs);
-                jobs.removeAll(jobs);
-                jobs.addAll(jobsUnique);
-                return jobs;
+                return keys;
             }
+            return Collections.emptyList();
         }
+        // Root tab-complete: subcommand list — B2 adds admin + listen
         List<String> actions = new ArrayList<>();
         actions.add("archive");
         actions.add("warpto");
@@ -485,6 +537,13 @@ public class JobCommand implements TabExecutor {
             actions.add("prep");
             actions.add("pause");
             actions.add("unpause");
+            actions.add("admin");   // B2
+            actions.add("listen");  // B2
+        }
+        // Filter by prefix if the user has started typing
+        String prefix = args[0];
+        if (!prefix.isEmpty()) {
+            actions.removeIf(a -> !a.startsWith(prefix.toLowerCase()));
         }
         Collections.sort(actions);
         return actions;
