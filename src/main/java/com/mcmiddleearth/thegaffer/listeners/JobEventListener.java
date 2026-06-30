@@ -52,7 +52,13 @@ public class JobEventListener implements Listener {
         Job job = event.getJob();
         job.sendToAll(Component.text("The " + job.getName() + " job has ended.", NamedTextColor.GRAY));
         for (Player p : job.getAllAsPlayersArray()) {
-            p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1f);
+            // Guarded (see onJobStart): a third-party sound-packet listener must not abort
+            // the job-end Discord recap below.
+            try {
+                p.playSound(p.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1f);
+            } catch (Exception ex) {
+                Util.debug("Job-end sound suppressed for " + p.getName() + ": " + ex.getMessage());
+            }
         }
         if(job.isDiscordSend()) {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
@@ -104,7 +110,14 @@ public class JobEventListener implements Listener {
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
             // A gentle server-wide cue for the new-job broadcast (the old
             // ENTITY_WITHER_DEATH was an alarming, full-volume blast for everyone).
-            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
+            // Guarded: a third-party outbound-packet listener (e.g. PremiumVanish's
+            // NamedSoundEffect module via ProtocolLib) can throw when the sound packet is
+            // sent — a COSMETIC cue must not abort the Discord announcement that follows.
+            try {
+                p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1.5f);
+            } catch (Exception ex) {
+                Util.debug("Job-start sound suppressed for " + p.getName() + ": " + ex.getMessage());
+            }
         }
         if (job.isDiscordSend()) {
             TextChannel channel = DiscordUtil.getTextChannelById(TheGaffer.getDiscordChannel());
