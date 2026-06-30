@@ -94,7 +94,10 @@ public class StatsManager {
         if (s == null) { return null; }
         s.setEndTime(endTime);
         if (persist) {
-            JobStatsStorage.save(s, statsDir(), true);
+            // Synchronous: job-end is infrequent (not a hot path), and the record must be
+            // durable + visible to the end-of-job recap immediately. The frequent periodic
+            // flushActive stays async.
+            JobStatsStorage.save(s, statsDir(), false);
             new File(activeDir(), JobStatsStorage.recordFileName(jobName, 0L)).delete();
         }
         ingest(s);
@@ -242,5 +245,13 @@ public class StatsManager {
     public static String formatDuration(long millis) {
         long mins = millis / 60000;
         return (mins / 60) + "h " + (mins % 60) + "m";
+    }
+
+    /** Plain-text recap for the Discord job-end post. Pure (no Bukkit/JDA), so it's unit-testable. */
+    public static String buildDiscordSummary(JobStats s) {
+        return "__**Recap:**__ **" + s.getName() + "**"
+                + "\n        Builders: " + s.getParticipants().size()
+                + "\n        Blocks: " + s.getTotalPlaced() + " placed, " + s.getTotalBroke() + " broken"
+                + "\n        Duration: " + formatDuration(s.getDurationMillis());
     }
 }

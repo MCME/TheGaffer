@@ -69,4 +69,14 @@ class StatsManagerTest {
         // limit truncation
         assertEquals(1, StatsManager.getLeaderboard(StatsManager.SortKey.PLACED, 1).size());
     }
+
+    @Test
+    void discordSummaryContainsTotals() {
+        JobStats s = new JobStats("river", java.util.UUID.randomUUID(), "p", "world", 0, 0, 10, 0L, 3600000L);
+        s.recordPlace(java.util.UUID.randomUUID(), 1200);
+        String msg = StatsManager.buildDiscordSummary(s);
+        org.junit.jupiter.api.Assertions.assertTrue(msg.contains("river"));
+        org.junit.jupiter.api.Assertions.assertTrue(msg.contains("1200"));
+        org.junit.jupiter.api.Assertions.assertTrue(msg.contains("1h 0m"));
+    }
 }
