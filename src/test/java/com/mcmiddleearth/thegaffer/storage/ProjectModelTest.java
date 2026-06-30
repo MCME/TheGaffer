@@ -40,4 +40,21 @@ class ProjectModelTest {
         p.removeManager(mgr);
         assertTrue(p.getManagers().isEmpty());
     }
+
+    @org.junit.jupiter.api.Test
+    void dirtyFlagTracksPersistentMutations() {
+        Project p = new Project("P", java.util.UUID.randomUUID(), 0L);
+        org.junit.jupiter.api.Assertions.assertFalse(p.isDirty(), "fresh project should not be dirty");
+        p.setDescription("x");
+        org.junit.jupiter.api.Assertions.assertTrue(p.isDirty(), "setDescription should mark dirty");
+        p.setDirty(false);
+        p.setCreatedTime(5L);
+        org.junit.jupiter.api.Assertions.assertFalse(p.isDirty(), "setCreatedTime should not mark dirty");
+        java.util.UUID m = java.util.UUID.randomUUID();
+        p.addManager(m);
+        org.junit.jupiter.api.Assertions.assertTrue(p.isDirty(), "addManager should mark dirty");
+        p.setDirty(false);
+        p.removeManager(m);
+        org.junit.jupiter.api.Assertions.assertTrue(p.isDirty(), "removeManager should mark dirty");
+    }
 }
