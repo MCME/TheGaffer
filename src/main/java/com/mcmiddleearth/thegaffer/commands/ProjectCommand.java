@@ -66,12 +66,11 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("Project names may only contain letters, digits, spaces, hyphens, and apostrophes.", NamedTextColor.RED));
             return true;
         }
-        if (ProjectDatabase.get(name) != null) {
+        Project p = new Project(name, ((Player) sender).getUniqueId(), System.currentTimeMillis());
+        if (!ProjectDatabase.create(p)) {
             sender.sendMessage(Component.text("A project named '" + name + "' already exists.", NamedTextColor.RED));
             return true;
         }
-        Project p = new Project(name, ((Player) sender).getUniqueId(), System.currentTimeMillis());
-        ProjectDatabase.create(p);
         sender.sendMessage(Component.text("Created project ", NamedTextColor.GREEN)
                 .append(Component.text(name, NamedTextColor.GOLD))
                 .append(Component.text(". You are its lead.", NamedTextColor.GREEN)));
@@ -95,7 +94,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             placed.put(Project.canonical(p.getName()), StatsManager.getProjectAggregate(p.getName()).getPlaced());
         }
         shown.sort(Comparator.comparingLong(
-                (Project p) -> placed.get(Project.canonical(p.getName()))).reversed());
+                (Project p) -> placed.getOrDefault(Project.canonical(p.getName()), 0L)).reversed());
         Component out = Component.text("Projects (" + filter.name().toLowerCase() + "):", NamedTextColor.GRAY);
         if (shown.isEmpty()) {
             out = out.append(Component.newline()).append(Component.text("  none", NamedTextColor.DARK_GRAY));
@@ -128,13 +127,13 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     // ---- shared helpers ----
 
-    boolean deny(CommandSender s) {
+    private boolean deny(CommandSender s) {
         s.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
         return true;
     }
 
     /** Joins args[from..] into a single space-separated string. */
-    String joinFrom(String[] args, int from) {
+    private String joinFrom(String[] args, int from) {
         StringBuilder sb = new StringBuilder();
         for (int i = from; i < args.length; i++) {
             if (i > from) { sb.append(" "); }
