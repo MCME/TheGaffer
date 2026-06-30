@@ -48,6 +48,17 @@ public class JobCommand implements TabExecutor {
 
     private HashMap<Player, InvHolder> invs = new HashMap<>();
 
+    /**
+     * Sends a standardised staff-action denial that names the required permission,
+     * so the player knows what to ask staff for.
+     */
+    private static void sendStaffDenied(Player player) {
+        String perm = PermissionsUtil.getCreatePermission().getName();
+        player.sendMessage(Component.text("That's a staff action (", NamedTextColor.RED)
+                .append(Component.text(perm, NamedTextColor.YELLOW))
+                .append(Component.text(") — ask staff to run it.", NamedTextColor.RED)));
+    }
+
     /** Number of archive pages for {@code inactiveCount} jobs at page-size 8. */
     static int archivePageCount(int inactiveCount) {
         if (inactiveCount <= 0) return 1;
@@ -86,7 +97,7 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage(Component.text("You must provide a job name.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                        sendStaffDenied(player);
                     }
                     return true;
                 }
@@ -108,7 +119,7 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage(Component.text("You must provide a job name.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                        sendStaffDenied(player);
                     }
                     return true;
                 }
@@ -130,7 +141,7 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage(Component.text("You must provide a job name.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                        sendStaffDenied(player);
                     }
                     return true;
                 }
@@ -147,7 +158,7 @@ public class JobCommand implements TabExecutor {
                         player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 0.5f);
                     }
                 } else {
-                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    sendStaffDenied(player);
                 }
                 return true;
             }
@@ -171,7 +182,7 @@ public class JobCommand implements TabExecutor {
                         player.updateInventory();
                     }
                 } else {
-                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    sendStaffDenied(player);
                 }
                 return true;
             }
@@ -233,8 +244,20 @@ public class JobCommand implements TabExecutor {
                                                  JobDatabase.getActiveJobs().firstEntry().getValue());
                                 GafferResponse resp = jobToJoin.addWorker(player);
                                 if (resp.isSuccessful()) {
-                                    player.sendMessage(Component.text("You have joined the job ", NamedTextColor.GRAY)
-                                            .append(Component.text(jobToJoin.getName(), NamedTextColor.AQUA)));
+                                    // Line 1: job name + role + gamemode rule
+                                    Component joinMsg = Component.text("You joined ", NamedTextColor.GREEN)
+                                            .append(Component.text(jobToJoin.getName(), NamedTextColor.AQUA))
+                                            .append(Component.text(" as Worker. Creative inside the build area, Survival outside.", NamedTextColor.GREEN))
+                                            .append(Component.newline())
+                                            // Line 2: clickable command hints
+                                            .append(Msg.button("/job border", NamedTextColor.AQUA, "/job border", "Toggle the build-area outline"))
+                                            .append(Component.text(" to outline the area · ", NamedTextColor.GRAY))
+                                            .append(Msg.button("/job leave", NamedTextColor.AQUA, "/job leave", "Leave this job"))
+                                            .append(Component.text(" to exit.", NamedTextColor.GRAY));
+                                    if (jobToJoin.isGlowing()) {
+                                        joinMsg = joinMsg.append(Component.text(" You will glow while in the job.", NamedTextColor.YELLOW));
+                                    }
+                                    player.sendMessage(joinMsg);
                                     // Show the job boundary border now that the player is a worker.
                                     JobBorderManager.refresh(player);
                                 } else {
@@ -379,7 +402,7 @@ public class JobCommand implements TabExecutor {
                 }
                 if (args.length > 1 && args[1].equalsIgnoreCase("export")) {
                     if (!player.hasPermission(PermissionsUtil.getCreatePermission())) {
-                        player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                        sendStaffDenied(player);
                         return true;
                     }
                     java.io.File f = StatsManager.exportAll(System.currentTimeMillis());
@@ -463,7 +486,7 @@ public class JobCommand implements TabExecutor {
                     .append(Component.text("  check, join, leave, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
             if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                 help = help.append(Component.newline())
-                        .append(Component.text("  stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
+                        .append(Component.text("  create, stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
             }
             player.sendMessage(help);
             return true;
@@ -606,6 +629,7 @@ public class JobCommand implements TabExecutor {
         actions.add("leaderboard");
         actions.add("top");
         if (sender.hasPermission(PermissionsUtil.getCreatePermission())) {
+            actions.add("create");  // #1
             actions.add("stop");
             actions.add("debug");
             actions.add("prep");

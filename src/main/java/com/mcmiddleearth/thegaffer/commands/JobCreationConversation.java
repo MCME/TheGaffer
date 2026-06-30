@@ -75,7 +75,13 @@ public class JobCreationConversation implements CommandExecutor, ConversationAba
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;
         } else {
-            return false;
+            if (sender instanceof Player) {
+                String perm = PermissionsUtil.getCreatePermission().getName();
+                ((Player) sender).sendMessage(Component.text("That's a staff action (", NamedTextColor.RED)
+                        .append(Component.text(perm, NamedTextColor.YELLOW))
+                        .append(Component.text(") — ask staff to run it.", NamedTextColor.RED)));
+            }
+            return true;
         }
     }
 
