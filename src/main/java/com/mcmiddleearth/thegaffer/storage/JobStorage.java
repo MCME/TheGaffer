@@ -25,7 +25,7 @@ import java.util.UUID;
  * Maps a {@link Job} to/from a Bukkit {@link YamlConfiguration}. Only the
  * persistent state is written; derived/runtime fields (area, bounds, the glow
  * scoreboard/teams, dirty flag, the abandoner "left" map) are regenerated or
- * reset at load time. ItemStacks serialize natively via YamlConfiguration.
+ * reset at load time.
  */
 public class JobStorage {
 
