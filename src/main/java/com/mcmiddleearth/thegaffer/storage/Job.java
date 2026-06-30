@@ -386,7 +386,7 @@ public class Job implements Listener {
 
     public BanWorkerResponse unbanWorker(List<OfflinePlayer> ps) {
         for (OfflinePlayer p : ps) {
-            if (bannedWorkers.contains(p.getUniqueId())) {
+            if (!bannedWorkers.contains(p.getUniqueId())) {
                 return BanWorkerResponse.ALREADY_UNBANNED;
             }
             bannedWorkers.remove(p.getUniqueId());

@@ -155,7 +155,7 @@ public class AdminMethods {
         return true;
     }
 
-    public Object clearworkerinvens() {
+    public Object clearworkerinven() {
         PlayerInventory pinven;
         for (Player curr : job.getWorkersAsPlayersArray()) {
             if (TheGaffer.getServerInstance().getOfflinePlayer(curr.getPlayerListName()).isOnline()) {
