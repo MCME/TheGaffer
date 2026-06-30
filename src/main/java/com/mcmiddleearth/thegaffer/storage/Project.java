@@ -49,13 +49,13 @@ public class Project {
     public UUID getLead() { return lead; }
     public void setLead(UUID lead) { this.lead = lead; this.dirty = true; }
     public List<UUID> getManagers() { return managers; }
-    public void setManagers(List<UUID> managers) { this.managers = managers; this.dirty = true; }
+    public void setManagers(List<UUID> managers) { this.managers = new ArrayList<>(managers); this.dirty = true; }
     public void addManager(UUID id) { if (id != null && !managers.contains(id)) { managers.add(id); dirty = true; } }
     public void removeManager(UUID id) { if (managers.remove(id)) { dirty = true; } }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; this.dirty = true; }
     public long getCreatedTime() { return createdTime; }
-    public void setCreatedTime(long t) { this.createdTime = t; }
+    public void setCreatedTime(long t) { this.createdTime = t; } // written once (construction/load); intentionally not dirty-tracked
     public long getCompletedTime() { return completedTime; }
     public void setCompletedTime(long t) { this.completedTime = t; this.dirty = true; }
 

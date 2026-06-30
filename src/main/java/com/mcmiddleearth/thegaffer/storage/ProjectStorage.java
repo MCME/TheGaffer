@@ -38,6 +38,8 @@ public class ProjectStorage {
         }
         p.setCreatedTime(c.getLong("createdTime"));
         p.setCompletedTime(c.getLong("completedTime"));
+        // NOTE: the setters above mark the Project dirty; ProjectDatabase.loadProjects()
+        // calls setDirty(false) after loading (mirrors JobDatabase.loadJobs).
         return p;
     }
 
