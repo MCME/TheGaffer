@@ -2,11 +2,14 @@ package com.mcmiddleearth.thegaffer.utilities;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
+import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -81,5 +84,36 @@ class StatsManagerTest {
         assertTrue(msg.contains("1h 0m"));
         assertTrue(msg.contains("Builders: 1")); // recordPlace adds the builder as a participant
         assertTrue(msg.contains("0 broken"));    // no breaks recorded
+    }
+
+    /**
+     * toCsv produces the canonical header and a data row containing the expected placed/broke counts.
+     *
+     * toCsv calls Util.nameOf(...), whose class static initializer reads
+     * TheGaffer.getServerInstance().getLogger(). We set serverInstance to the MockBukkit
+     * server (already live from @BeforeEach) via reflection, exactly as StatsManagerFindTest does.
+     */
+    @Test
+    void exportWritesCsvRows() throws Exception {
+        Field f = TheGaffer.class.getDeclaredField("serverInstance");
+        f.setAccessible(true);
+        f.set(null, server);
+        try {
+            UUID alice = UUID.randomUUID();
+            JobStats s = new JobStats("river", alice, "p", "world", 1, 2, 10, 0L, 1000L);
+            s.recordPlace(alice, 5);
+            s.recordBreak(alice, 2);
+
+            String csv = StatsManager.toCsv(Collections.singletonList(s));
+            String[] lines = csv.split("\n");
+
+            assertEquals("job,owner,project,world,centerX,centerZ,startTime,endTime,builder,placed,broke",
+                    lines[0], "First line must be the CSV header");
+            // The data row must contain the job name and the placed/broke counts
+            assertTrue(csv.contains("river,"), "CSV must contain the job name");
+            assertTrue(csv.contains(",5,2"), "CSV must contain placed=5 and broke=2 as last two columns");
+        } finally {
+            f.set(null, null);
+        }
     }
 }
