@@ -63,4 +63,22 @@ class CleanupUtilTest {
         assertTrue(job.isAutoPaused(), "the pause must be flagged as automatic");
         assertTrue(job.isRunning(), "the job must stay active (not archived)");
     }
+
+    @Test
+    void scheduledCleanupDropsAutoPausedJobFromWaitQueue() {
+        CleanupUtil.getWaiting().clear();
+        Job job = new Job();
+        job.setName("anduin");
+        job.setRunning(true);
+        job.setOwner(UUID.randomUUID()); // offline owner, no helpers
+
+        // Queue it as having waited past the 250s owner-timeout threshold.
+        CleanupUtil.getWaiting().put(job, System.currentTimeMillis() - 300_000L);
+
+        CleanupUtil.scheduledCleanup();
+
+        assertTrue(job.isAutoPaused(), "owner gone + no helper online → auto-paused");
+        assertFalse(CleanupUtil.getWaiting().containsKey(job),
+                "an auto-paused job must be dropped from the wait queue (prevents the re-pause loop)");
+    }
 }
