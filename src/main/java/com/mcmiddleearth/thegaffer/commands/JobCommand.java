@@ -20,6 +20,7 @@ import com.mcmiddleearth.thegaffer.GafferResponses.GafferResponse;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
+import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
@@ -349,15 +350,18 @@ public class JobCommand implements TabExecutor {
                 }
                 if (args.length > 1) {
                     // Try to find a job by that name first; if not found treat as a player name
-                    com.mcmiddleearth.thegaffer.storage.JobStats js = StatsManager.findJobStats(args[1]);
+                    JobStats js = StatsManager.findJobStats(args[1]);
                     if (js != null) {
                         player.sendMessage(StatsManager.renderJobStats(js));
                     } else {
-                        java.util.UUID id = org.bukkit.Bukkit.getOfflinePlayer(args[1]).getUniqueId();
-                        StatsManager.PlayerAggregate a = StatsManager.getPlayerTotals(id);
-                        player.sendMessage(Component.text(args[1] + ": ", NamedTextColor.AQUA)
-                                .append(Component.text(a.getPlaced() + " placed, " + a.getBroke()
-                                        + " broken across " + a.getJobs() + " jobs", NamedTextColor.GRAY)));
+                        StatsManager.PlayerAggregate a = StatsManager.findPlayerTotalsByName(args[1]);
+                        if (a != null) {
+                            player.sendMessage(Component.text(Util.nameOf(a.getId()) + ": ", NamedTextColor.AQUA)
+                                    .append(Component.text(a.getPlaced() + " placed, " + a.getBroke()
+                                            + " broken across " + a.getJobs() + " jobs", NamedTextColor.GRAY)));
+                        } else {
+                            player.sendMessage(Component.text("No job or player found by that name.", NamedTextColor.RED));
+                        }
                     }
                 } else {
                     player.sendMessage(Component.text("Usage: /job stats <job|player>", NamedTextColor.RED));
@@ -380,6 +384,10 @@ public class JobCommand implements TabExecutor {
                             .append(Msg.button(Util.nameOf(a.getId()), NamedTextColor.AQUA,
                                     "/job stats " + Util.nameOf(a.getId()), "View stats"))
                             .append(Component.text("  " + a.getPlaced() + " placed / " + a.getBroke() + " broken", NamedTextColor.GRAY));
+                }
+                if (rank == 1) {
+                    out = out.append(Component.newline())
+                            .append(Component.text("No stats recorded yet.", NamedTextColor.GRAY));
                 }
                 player.sendMessage(out);
                 return true;

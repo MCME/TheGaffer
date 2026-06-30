@@ -131,6 +131,16 @@ public class StatsManager {
         return aggregate.getOrDefault(id, new PlayerAggregate(id));
     }
 
+    /** Finds a player's aggregate by case-insensitive name among players with recorded stats; null if none. */
+    public static PlayerAggregate findPlayerTotalsByName(String name) {
+        for (PlayerAggregate a : aggregate.values()) {
+            if (name.equalsIgnoreCase(Util.nameOf(a.getId()))) {
+                return a;
+            }
+        }
+        return null;
+    }
+
     public static List<PlayerAggregate> getLeaderboard(SortKey key, int limit) {
         List<PlayerAggregate> all = new ArrayList<>(aggregate.values());
         Comparator<PlayerAggregate> cmp;
