@@ -180,6 +180,14 @@ public class StatsManager {
                 live.put(s.getName(), s);
             }
         }
+        // Any running job without an active snapshot (first deploy of stats, or a
+        // crash before the first flush) gets fresh empty counters so counting works
+        // this session — matches the spec's "counting starts from now".
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            if (!live.containsKey(job.getName())) {
+                begin(job);
+            }
+        }
     }
 
     // ---- test seams (no Bukkit Job required) ----
