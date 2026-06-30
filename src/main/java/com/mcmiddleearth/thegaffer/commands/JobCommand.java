@@ -23,6 +23,7 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -341,6 +342,48 @@ public class JobCommand implements TabExecutor {
                 Bukkit.getServer().dispatchCommand(sender, "createjob");
                 return true;
             }
+            if (args[0].equalsIgnoreCase("stats")) {
+                if (!player.hasPermission(PermissionsUtil.getJoinPermission())) {
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    return true;
+                }
+                if (args.length > 1) {
+                    // Try to find a job by that name first; if not found treat as a player name
+                    com.mcmiddleearth.thegaffer.storage.JobStats js = StatsManager.findJobStats(args[1]);
+                    if (js != null) {
+                        player.sendMessage(StatsManager.renderJobStats(js));
+                    } else {
+                        java.util.UUID id = org.bukkit.Bukkit.getOfflinePlayer(args[1]).getUniqueId();
+                        StatsManager.PlayerAggregate a = StatsManager.getPlayerTotals(id);
+                        player.sendMessage(Component.text(args[1] + ": ", NamedTextColor.AQUA)
+                                .append(Component.text(a.getPlaced() + " placed, " + a.getBroke()
+                                        + " broken across " + a.getJobs() + " jobs", NamedTextColor.GRAY)));
+                    }
+                } else {
+                    player.sendMessage(Component.text("Usage: /job stats <job|player>", NamedTextColor.RED));
+                }
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("leaderboard") || args[0].equalsIgnoreCase("top")) {
+                if (!player.hasPermission(PermissionsUtil.getJoinPermission())) {
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    return true;
+                }
+                StatsManager.SortKey key = StatsManager.SortKey.PLACED;
+                if (args.length > 1 && args[1].equalsIgnoreCase("broke")) { key = StatsManager.SortKey.BROKE; }
+                else if (args.length > 1 && args[1].equalsIgnoreCase("active")) { key = StatsManager.SortKey.ACTIVE; }
+                Component out = Component.text("Top builders (" + key.name().toLowerCase() + "):", NamedTextColor.GRAY);
+                int rank = 1;
+                for (StatsManager.PlayerAggregate a : StatsManager.getLeaderboard(key, 10)) {
+                    out = out.append(Component.newline())
+                            .append(Component.text(rank++ + ". ", NamedTextColor.GRAY))
+                            .append(Msg.button(Util.nameOf(a.getId()), NamedTextColor.AQUA,
+                                    "/job stats " + Util.nameOf(a.getId()), "View stats"))
+                            .append(Component.text("  " + a.getPlaced() + " placed / " + a.getBroke() + " broken", NamedTextColor.GRAY));
+                }
+                player.sendMessage(out);
+                return true;
+            }
             if (args[0].equalsIgnoreCase("admin")) {
                 JobAdminCommands jAC = new JobAdminCommands();
                 return jAC.onCommand(sender, command, label, args);
@@ -414,6 +457,8 @@ public class JobCommand implements TabExecutor {
         actions.add("join");
         actions.add("check");
         actions.add("leave");
+        actions.add("stats");
+        actions.add("leaderboard");
         if (sender.hasPermission(PermissionsUtil.getCreatePermission())) {
             actions.add("stop");
             actions.add("debug");
