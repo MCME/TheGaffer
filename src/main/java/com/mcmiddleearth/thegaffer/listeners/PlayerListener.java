@@ -97,7 +97,28 @@ public class PlayerListener implements Listener {
         JobBorderManager.forget(event.getPlayer().getUniqueId());
     }
 
-    private List<UUID> playersSwitchedToCreative = new ArrayList<>();
+    private static List<UUID> playersSwitchedToCreative = new ArrayList<>();
+
+    /**
+     * Reverts {@code p} to Survival if this plugin switched them to Creative.
+     * Does nothing if we never switched this player (e.g. staff who set their own gamemode).
+     * Mirrors the flight-restore logic in {@link #playerMove}.
+     */
+    public static void revertToSurvivalIfSwitched(Player p) {
+        if (!playersSwitchedToCreative.contains(p.getUniqueId())) {
+            return;
+        }
+        boolean flying = p.isFlying();
+        p.setGameMode(GameMode.SURVIVAL);
+        if (TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight", true)) {
+            p.setAllowFlight(true);
+            p.setFlying(flying);
+        }
+        p.sendMessage(net.kyori.adventure.text.Component.text(
+                "You left the job build area — back to Survival.",
+                NamedTextColor.GRAY));
+        playersSwitchedToCreative.remove(p.getUniqueId());
+    }
 
     @EventHandler(priority = EventPriority.LOW)
     public void playerMove(PlayerMoveEvent event) {

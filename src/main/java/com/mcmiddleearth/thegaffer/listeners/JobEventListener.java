@@ -19,6 +19,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
+import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
@@ -63,6 +64,8 @@ public class JobEventListener implements Listener {
             } catch (Exception ex) {
                 Util.debug("Job-end sound suppressed for " + p.getName() + ": " + ex.getMessage());
             }
+            // #15: Immediately revert to Survival any member we switched to Creative.
+            PlayerListener.revertToSurvivalIfSwitched(p);
         }
         if(job.isDiscordSend()) {
             String emoji =(TheGaffer.getDiscordJobEmoji()==null 
@@ -95,7 +98,7 @@ public class JobEventListener implements Listener {
             message = message +"\n"+ChatColor.GRAY+"Job Description: "+ChatColor.AQUA+job.getDescription();
         }
         message = message + "\n"+ChatColor.GRAY+"To join the job do "+ChatColor.AQUA+"/job join "+job.getName()
-                          + "\n"+ChatColor.GRAY+"If you are at another world you'll need to first do "+ChatColor.AQUA+"/"+job.getBukkitWorld().getName()
+                          + "\n"+ChatColor.GRAY+"If you're on another world, travel to the "+ChatColor.AQUA+job.getBukkitWorld().getName()+ChatColor.GRAY+" world first."
                           + "\n"+ first + second;
         Plugin connectPlugin = Bukkit.getPluginManager().getPlugin("MCME-Connect");
         Player player = Bukkit.getOnlinePlayers().stream().findFirst().orElse(null);
