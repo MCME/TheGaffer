@@ -33,6 +33,7 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.CleanupUtil;
+import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import org.bukkit.Location;
@@ -128,6 +129,10 @@ public class TheGaffer extends JavaPlugin {
                 StatsManager.flushActive(true);
             }
         }.runTaskTimer(this, 60 * 20, 60 * 20);
+
+        // Start the particle-wall render task for the visual job boundary.
+        // Runs every 10 ticks; draws END_ROD particles for players in active.
+        JobBorderManager.startRenderTask(this);
     }
 
     @Override
