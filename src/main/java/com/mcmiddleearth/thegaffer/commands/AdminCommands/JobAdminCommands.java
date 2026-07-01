@@ -47,7 +47,24 @@ import org.bukkit.entity.Player;
  */
 public class JobAdminCommands implements TabExecutor{
     
-    private static HashMap<String, Integer> Methods = new HashMap<>();
+    private static final HashMap<String, Integer> Methods = new HashMap<>();
+    static {
+        // Populate at class-init, NOT in the instance constructor: /jobadmin is registered as
+        // a JobAdminConversation, so a JobAdminCommands instance may never be constructed — yet
+        // JobAdminConversation forwards to the static executeOneLiner, which needs this map.
+        Methods.put("addhelper", 1);
+        Methods.put("removehelper", 1);
+        Methods.put("kickworker", 1);
+        Methods.put("banworker", 1);
+        Methods.put("unbanworker", 1);
+        Methods.put("setwarp", 0);
+        Methods.put("bringall", 0);
+        Methods.put("listworkers", 0);
+        Methods.put("inviteworker", 1);
+        Methods.put("uninviteworker", 1);
+        Methods.put("setradius", 1);
+        Methods.put("clearworkerinven", 0);
+    }
 
     /**
      * Actions that are destructive and require the trailing "confirm" token in the one-liner.
@@ -112,18 +129,8 @@ public class JobAdminCommands implements TabExecutor{
     }
     
     public JobAdminCommands(){
-        Methods.put("addhelper", 1);
-        Methods.put("removehelper", 1);
-        Methods.put("kickworker", 1);
-        Methods.put("banworker", 1);
-        Methods.put("unbanworker", 1);
-        Methods.put("setwarp", 0);
-        Methods.put("bringall", 0);
-        Methods.put("listworkers", 0);
-        Methods.put("inviteworker", 1);
-        Methods.put("uninviteworker", 1);
-        Methods.put("setradius", 1);
-        Methods.put("clearworkerinven", 0);
+        // Dispatch map is populated in a static initialiser (above) so it is ready regardless
+        // of whether an instance is ever constructed.
     }
 
     /** Sends a help line listing all known admin actions. */
