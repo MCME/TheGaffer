@@ -67,6 +67,20 @@ public class PlayerListener implements Listener {
                         NamedTextColor.GREEN, TextDecoration.BOLD));
             }
         }
+        // #13: If this player belongs to an active job that is paused, tell them
+        // right away so they know building is suspended.
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            if (job.isPaused()
+                    && (uuid.equals(job.getOwner())
+                        || job.getHelpers().contains(uuid)
+                        || job.getWorkers().contains(uuid))) {
+                player.sendMessage(Component.text("The ", NamedTextColor.YELLOW)
+                        .append(Component.text(job.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(
+                                " job you're in is paused — building is suspended until staff resume it.",
+                                NamedTextColor.YELLOW)));
+            }
+        }
         // Restore the job border for players who relog while in a job.
         JobBorderManager.refresh(player);
     }

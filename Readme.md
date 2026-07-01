@@ -55,6 +55,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job check` | List the running jobs (click a name to join). |
 | `/job join <job>` | Join a running job (or the only one running). |
 | `/job leave` | Leave your current job. |
+| `/job mine` | Show your current job status: name, role (Owner / Helper / Worker), paused/glow state, and clickable `[warpto]` / `[leave]` shortcuts. |
 | `/job info <job>` | Show a job's details: current owner, helpers (by name), worker count, location, and status. If the job was taken over by a helper, also shows the original starter ("Started by"). |
 | `/job warpto <job>` | Teleport to a job's warp point. |
 | `/job archive [page]` | Browse finished (archived) jobs. |
