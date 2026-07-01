@@ -520,8 +520,11 @@ public class JobCommand implements TabExecutor {
                     boolean on = JobBorderManager.toggle(player);
                     if (on) {
                         player.sendMessage(Component.text("Job boundary shown.", NamedTextColor.GREEN));
-                    } else {
+                    } else if (JobDatabase.getJobWorking(player) != null) {
                         player.sendMessage(Component.text("Job boundary hidden.", NamedTextColor.GRAY));
+                    } else {
+                        player.sendMessage(Component.text("You're not in a job here — no boundary to show. ", NamedTextColor.GRAY)
+                                .append(Msg.button("[/job check]", NamedTextColor.AQUA, "/job check", "See running jobs")));
                     }
                 } else {
                     player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
