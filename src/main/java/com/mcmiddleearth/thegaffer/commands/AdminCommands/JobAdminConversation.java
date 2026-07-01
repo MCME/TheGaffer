@@ -63,6 +63,18 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // If the player supplied args (/jobadmin <job> <action> …), forward to the shared
+        // one-liner executor so both entry points behave identically — including the
+        // confirm-gate and setradius validation.
+        // The one-liner expects the admin-prefixed layout: args[0]="admin", args[1]=<job>, …
+        // so we prepend "admin" to the conversation's own args before delegating.
+        if (args.length > 0) {
+            String[] adminArgs = new String[args.length + 1];
+            adminArgs[0] = "admin";
+            System.arraycopy(args, 0, adminArgs, 1, args.length);
+            return JobAdminCommands.executeOneLiner(sender, adminArgs);
+        }
+        // No args — open the guided conversation as before.
         if (sender instanceof Conversable && sender.hasPermission(PermissionsUtil.getCreatePermission())) {
             conversationFactory.buildConversation((Conversable) sender).begin();
             return true;

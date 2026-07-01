@@ -502,6 +502,13 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("admin")) {
+                // If no job/action supplied (/job admin alone), open the guided conversation
+                // so the behaviour mirrors bare /jobadmin.
+                if (args.length == 1) {
+                    // Reuse the conversation entry-point (no args → guided flow).
+                    return new com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation()
+                            .onCommand(sender, command, label, new String[0]);
+                }
                 JobAdminCommands jAC = new JobAdminCommands();
                 return jAC.onCommand(sender, command, label, args);
             }
