@@ -603,12 +603,8 @@ public class JobCommand implements TabExecutor {
                         suggestions.add(s);
                     }
                 }
-                // inactive job names
-                for (String s : JobDatabase.getInactiveJobs().keySet()) {
-                    if (s.startsWith(prefix)) {
-                        suggestions.add(s);
-                    }
-                }
+                // Archived jobs are intentionally NOT suggested (they accumulate unboundedly);
+                // type an archived job's name to view its stats, or use /job archive.
                 // online player names
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     if (p.getName().startsWith(prefix)) {
@@ -636,11 +632,9 @@ public class JobCommand implements TabExecutor {
                     jobs.add(s);
                 }
             }
-            for (String s : JobDatabase.getInactiveJobs().keySet()) {
-                if (s.startsWith(prefix)) {
-                    jobs.add(s);
-                }
-            }
+            // Only ACTIVE jobs are suggested. Archived jobs are still viewable by typing the
+            // name (the /job info handler resolves inactive jobs too) or via /job archive —
+            // but suggesting every closed job would grow this list unboundedly over time.
             Set<String> jobsUnique = new HashSet<>(jobs);
             jobs.clear();
             jobs.addAll(jobsUnique);
