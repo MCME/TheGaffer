@@ -61,7 +61,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job archive [page]` | Browse finished (archived) jobs. |
 | `/job stats <job\|player>` | Show a job's recap, or a player's lifetime totals. |
 | `/job leaderboard [placed\|broke\|active]` | Top builders (alias: `/job top`). |
-| `/job border` | Toggle the client-side world border outlining your current job's build area (visual only). |
+| `/job border` | Toggle the particle outline marking your current job's build-area perimeter (purely visual, fly-through — no movement effect). |
 | `/jobchat [message]` | Toggle job-only chat, or send a one-off message to your job (alias: `/jc`). |
 
 ### For staff (permission: `thegaffer.create`, default **op**)
@@ -104,7 +104,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `discord.emoji` | Emoji prefix for Discord messages. |
 | `allowRolePing` | Discord roles pinged when a job is announced (e.g. `Jobber`). Only these roles are pinged — never `@everyone` or individual players. Empty/omit = announce with no ping. |
 | `glowing.enabled` / `glowing.helperColor` / `glowing.workerColor` | Team-glow toggle and colours. |
-| `showJobBorder` | Show a player a client-side world border outlining the job area while they're in a job (visual only; toggle per-player with `/job border`). |
+| `showJobBorder` | Show players a particle outline (`END_ROD`, white glow) tracing the job's build-area perimeter while they're in a job. Purely visual — no movement effect, players can cross freely. Toggle per-player with `/job border`. |
 | `unprotectedworlds` | Worlds where the map protection does not apply. |
 | `externalProtectionHandlers` | Allow/deny hooks for integrating other protection plugins. |
 
@@ -199,7 +199,7 @@ This branch is a substantial overhaul focused on stability, performance, securit
 - **UUID identity** — members, owners, and bans are keyed by UUID instead of name, closing a ban-evasion-by-rename hole and removing blocking name lookups.
 - **Statistics** — the full feature described above (new).
 - **Adventure UI** — chat output migrated to Adventure components with **clickable** actions (e.g. `/job check` entries join with one click).
-- **Visual job boundary** — workers see a per-player, client-side **world border** outlining the active job's build area (purely visual, walk-through; toggle with `/job border`).
+- **Visual job boundary** — workers see a per-player **particle outline** (`END_ROD`) tracing the active job's build-area perimeter. Purely visual — fly-through, zero movement effect. Toggle with `/job border`.
 - **Native `/jobchat`** — job-team chat without an external chat plugin.
 - **Performance** — the build-protection hot path and the player-move handler were optimised.
 - **Security & cleanup** — dead TeamSpeak code and a hard-coded password removed; the build is dependency-clean and reproducible from public repositories.
