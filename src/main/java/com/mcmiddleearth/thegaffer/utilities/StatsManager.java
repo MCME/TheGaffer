@@ -350,7 +350,7 @@ public class StatsManager {
         // Jobs list (distinct names, same canonical-match set as the aggregate)
         List<String> names = new ArrayList<>(new LinkedHashSet<>(a.getJobNames()));
         out = out.append(Component.newline())
-                .append(Component.text("Jobs: ", NamedTextColor.GRAY));
+                .append(Component.text("Job list: ", NamedTextColor.GRAY));
         if (names.isEmpty()) {
             out = out.append(Component.text("none", NamedTextColor.AQUA));
         } else {
