@@ -124,14 +124,16 @@ public final class JobBorderManager {
      * called on join, world-change, and job-join events.
      */
     public static void refresh(Player p) {
-        for (Job job : JobDatabase.getActiveJobs().values()) {
-            if (job.isPlayerWorking(p) && p.getWorld().equals(job.getBukkitWorld())) {
-                show(p, job);
-                return;
-            }
+        // Recognise the player's job whether they are the OWNER, a HELPER, or a WORKER
+        // (getJobWorking checks all three) — not just workers, so a staff member who
+        // started or helps a job still gets the boundary.
+        Job job = JobDatabase.getJobWorking(p);
+        if (job != null && p.getWorld().equals(job.getBukkitWorld())) {
+            show(p, job);
+        } else {
+            // Not in a job in this world — remove any stale border.
+            clear(p);
         }
-        // No matching job found — remove any stale border.
-        clear(p);
     }
 
     /**
@@ -140,15 +142,19 @@ public final class JobBorderManager {
      * @return {@code true} if the border is now <em>visible</em> (on), {@code false} if hidden
      */
     public static boolean toggle(Player p) {
-        if (disabled.contains(p.getUniqueId())) {
-            disabled.remove(p.getUniqueId());
-            refresh(p);          // re-apply if they are in a job
-            return true;         // border is now on (visible)
-        } else {
-            disabled.add(p.getUniqueId());
-            clear(p);            // hide immediately
-            return false;        // border is now off (hidden)
+        UUID id = p.getUniqueId();
+        if (shown.contains(id)) {
+            // Currently visible → hide it and remember the opt-out.
+            disabled.add(id);
+            clear(p);
+            return false;
         }
+        // Not currently visible → opt back in and try to show it. Returns true ONLY if a
+        // border was actually applied (i.e. the player is in a job in this world), so a
+        // player who isn't in a job doesn't get a misleading "shown".
+        disabled.remove(id);
+        refresh(p);
+        return shown.contains(id);
     }
 
     /**

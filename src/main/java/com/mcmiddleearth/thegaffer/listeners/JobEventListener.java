@@ -131,6 +131,12 @@ public class JobEventListener implements Listener {
                 Util.debug("Job-start sound suppressed for " + p.getName() + ": " + ex.getMessage());
             }
         }
+        // Show the build-area border to the owner right away. Workers get it on /job join; the
+        // owner isn't a "worker", so without this they'd not see it until a relog/world-change.
+        Player owner = Bukkit.getPlayer(job.getOwner());
+        if (owner != null) {
+            JobBorderManager.refresh(owner);
+        }
         if (job.isDiscordSend()) {
             // discord.channel is a DiscordSRV game-channel NAME, not a raw snowflake ID, so
             // getTextChannelById(...) returned null and the embed was silently skipped. Resolve it
