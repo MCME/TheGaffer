@@ -26,6 +26,7 @@ import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
+import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -336,6 +337,8 @@ public class JobCommand implements TabExecutor {
                             if (resp.isSuccessful()) {
                                 player.sendMessage(Component.text("You left the job ", NamedTextColor.GRAY)
                                         .append(Component.text(jobToLeave.getName(), NamedTextColor.AQUA)));
+                                // #15: Immediately revert to Survival if we switched this player to Creative.
+                                PlayerListener.revertToSurvivalIfSwitched(player);
                                 // Remove the job boundary border now that the player has left.
                                 JobBorderManager.clear(player);
                             } else {

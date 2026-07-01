@@ -17,6 +17,7 @@ package com.mcmiddleearth.thegaffer.storage;
 
 import com.mcmiddleearth.thegaffer.GafferResponses.*;
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
@@ -445,6 +446,8 @@ public class Job implements Listener {
             // #7: Tell the target immediately if they are online (mirrors removeWorker's AQUA notice to all).
             if (p.isOnline()) {
                 p.getPlayer().sendMessage(Component.text("You were removed from the " + name + " job.", NamedTextColor.RED));
+                // #15: Immediately revert to Survival if we switched this player to Creative.
+                PlayerListener.revertToSurvivalIfSwitched(p.getPlayer());
             }
         }
         setDirty(true);
