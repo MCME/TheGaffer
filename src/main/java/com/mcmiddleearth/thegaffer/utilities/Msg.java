@@ -49,4 +49,19 @@ public final class Msg {
                 .clickEvent(ClickEvent.suggestCommand(command))
                 .hoverEvent(HoverEvent.showText(Component.text(hover)));
     }
+
+    // #17 — shared job-chat formatter used by BOTH the sticky listener (JobChatListener)
+    // and the one-off command (/jc <message>, JobChatCommand) so they are byte-for-byte identical.
+    // Format: aqua "[Job] " + grey "senderName: " + body Component
+    /**
+     * Formats a job-chat message in the canonical channel style:
+     * {@code [Job] } in aqua, {@code senderName: } in grey, then {@code body}.
+     * Both the sticky listener and the one-off /jc command call this so they
+     * produce an identical result.
+     */
+    public static Component jobChat(String senderName, Component body) {
+        return Component.text("[Job] ", NamedTextColor.AQUA)
+                .append(Component.text(senderName + ": ", NamedTextColor.GRAY))
+                .append(body);
+    }
 }
