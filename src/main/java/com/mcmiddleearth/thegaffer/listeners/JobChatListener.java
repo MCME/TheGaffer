@@ -19,6 +19,7 @@ import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.JobChat;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -54,9 +55,8 @@ public class JobChatListener implements Listener {
                 sender.sendMessage(Component.text("You are not in a job - job chat turned off.", NamedTextColor.RED));
                 return;
             }
-            Component formatted = Component.text("[Job] ", NamedTextColor.AQUA)
-                    .append(Component.text(sender.getName() + ": ", NamedTextColor.GRAY))
-                    .append(body);
+            // #17 — use shared Msg.jobChat formatter (identical to the one-off /jc path)
+            Component formatted = Msg.jobChat(sender.getName(), body);
             for (Player member : job.getAllAsPlayersArray()) {
                 member.sendMessage(formatted);
             }

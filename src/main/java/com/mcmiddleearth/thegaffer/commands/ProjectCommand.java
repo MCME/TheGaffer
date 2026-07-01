@@ -8,6 +8,7 @@ import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
+import com.mcmiddleearth.thegaffer.utilities.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
@@ -113,11 +114,41 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
                 (Project p) -> placed.getOrDefault(Project.canonical(p.getName()), 0L)).reversed());
         Component out = Component.text("Projects (" + filter.name().toLowerCase() + "):", NamedTextColor.GRAY);
         if (shown.isEmpty()) {
-            out = out.append(Component.newline()).append(Component.text("  none", NamedTextColor.DARK_GRAY));
+            // #16 — contextual empty state: suggest /project create if the sender has permission, else plain text
+            out = out.append(Component.newline());
+            if (sender.hasPermission(PermissionsUtil.getProjectCreatePermission())
+                    || sender.hasPermission(PermissionsUtil.getProjectAdminPermission())) {
+                out = out.append(Msg.suggest(
+                        "  No projects yet — /project create <name> to start one.",
+                        NamedTextColor.DARK_GRAY,
+                        "/project create ",
+                        "Click to fill in /project create"));
+            } else {
+                out = out.append(Component.text("  No projects yet.", NamedTextColor.DARK_GRAY));
+            }
+        }
+        // #16 — compute job counts per project (scan active + inactive jobs once) for the list entries
+        Map<String, Integer> jobCounts = new HashMap<>();
+        for (Job j : JobDatabase.getActiveJobs().values()) {
+            String pn = j.getProjectname();
+            if (pn != null && !pn.equalsIgnoreCase("nothing")) {
+                jobCounts.merge(Project.canonical(pn), 1, Integer::sum);
+            }
+        }
+        for (Job j : JobDatabase.getInactiveJobs().values()) {
+            String pn = j.getProjectname();
+            if (pn != null && !pn.equalsIgnoreCase("nothing")) {
+                jobCounts.merge(Project.canonical(pn), 1, Integer::sum);
+            }
         }
         for (Project p : shown) {
+            int jobCount = jobCounts.getOrDefault(Project.canonical(p.getName()), 0);
+            // Mirror /job archive density: clickable name + lead + job count in grey
             out = out.append(Component.newline())
-                    .append(Msg.button(p.getName(), NamedTextColor.GOLD, "/project info " + p.getName(), "View project"));
+                    .append(Msg.button(p.getName(), NamedTextColor.GOLD, "/project info " + p.getName(), "View project"))
+                    .append(Component.text(
+                            " — " + Util.nameOf(p.getLead()) + " (" + jobCount + " job" + (jobCount == 1 ? "" : "s") + ")",
+                            NamedTextColor.GRAY));
         }
         sender.sendMessage(out);
         return true;
@@ -132,7 +163,17 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         Project p = ProjectDatabase.get(name);
         StatsManager.ProjectAggregate agg = StatsManager.getProjectAggregate(name);
         if (p != null) {
-            sender.sendMessage(StatsManager.renderProjectStats(p, agg));
+            Component infoMsg = StatsManager.renderProjectStats(p, agg);
+            // #16 — append a clickable "Attach a job" hint for viewers who can manage this project
+            if (canManage(sender, p)) {
+                infoMsg = infoMsg.append(Component.newline())
+                        .append(Msg.suggest(
+                                "  Attach a job: /project attach " + p.getName() + " <job>",
+                                NamedTextColor.DARK_GRAY,
+                                "/project attach " + p.getName() + " ",
+                                "Click to fill in /project attach"));
+            }
+            sender.sendMessage(infoMsg);
         } else if (!agg.isEmpty()) {
             sender.sendMessage(StatsManager.renderOrphanProjectStats(name, agg));
         } else {
@@ -279,10 +320,21 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         String jobName = joinFrom(args, m.next);
         Job job = findJob(jobName);
         if (job == null) { sender.sendMessage(Component.text("No job named '" + jobName + "'.", NamedTextColor.RED)); return true; }
+        // #9 — surface a "moved" message when this job was already attached to a different project
+        // so staff can see that the job is being stolen rather than freshly attached.
+        // The "nothing" sentinel is the value set by detach and by createjob when no project is chosen.
+        String prevProject = job.getProjectname();
+        boolean isReassigned = prevProject != null
+                && !prevProject.equalsIgnoreCase("nothing")
+                && !prevProject.equalsIgnoreCase(m.project.getName());
         job.setProjectname(m.project.getName());
         job.setDirty(true);
         JobDatabase.saveJob(job);
-        sender.sendMessage(Component.text("Attached job " + job.getName() + " to project " + m.project.getName() + ".", NamedTextColor.GREEN));
+        if (isReassigned) {
+            sender.sendMessage(Component.text("Moved job " + job.getName() + " from project " + prevProject + " to project " + m.project.getName() + ".", NamedTextColor.GREEN));
+        } else {
+            sender.sendMessage(Component.text("Attached job " + job.getName() + " to project " + m.project.getName() + ".", NamedTextColor.GREEN));
+        }
         return true;
     }
 

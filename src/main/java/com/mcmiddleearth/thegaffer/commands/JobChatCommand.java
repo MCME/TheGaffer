@@ -18,6 +18,7 @@ package com.mcmiddleearth.thegaffer.commands;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.JobChat;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -52,8 +53,8 @@ public class JobChatCommand implements CommandExecutor {
         }
         if (args.length > 0) {
             String message = String.join(" ", args);
-            job.sendToAll(Component.text("[Job] ", NamedTextColor.AQUA)
-                    .append(Component.text(player.getName() + ": " + message, NamedTextColor.WHITE)));
+            // #17 — use shared Msg.jobChat formatter so one-off /jc is byte-for-byte identical to sticky chat
+            job.sendToAll(Msg.jobChat(player.getName(), Component.text(message)));
             return true;
         }
         boolean on = JobChat.toggle(player.getName());
