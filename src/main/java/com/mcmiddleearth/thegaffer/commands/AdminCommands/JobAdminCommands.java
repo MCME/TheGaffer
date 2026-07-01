@@ -127,7 +127,7 @@ public class JobAdminCommands implements TabExecutor{
     }
 
     /** Sends a help line listing all known admin actions. */
-    private void sendAdminHelp(CommandSender cs) {
+    private static void sendAdminHelp(CommandSender cs) {
         String actions = String.join(", ", ADMIN_ACTIONS);
         cs.sendMessage(Component.text(
                 "Unknown admin action — try: " + actions + " · or /jobadmin for the guided version.",
@@ -136,17 +136,33 @@ public class JobAdminCommands implements TabExecutor{
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmd, String label, String[] args){
-        if(cs instanceof Player){
+        return executeOneLiner(cs, args);
+    }
+
+    /**
+     * Shared one-liner executor for both {@code /job admin …} and {@code /jobadmin …} (with args).
+     *
+     * <p>The {@code args} array must use the <em>admin-prefixed</em> layout:
+     * <pre>args[0]="admin"  args[1]=&lt;job&gt;  args[2]=&lt;action&gt;  args[3…]=extras</pre>
+     * {@code JobAdminConversation} prepends {@code "admin"} to its own arg array before calling
+     * here, so both entry points go through the same code path, including the confirm-gate and
+     * the {@code setradius} validation.</p>
+     *
+     * @param cs   the command sender (must be an online Player with create permission)
+     * @param args the admin-prefixed argument array
+     * @return always {@code true} (Bukkit contract)
+     */
+    public static boolean executeOneLiner(CommandSender cs, String[] args){
+        if(cs instanceof Player p){
             if(cs.hasPermission(PermissionsUtil.getCreatePermission())){
-                Player p = (Player) cs;
-                // Validate that arg[0] is "admin" (sanity-check: JobCommand routes this sub-command).
+                // Validate that arg[0] is "admin" (sanity-check: both entry points set this).
                 if (args.length >= 1 && !args[0].equalsIgnoreCase("admin")) {
-                    sendAdminHelp(p);
+                    sendAdminHelp(cs);
                     return true;
                 }
                 // Need at least: admin <job> <action>
                 if (args.length <= 2 || !Methods.containsKey(args[2].toLowerCase())) {  //job admin <job> <command> <args...>
-                    sendAdminHelp(p);                                                    //cmd arg 0 arg 1   arg 2    arg 3 -
+                    sendAdminHelp(cs);                                                   //cmd arg 0 arg 1   arg 2    arg 3 -
                     return true;
                 } else if(args.length>=Methods.get(args[2].toLowerCase())+3){
                     Job j = JobDatabase.getActiveJobs().get(args[1]);
@@ -164,10 +180,10 @@ public class JobAdminCommands implements TabExecutor{
                             boolean hasConfirm = args.length >= 4
                                     && "confirm".equalsIgnoreCase(args[3]);
                             if (!hasConfirm) {
-                                String msg = action + " wipes every worker's inventory."
+                                String msg = action + " teleports all online workers to your location."
                                         + " Re-run: /job admin " + args[1] + " " + action + " confirm";
-                                if (action.equals("bringall")) {
-                                    msg = action + " teleports all online workers to your location."
+                                if (action.equals("clearworkerinven")) {
+                                    msg = action + " wipes every worker's inventory."
                                             + " Re-run: /job admin " + args[1] + " " + action + " confirm";
                                 }
                                 p.sendMessage(Component.text(msg, NamedTextColor.YELLOW));
@@ -199,7 +215,7 @@ public class JobAdminCommands implements TabExecutor{
                     }
                 } else {
                     // Not enough arguments for the given action — show help.
-                    sendAdminHelp(p);
+                    sendAdminHelp(cs);
                     return true;
                 }
             } else {
@@ -228,7 +244,7 @@ public class JobAdminCommands implements TabExecutor{
      * @param jobName  the job name, substituted for {@code %job%} in response messages
      * @param nameArg  the player-name argument (args[3]), substituted for {@code %name%}; may be null
      */
-    private void sendResult(Player p, Object result, String jobName, String nameArg) {
+    private static void sendResult(Player p, Object result, String jobName, String nameArg) {
         if (result instanceof String s && !s.isBlank()) {
             // listworkers and any future String-returning methods: send raw text
             p.sendMessage(Component.text(s, NamedTextColor.AQUA));
