@@ -7,6 +7,7 @@ import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.storage.JobStatsStorage;
 import com.mcmiddleearth.thegaffer.storage.Project;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -54,6 +55,7 @@ public class StatsManager {
         private long firstStart = Long.MAX_VALUE;
         private long lastEnd;
         private final Map<UUID, JobStats.BuilderStat> perBuilder = new HashMap<>();
+        private final List<String> jobNames = new ArrayList<>();
 
         public ProjectAggregate(String project) { this.project = project; }
 
@@ -66,6 +68,7 @@ public class StatsManager {
         public long getFirstStart() { return firstStart == Long.MAX_VALUE ? 0L : firstStart; }
         public long getLastEnd() { return lastEnd; }
         public Map<UUID, JobStats.BuilderStat> getPerBuilder() { return java.util.Collections.unmodifiableMap(perBuilder); }
+        public List<String> getJobNames() { return java.util.Collections.unmodifiableList(jobNames); }
         public boolean isEmpty() { return jobCount == 0; }
     }
 
@@ -212,6 +215,7 @@ public class StatsManager {
 
     private static void foldIntoProject(ProjectAggregate agg, JobStats s) {
         agg.jobCount += 1;
+        agg.jobNames.add(s.getName());
         agg.builders.addAll(s.getParticipants());
         agg.placed += s.getTotalPlaced();
         agg.broke += s.getTotalBroke();
@@ -342,7 +346,24 @@ public class StatsManager {
                     .append(Component.text("Managers: ", NamedTextColor.GRAY))
                     .append(Component.text(mgrs.toString().trim(), NamedTextColor.AQUA));
         }
-        return out.append(Component.newline()).append(renderProjectTotals(a));
+        out = out.append(Component.newline()).append(renderProjectTotals(a));
+        // Jobs list (distinct names, same canonical-match set as the aggregate)
+        List<String> names = new ArrayList<>(new LinkedHashSet<>(a.getJobNames()));
+        out = out.append(Component.newline())
+                .append(Component.text("Jobs: ", NamedTextColor.GRAY));
+        if (names.isEmpty()) {
+            out = out.append(Component.text("none", NamedTextColor.AQUA));
+        } else {
+            for (int i = 0; i < names.size(); i++) {
+                String jn = names.get(i);
+                out = out.append(Msg.button(jn, NamedTextColor.AQUA,
+                        "/job info " + jn, "Click to view job info"));
+                if (i < names.size() - 1) {
+                    out = out.append(Component.text(", ", NamedTextColor.GRAY));
+                }
+            }
+        }
+        return out;
     }
 
     /** Renders stats for a project name that has records but no registry entry. */
