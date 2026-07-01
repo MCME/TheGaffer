@@ -17,6 +17,7 @@ package com.mcmiddleearth.thegaffer.storage;
 
 import com.mcmiddleearth.thegaffer.GafferResponses.*;
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
@@ -232,7 +233,16 @@ public class Job implements Listener {
                 .append(Component.newline())
                 .append(Component.text("Workers: ", NamedTextColor.GRAY))
                 .append(Component.text(String.valueOf(getWorkers().size()), NamedTextColor.AQUA))
-                .append(Component.newline())
+                .append(Component.newline());
+        if (projectname != null && !projectname.equalsIgnoreCase("nothing")) {
+            info = info
+                    .append(Component.text("Project: ", NamedTextColor.GRAY))
+                    .append(Msg.button(projectname, NamedTextColor.GOLD,
+                            "/project info " + projectname,
+                            "Click to view project info"))
+                    .append(Component.newline());
+        }
+        info = info
                 .append(Component.text("Started on: ", NamedTextColor.GRAY))
                 .append(Component.text(new Date(startTime).toGMTString(), NamedTextColor.AQUA))
                 .append(Component.newline());
