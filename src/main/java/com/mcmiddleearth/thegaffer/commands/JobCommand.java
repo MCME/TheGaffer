@@ -65,6 +65,20 @@ public class JobCommand implements TabExecutor {
         return (int) Math.ceil(inactiveCount / 8.0);
     }
 
+    /**
+     * Returns the player's role label in the given job: "Owner", "Helper", or "Worker".
+     * Pure function — no side effects, easily unit-tested.
+     */
+    static String roleOf(Job job, java.util.UUID uuid) {
+        if (uuid.equals(job.getOwner())) {
+            return "Owner";
+        }
+        if (job.getHelpers().contains(uuid)) {
+            return "Helper";
+        }
+        return "Worker";
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof ConsoleCommandSender && args.length > 0 && args[0].equalsIgnoreCase("reloadConfig")) {
@@ -281,6 +295,38 @@ public class JobCommand implements TabExecutor {
                 }
                 return true;
             }
+            if (args[0].equalsIgnoreCase("mine")) {
+                if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
+                    Job myJob = JobDatabase.getJobWorking(player);
+                    if (myJob != null) {
+                        String role = roleOf(myJob, player.getUniqueId());
+                        Component msg = Component.text(myJob.getName(), NamedTextColor.AQUA)
+                                .append(Component.text("  [" + role + "]", NamedTextColor.GRAY));
+                        if (myJob.isPaused()) {
+                            msg = msg.append(Component.text("  PAUSED", NamedTextColor.YELLOW));
+                        }
+                        if (myJob.isGlowing()) {
+                            msg = msg.append(Component.text("  glowing", NamedTextColor.GREEN));
+                        }
+                        msg = msg.append(Component.newline())
+                                .append(Msg.button("[warpto]", NamedTextColor.AQUA,
+                                        "/job warpto " + myJob.getName(), "Warp to " + myJob.getName()))
+                                .append(Component.text("  ", NamedTextColor.GRAY))
+                                .append(Msg.button("[leave]", NamedTextColor.RED,
+                                        "/job leave", "Leave this job"));
+                        player.sendMessage(msg);
+                    } else {
+                        player.sendMessage(
+                                Component.text("You are not currently in a job — ", NamedTextColor.GRAY)
+                                        .append(Msg.button("/job check", NamedTextColor.AQUA,
+                                                "/job check", "Run /job check"))
+                                        .append(Component.text(" to find one.", NamedTextColor.GRAY)));
+                    }
+                } else {
+                    player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
+                }
+                return true;
+            }
             if(args[0].equalsIgnoreCase("leave")){
                 if(player.hasPermission(PermissionsUtil.getJoinPermission())){
                     if (JobDatabase.getActiveJobs().size() > 0){
@@ -483,7 +529,7 @@ public class JobCommand implements TabExecutor {
             Player player = (Player) sender;
             Component help = Component.text("Job commands:", NamedTextColor.GRAY)
                     .append(Component.newline())
-                    .append(Component.text("  check, join, leave, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
+                    .append(Component.text("  check, join, leave, mine, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
             if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                 help = help.append(Component.newline())
                         .append(Component.text("  create, stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
@@ -499,6 +545,7 @@ public class JobCommand implements TabExecutor {
         // B4 — no-arg subcommands: return empty list so Bukkit doesn't show player names
         if (args[0].equalsIgnoreCase("check")
                 || args[0].equalsIgnoreCase("leave")
+                || args[0].equalsIgnoreCase("mine")
                 || args[0].equalsIgnoreCase("border")
                 || args[0].equalsIgnoreCase("listen")
                 || args[0].equalsIgnoreCase("prep")) {
@@ -625,6 +672,7 @@ public class JobCommand implements TabExecutor {
         actions.add("join");
         actions.add("check");
         actions.add("leave");
+        actions.add("mine");
         actions.add("stats");
         actions.add("leaderboard");
         actions.add("top");
