@@ -174,7 +174,7 @@ public class ProtectionListener implements Listener {
 
         if (item != null && event.hasBlock()) {
             if (item.getType().equals(Material.BONE_MEAL)) {
-                if (event.getClickedBlock().getType() == Material.GRASS
+                if (event.getClickedBlock().getType() == Material.SHORT_GRASS
                         || event.getClickedBlock().getType() == Material.SPRUCE_SAPLING
                         || event.getClickedBlock().getType() == Material.ACACIA_SAPLING
                         || event.getClickedBlock().getType() == Material.BIRCH_SAPLING

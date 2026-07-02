@@ -1,7 +1,7 @@
 package com.mcmiddleearth.thegaffer.commands;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
+import org.mockbukkit.mockbukkit.MockBukkit;
+import org.mockbukkit.mockbukkit.ServerMock;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Project;
 import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;

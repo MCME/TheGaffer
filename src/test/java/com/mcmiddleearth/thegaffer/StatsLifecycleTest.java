@@ -1,8 +1,8 @@
 package com.mcmiddleearth.thegaffer;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
+import org.mockbukkit.mockbukkit.MockBukkit;
+import org.mockbukkit.mockbukkit.ServerMock;
+import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import com.mcmiddleearth.thegaffer.storage.*;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import org.junit.jupiter.api.*;
