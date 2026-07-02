@@ -18,12 +18,7 @@ package com.mcmiddleearth.thegaffer.integrations;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.utilities.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
-import org.dynmap.DynmapCommonAPI;
-import org.dynmap.markers.AreaMarker;
-import org.dynmap.markers.MarkerAPI;
-import org.dynmap.markers.MarkerSet;
 
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Logger;
@@ -33,8 +28,24 @@ import java.util.logging.Logger;
  * whose web map is served by <a href="https://github.com/JLyne/LiveAtlas">LiveAtlas</a>.
  *
  * <p>All methods are static and no-op silently when Dynmap is absent or its
- * MarkerAPI is unavailable. Exceptions from the Dynmap API are caught and logged
+ * MarkerAPI is unavailable. Throwables from the Dynmap API are caught and logged
  * so they can never propagate into job lifecycle code.
+ *
+ * <h3>Soft-dependency class-load isolation (important)</h3>
+ * This OUTER class references <b>no Dynmap type</b> in any field, parameter, or
+ * return type. That guarantees loading {@code JobMapIntegration} — which happens
+ * as soon as {@code TheGaffer.onEnable()} calls {@link #init(Plugin)} — never
+ * triggers resolution of any {@code org.dynmap.*} class descriptor. On a server
+ * <i>without</i> Dynmap, such resolution would throw {@link NoClassDefFoundError}
+ * (an {@link Error}, not caught by {@code catch (Exception)}, and it would fire
+ * during class-load before any method body runs), crashing the plugin on enable.
+ *
+ * <p>All Dynmap-typed state and every Dynmap API call live in the nested
+ * {@link DynmapMarkers} class. That class is only <b>class-loaded</b> the first
+ * time it is instantiated ({@code new DynmapMarkers()} in {@link #init}), which
+ * happens only <i>after</i> {@code Bukkit.getPluginManager().getPlugin("dynmap")}
+ * confirms Dynmap is present and enabled. Every boundary that touches the inner
+ * class is wrapped in {@code catch (Throwable)} as a backstop.
  *
  * <h3>Dependency strategy</h3>
  * {@code DynmapCoreAPI} is declared as a {@code provided} compile dependency
@@ -55,14 +66,8 @@ public final class JobMapIntegration {
     /** Human-readable label shown in the LiveAtlas/Dynmap layer selector. */
     private static final String MARKER_SET_LABEL = "Jobs";
 
-    /** Marker id prefix — actual id is the job name (sanitised). */
+    /** Marker id suffix — actual id is the sanitised job name + this. */
     private static final String AREA_MARKER_SUFFIX = "_job";
-
-    /** Null when Dynmap is absent/disabled; non-null means ready. */
-    private static MarkerAPI markerAPI = null;
-
-    /** The MarkerSet that holds all job AreaMarkers. */
-    private static MarkerSet markerSet = null;
 
     /**
      * A small fixed palette for project colours (fill, in 0xRRGGBB).
@@ -82,6 +87,13 @@ public final class JobMapIntegration {
     /** Default colour for jobs with no project (grey). */
     private static final int DEFAULT_COLOUR = 0x888888;
 
+    /**
+     * Handle to the Dynmap-touching state. Typed as the nested class (NOT any
+     * Dynmap type), so the outer class descriptor never references org.dynmap.*.
+     * Null when Dynmap is absent/disabled → all methods no-op.
+     */
+    private static DynmapMarkers handle = null;
+
     private JobMapIntegration() { /* utility class */ }
 
     // -------------------------------------------------------------------------
@@ -92,56 +104,38 @@ public final class JobMapIntegration {
      * Initialises the Dynmap integration. Call from
      * {@link com.mcmiddleearth.thegaffer.TheGaffer#onEnable()} after all
      * other setup is done. If Dynmap is absent or its MarkerAPI is unavailable
-     * the integration is marked disabled and all other methods become no-ops.
+     * the integration is left disabled and all other methods become no-ops.
      *
      * @param plugin  the TheGaffer plugin instance (used only for logging)
      */
     public static void init(Plugin plugin) {
-        markerAPI = null;
-        markerSet  = null;
+        handle = null;
+        // Gate on the Bukkit plugin lookup — no Dynmap class is touched here.
+        Plugin dyn = Bukkit.getPluginManager().getPlugin("dynmap");
+        if (dyn == null || !dyn.isEnabled()) {
+            Util.info("Dynmap not present — web-map integration disabled.");
+            return;
+        }
+        // First (and only) touch of any org.dynmap.* class is inside DynmapMarkers,
+        // instantiated here only after Dynmap is confirmed present. catch Throwable
+        // covers NoClassDefFoundError / LinkageError from an API mismatch.
         try {
-            Plugin dyn = Bukkit.getPluginManager().getPlugin("dynmap");
-            if (dyn == null || !dyn.isEnabled()) {
-                Util.info("Dynmap not present — web-map integration disabled.");
-                return;
-            }
-            if (!(dyn instanceof DynmapCommonAPI)) {
-                Util.info("Dynmap plugin found but does not implement DynmapCommonAPI — web-map integration disabled.");
-                return;
-            }
-            DynmapCommonAPI api = (DynmapCommonAPI) dyn;
-            markerAPI = api.getMarkerAPI();
-            if (markerAPI == null) {
-                Util.info("Dynmap MarkerAPI is null — web-map integration disabled.");
-                return;
-            }
-            // Reuse an existing MarkerSet or create a new one.
-            markerSet = markerAPI.getMarkerSet(MARKER_SET_ID);
-            if (markerSet == null) {
-                markerSet = markerAPI.createMarkerSet(
-                        MARKER_SET_ID, MARKER_SET_LABEL,
-                        null,   // allowed icons (null = all)
-                        false); // not persistent (we rebuild on each enable)
+            DynmapMarkers markers = new DynmapMarkers();
+            if (markers.setup(dyn)) {
+                handle = markers;
+                Util.info("Dynmap web-map integration enabled (MarkerSet: " + MARKER_SET_ID + ").");
             } else {
-                markerSet.setMarkerSetLabel(MARKER_SET_LABEL);
+                Util.info("Dynmap present but MarkerAPI/MarkerSet unavailable — web-map integration disabled.");
             }
-            if (markerSet == null) {
-                Logger.getLogger("TheGaffer").warning(
-                        "[JobMapIntegration] Could not create/retrieve MarkerSet — web-map integration disabled.");
-                markerAPI = null;
-                return;
-            }
-            Util.info("Dynmap web-map integration enabled (MarkerSet: " + MARKER_SET_ID + ").");
-        } catch (Exception ex) {
+        } catch (Throwable t) {
             Logger.getLogger("TheGaffer").warning(
-                    "[JobMapIntegration] init() threw an exception — web-map integration disabled: " + ex);
-            markerAPI = null;
-            markerSet  = null;
+                    "[JobMapIntegration] init() failed — web-map integration disabled: " + t);
+            handle = null;
         }
     }
 
     // -------------------------------------------------------------------------
-    // Public API
+    // Public API — all signatures are Dynmap-free; delegate to the handle.
     // -------------------------------------------------------------------------
 
     /**
@@ -149,44 +143,14 @@ public final class JobMapIntegration {
      * if the job's world is not loaded yet (silently no-ops if so).
      */
     public static void showJob(Job job) {
-        if (!isEnabled()) { return; }
+        if (handle == null || job == null) { return; }
         try {
-            String markerId = markerId(job);
-            World world = job.getBukkitWorld();
+            String world = worldName(job);
             if (world == null) { return; } // world not loaded
-
-            // Delete any stale marker first (e.g. if radius/warp changed).
-            AreaMarker existing = markerSet.findAreaMarker(markerId);
-            if (existing != null) {
-                existing.deleteMarker();
-            }
-
-            double[] corners = corners(job);
-            double[] xCorners = { corners[0], corners[1], corners[1], corners[0] };
-            double[] zCorners = { corners[2], corners[2], corners[3], corners[3] };
-
-            AreaMarker marker = markerSet.createAreaMarker(
-                    markerId,
-                    job.getName(),      // label (shown in popup header)
-                    true,               // markup (allow HTML in description)
-                    world.getName(),
-                    xCorners,
-                    zCorners,
-                    false               // not persistent
-            );
-            if (marker == null) { return; }
-
-            int colour = colourFor(job);
-            // Fill: semi-transparent (opacity 0.3 = ~77 out of 255, encoded as 0-1 float)
-            marker.setFillStyle(0.3, colour);
-            // Outline: fully opaque, 2px weight
-            marker.setLineStyle(2, 1.0, colour);
-            // HTML popup description
-            marker.setDescription(buildDescription(job));
-
-        } catch (Exception ex) {
-            Logger.getLogger("TheGaffer").warning(
-                    "[JobMapIntegration] showJob(" + job.getName() + ") failed: " + ex);
+            handle.show(markerId(job), job.getName(), world,
+                    corners(job), colourFor(job), buildDescription(job));
+        } catch (Throwable t) {
+            Util.debug("[JobMapIntegration] showJob(" + job.getName() + ") failed: " + t);
         }
     }
 
@@ -194,15 +158,11 @@ public final class JobMapIntegration {
      * Removes the AreaMarker for a job that has ended.
      */
     public static void removeJob(Job job) {
-        if (!isEnabled()) { return; }
+        if (handle == null || job == null) { return; }
         try {
-            AreaMarker marker = markerSet.findAreaMarker(markerId(job));
-            if (marker != null) {
-                marker.deleteMarker();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger("TheGaffer").warning(
-                    "[JobMapIntegration] removeJob(" + job.getName() + ") failed: " + ex);
+            handle.remove(markerId(job));
+        } catch (Throwable t) {
+            Util.debug("[JobMapIntegration] removeJob(" + job.getName() + ") failed: " + t);
         }
     }
 
@@ -211,17 +171,16 @@ public final class JobMapIntegration {
      * Delegates to {@link #showJob(Job)} which already handles create-or-replace.
      */
     public static void updateJob(Job job) {
-        if (!isEnabled()) { return; }
-        showJob(job); // showJob deletes existing and recreates
+        showJob(job); // show() deletes any existing marker first, then recreates
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
+    // Pure helpers (NO Dynmap types) — exercised by JobMapIntegrationTest.
     // -------------------------------------------------------------------------
 
     /** Returns {@code true} when Dynmap is present and the MarkerSet is ready. */
     public static boolean isEnabled() {
-        return markerSet != null;
+        return handle != null;
     }
 
     /**
@@ -268,7 +227,13 @@ public final class JobMapIntegration {
                 + "<i>/job join " + htmlEscape(job.getName()) + "</i>";
     }
 
-    private static String markerId(Job job) {
+    /** The job's world name, or null if the world is not loaded. Bukkit-only, no Dynmap. */
+    private static String worldName(Job job) {
+        org.bukkit.World w = job.getBukkitWorld();
+        return (w == null) ? null : w.getName();
+    }
+
+    static String markerId(Job job) {
         // Dynmap marker ids must be short and not contain special characters.
         // Sanitise: lowercase, strip everything except letters/digits/hyphen/underscore.
         return job.getName().toLowerCase().replaceAll("[^a-z0-9_\\-]", "_") + AREA_MARKER_SUFFIX;
@@ -277,5 +242,80 @@ public final class JobMapIntegration {
     private static String htmlEscape(String s) {
         if (s == null) { return ""; }
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    // -------------------------------------------------------------------------
+    // Dynmap-typed inner class — LOADED ONLY WHEN INSTANTIATED (Dynmap present).
+    //
+    // Every org.dynmap.* reference in this whole file is confined here. Because
+    // the JVM resolves a class's referenced-type descriptors lazily at first
+    // active use, and the outer class never names any org.dynmap type, this
+    // nested class is not resolved until `new DynmapMarkers()` runs in init() —
+    // which only happens after getPlugin("dynmap") confirms Dynmap is present.
+    // -------------------------------------------------------------------------
+    private static final class DynmapMarkers {
+
+        private org.dynmap.markers.MarkerAPI markerAPI;
+        private org.dynmap.markers.MarkerSet markerSet;
+
+        /**
+         * Obtains the Dynmap MarkerAPI and the shared "Jobs" MarkerSet.
+         *
+         * @param dyn  the Dynmap plugin (already confirmed present + enabled)
+         * @return true if the MarkerAPI and MarkerSet are ready; false otherwise
+         */
+        boolean setup(Plugin dyn) {
+            if (!(dyn instanceof org.dynmap.DynmapCommonAPI)) {
+                return false;
+            }
+            org.dynmap.DynmapCommonAPI api = (org.dynmap.DynmapCommonAPI) dyn;
+            markerAPI = api.getMarkerAPI();
+            if (markerAPI == null) {
+                return false;
+            }
+            markerSet = markerAPI.getMarkerSet(MARKER_SET_ID);
+            if (markerSet == null) {
+                markerSet = markerAPI.createMarkerSet(
+                        MARKER_SET_ID, MARKER_SET_LABEL,
+                        null,   // allowed icons (null = all)
+                        false); // not persistent (we rebuild on each enable)
+            } else {
+                markerSet.setMarkerSetLabel(MARKER_SET_LABEL);
+            }
+            return markerSet != null;
+        }
+
+        /** Creates or replaces the AreaMarker for a job. */
+        void show(String markerId, String label, String world,
+                  double[] corners, int colour, String description) {
+            // Delete any stale marker first (e.g. if radius/warp changed).
+            org.dynmap.markers.AreaMarker existing = markerSet.findAreaMarker(markerId);
+            if (existing != null) {
+                existing.deleteMarker();
+            }
+            double[] xCorners = { corners[0], corners[1], corners[1], corners[0] };
+            double[] zCorners = { corners[2], corners[2], corners[3], corners[3] };
+            org.dynmap.markers.AreaMarker marker = markerSet.createAreaMarker(
+                    markerId,
+                    label,   // shown in popup header
+                    true,    // markup (allow HTML in description)
+                    world,
+                    xCorners,
+                    zCorners,
+                    false);  // not persistent
+            if (marker == null) { return; }
+            // Fill: semi-transparent (opacity 0.3); outline: fully opaque, 2px weight.
+            marker.setFillStyle(0.3, colour);
+            marker.setLineStyle(2, 1.0, colour);
+            marker.setDescription(description);
+        }
+
+        /** Deletes the AreaMarker for a job by its id, if present. */
+        void remove(String markerId) {
+            org.dynmap.markers.AreaMarker marker = markerSet.findAreaMarker(markerId);
+            if (marker != null) {
+                marker.deleteMarker();
+            }
+        }
     }
 }
