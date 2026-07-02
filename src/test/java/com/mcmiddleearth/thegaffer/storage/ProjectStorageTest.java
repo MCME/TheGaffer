@@ -1,6 +1,6 @@
 package com.mcmiddleearth.thegaffer.storage;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
+import org.mockbukkit.mockbukkit.MockBukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.*;
 import java.util.Arrays;

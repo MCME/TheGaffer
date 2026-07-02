@@ -1,6 +1,6 @@
 package com.mcmiddleearth.thegaffer.utilities;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
+import org.mockbukkit.mockbukkit.MockBukkit;
 import org.bukkit.ChatColor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

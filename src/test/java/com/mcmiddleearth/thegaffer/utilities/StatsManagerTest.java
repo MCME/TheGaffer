@@ -1,7 +1,7 @@
 package com.mcmiddleearth.thegaffer.utilities;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
+import org.mockbukkit.mockbukkit.MockBukkit;
+import org.mockbukkit.mockbukkit.ServerMock;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import org.junit.jupiter.api.AfterEach;
