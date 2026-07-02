@@ -114,7 +114,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 
 Both are **soft dependencies** — TheGaffer runs fine without them; the relevant feature simply no-ops if the plugin is absent.
 
-- **DiscordSRV** — posts a **rich embed** announcement (with relative timestamps that localize to each viewer) to a Discord channel when a job **starts** (pinging the roles in `allowRolePing` — e.g. a `Jobber` opt-in role — never `@everyone`), and a **recap** when it ends (builders, blocks placed/broken, duration). Controlled per-job by the "send to Discord" flag and globally by `discord.channel`.
+- **DiscordSRV** — posts a **rich embed** announcement (with relative timestamps that localize to each viewer) to a Discord channel when a job **starts** (pinging the roles in `allowRolePing` — e.g. a `Jobber` opt-in role — never `@everyone`), and a **rich embed recap** when it ends (duration, blocks placed/broken, builder count — inline fields; muted red colour). Both embeds fall back to plain-text automatically if the bot lacks the "Embed Links" permission in the channel. Controlled per-job by the "send to Discord" flag and globally by `discord.channel`.
 - **MCME-Connect** — broadcasts job-start announcements **across the BungeeCord network**, so players on other servers see that a job has started. Falls back to a local broadcast when not present.
 
 ---
