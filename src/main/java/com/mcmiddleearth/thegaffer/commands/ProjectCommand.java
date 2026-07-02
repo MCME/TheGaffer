@@ -17,11 +17,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class ProjectCommand implements CommandExecutor, TabCompleter {
@@ -32,7 +35,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /project <create|list|info|setdescription|setgoal|setlead|addmanager|removemanager|complete|archive|reopen|attach|detach|delete>", NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("Usage: /project <create|list|info|setdescription|setgoal|setlead|addmanager|removemanager|complete|archive|reopen|attach|detach|delete|announce|export>", NamedTextColor.GRAY));
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -51,6 +54,8 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             case "attach":          return attach(sender, args);
             case "detach":          return detach(sender, args);
             case "delete":          return delete(sender, args);
+            case "announce":        return announce(sender, args);
+            case "export":          return export(sender, args);
             default:
                 sender.sendMessage(Component.text("Unknown subcommand: " + sub + " — type /project for the list.", NamedTextColor.RED));
                 return true;
@@ -377,6 +382,77 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // ---- Batch P: announce / export ----
+
+    /**
+     * /project announce <name> <message>
+     * Sends a prefixed message to every online member (owner + helpers + workers, deduped by UUID)
+     * of every active job whose projectname matches this project (canonical). Reports the count.
+     */
+    private boolean announce(CommandSender sender, String[] args) {
+        Match m = matchProject(args, 1);
+        if (m == null) { return noProject(sender); }
+        if (!canManage(sender, m.project)) { return denyManage(sender); }
+        if (m.next >= args.length) {
+            sender.sendMessage(Component.text("Usage: /project announce <name> <message>", NamedTextColor.RED));
+            return true;
+        }
+        String message = joinFrom(args, m.next);
+        String projectName = m.project.getName();
+        String canon = Project.canonical(projectName);
+
+        // Collect every online member of every active job belonging to this project (dedupe by UUID).
+        Set<UUID> seen = new HashSet<>();
+        List<org.bukkit.entity.Player> recipients = new ArrayList<>();
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            String pn = job.getProjectname();
+            if (pn == null || !Project.canonical(pn).equals(canon)) { continue; }
+            // owner
+            org.bukkit.entity.Player owner = org.bukkit.Bukkit.getPlayer(job.getOwner());
+            if (owner != null && seen.add(job.getOwner())) { recipients.add(owner); }
+            // helpers
+            for (UUID hId : job.getHelpers()) {
+                org.bukkit.entity.Player hp = org.bukkit.Bukkit.getPlayer(hId);
+                if (hp != null && seen.add(hId)) { recipients.add(hp); }
+            }
+            // workers
+            for (UUID wId : job.getWorkers()) {
+                org.bukkit.entity.Player wp = org.bukkit.Bukkit.getPlayer(wId);
+                if (wp != null && seen.add(wId)) { recipients.add(wp); }
+            }
+        }
+
+        Component prefix = Component.text("[Project " + projectName + "] ", NamedTextColor.LIGHT_PURPLE);
+        Component body   = Component.text(message, NamedTextColor.WHITE);
+        Component full   = prefix.append(body);
+        for (org.bukkit.entity.Player p : recipients) {
+            p.sendMessage(full);
+        }
+        sender.sendMessage(Component.text(
+                "Announced to " + recipients.size() + " player" + (recipients.size() == 1 ? "" : "s") + " on project " + projectName + ".",
+                NamedTextColor.GREEN));
+        return true;
+    }
+
+    /**
+     * /project export <name>
+     * Writes a CSV of all finished stats records for this project to
+     * plugins/TheGaffer/stats/export-<safeProjectName>-<timestamp>.csv and reports the filename.
+     */
+    private boolean export(CommandSender sender, String[] args) {
+        Match m = matchProject(args, 1);
+        if (m == null) { return noProject(sender); }
+        if (!canManage(sender, m.project)) { return denyManage(sender); }
+
+        File out = StatsManager.exportProject(m.project.getName(), System.currentTimeMillis());
+        if (out == null) {
+            sender.sendMessage(Component.text("Export failed — check server logs.", NamedTextColor.RED));
+        } else {
+            sender.sendMessage(Component.text("Exported to: " + out.getName(), NamedTextColor.GREEN));
+        }
+        return true;
+    }
+
     // ---- shared helpers ----
 
     private boolean deny(CommandSender s) {
@@ -416,7 +492,8 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         List<String> out = new ArrayList<>();
         if (args.length == 1) {
             for (String s : new String[]{"create", "list", "info", "setdescription", "setgoal", "setlead",
-                    "addmanager", "removemanager", "complete", "archive", "reopen", "attach", "detach", "delete"}) {
+                    "addmanager", "removemanager", "complete", "archive", "reopen", "attach", "detach", "delete",
+                    "announce", "export"}) {
                 if (s.startsWith(args[0].toLowerCase())) { out.add(s); }
             }
             return out;

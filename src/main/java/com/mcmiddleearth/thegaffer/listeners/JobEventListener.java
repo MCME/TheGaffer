@@ -22,7 +22,10 @@ import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
+import com.mcmiddleearth.thegaffer.storage.Project;
+import com.mcmiddleearth.thegaffer.storage.ProjectDatabase;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
 import com.mcmiddleearth.thegaffer.utilities.Util;
@@ -47,6 +50,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class JobEventListener implements Listener {
@@ -103,6 +107,51 @@ public class JobEventListener implements Listener {
                         + "' not found — job-end embed not sent.");
             }
         }
+
+        // Batch P — Completion prompt: if this job belonged to a project, check whether all
+        // active jobs in the project have now finished. If yes and the project is still ACTIVE,
+        // notify the lead (if online) with a clickable [Complete <project>] button.
+        maybePromptProjectCompletion(job);
+    }
+
+    /**
+     * Called after a job ends. If the job had a project, counts remaining active jobs in that
+     * project. If the count is zero and the project is still ACTIVE, sends the project lead
+     * (if online) a clickable completion prompt. Does nothing if any guard condition fails.
+     */
+    private void maybePromptProjectCompletion(Job endedJob) {
+        String projectName = endedJob.getProjectname();
+        if (projectName == null || projectName.equalsIgnoreCase("nothing")) { return; }
+        Project project = ProjectDatabase.get(projectName);
+        if (project == null) { return; }
+        if (project.getStatus() != Project.Status.ACTIVE) { return; }
+
+        // Count remaining active jobs for this project (the ended job is already deactivated
+        // in JobDatabase.deactivateJob before this event fires, so we just count all active ones).
+        String canon = Project.canonical(project.getName());
+        long remaining = 0;
+        for (Job active : JobDatabase.getActiveJobs().values()) {
+            String pn = active.getProjectname();
+            if (pn != null && Project.canonical(pn).equals(canon)) {
+                remaining++;
+            }
+        }
+        if (remaining > 0) { return; } // still more active jobs — do not prompt yet
+
+        UUID leadId = project.getLead();
+        if (leadId == null) { return; }
+        Player lead = Bukkit.getPlayer(leadId);
+        if (lead == null) { return; } // offline — do nothing
+
+        Component prompt = Component.text("All jobs for project ", NamedTextColor.GOLD)
+                .append(Component.text(project.getName(), NamedTextColor.AQUA))
+                .append(Component.text(" have finished. ", NamedTextColor.GOLD))
+                .append(Msg.button(
+                        "[Complete " + project.getName() + "]",
+                        NamedTextColor.GREEN,
+                        "/project complete " + project.getName(),
+                        "Click to mark project " + project.getName() + " as complete"));
+        lead.sendMessage(prompt);
     }
 
     @EventHandler

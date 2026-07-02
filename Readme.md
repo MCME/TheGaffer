@@ -164,6 +164,8 @@ A **Project** (e.g. "Minas Tirith") is a named, managed collection of jobs, run 
 | `/project complete\|archive\|reopen <name>` | lead/manager | Change lifecycle status. |
 | `/project attach <name> <job>` / `/project detach <job>` | lead/manager | Link / unlink a job. |
 | `/project delete <name>` | lead / admin | Remove the project record (job & stats history keep the name). |
+| `/project announce <name> <message>` | lead/manager | Send a prefixed message to every online member of every active job in this project (deduped). |
+| `/project export <name>` | lead/manager | Export stats for all jobs in this project to `stats/export-<name>-<timestamp>.csv`. |
 
 At `/createjob`, if any active projects exist you'll be asked which one this job belongs to (or `nothing`).
 
