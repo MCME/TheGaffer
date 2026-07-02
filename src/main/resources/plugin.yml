@@ -9,7 +9,7 @@ softdepend: [DiscordSRV, MCME-Connect, dynmap]
 author: meggawatts
 commands:
   createjob:
-    description: Launches a job creation conversation can be done with /job start or /job create
+    description: Opens the job creation form (Dialog). Also available as /job start or /job create
     usage: |
            /createjob
   job:
