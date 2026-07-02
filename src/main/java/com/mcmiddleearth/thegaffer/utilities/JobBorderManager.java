@@ -61,8 +61,10 @@ public final class JobBorderManager {
     /** Players currently showing the particle border, mapped to the job whose bounds to draw. */
     private static final Map<UUID, Job> active = new HashMap<>();
 
-    /** Render range: only draw edge segments within this many blocks of the player. */
-    static final double RENDER_RANGE = 32.0;
+    /** Render range: only draw edge segments within this many blocks of the player. Large enough
+     *  that a player standing at the job's centre (the warp, where /createjob drops them) still sees
+     *  the walls of a typical job; bigger jobs reveal each wall as the player approaches it. */
+    static final double RENDER_RANGE = 64.0;
 
     /** Sample step along each edge (blocks). */
     static final double STEP = 2.0;
@@ -216,11 +218,14 @@ public final class JobBorderManager {
                              wy += HEIGHT_STEP) {
                             // END_ROD: white glow, no data object, exists in all supported
                             // API versions (1.9+). Safe on 1.19-compiled / 26.2-runtime.
+                            // Per-player render. NOTE: Player.spawnParticle has no "force" flag in
+                            // the 1.19 API, so a client running reduced ("Minimal"/"Decreased")
+                            // particle settings may not see END_ROD — default/"All" settings do.
                             p.spawnParticle(Particle.END_ROD,
                                     new Location(p.getWorld(), wx, wy, wz),
-                                    1,          // count
+                                    1,              // count
                                     0.0, 0.0, 0.0,  // no spread
-                                    0.0);       // no extra speed
+                                    0.0);           // no extra speed
                         }
                     }
                 }
