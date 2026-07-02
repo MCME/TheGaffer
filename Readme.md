@@ -79,7 +79,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 
 ### `/job admin <job> <action>` subcommands
 
-`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `setwarp`, `setradius <n>`, `clearworkerinven`, `bringall`, `listworkers`.
+`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `setwarp`, `setradius <n>`, `clearworkerinven`, `teleportall`, `teleport <player>`, `listworkers`.
 
 ---
 

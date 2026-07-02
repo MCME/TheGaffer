@@ -228,6 +228,26 @@ public class GafferResponses {
         }
     }
 
+    /** Success response for the {@code teleport <player>} admin action. */
+    public static final class TeleportWorkerResponse implements GafferResponse {
+
+        private final String playerName;
+
+        public TeleportWorkerResponse(String playerName) {
+            this.playerName = playerName;
+        }
+
+        @Override
+        public String getMessage() {
+            return "Teleported " + playerName + " to your location.";
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return true;
+        }
+    }
+
     public interface GafferResponse {
 
         String getMessage();
