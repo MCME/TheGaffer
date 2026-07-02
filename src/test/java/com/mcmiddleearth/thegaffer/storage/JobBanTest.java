@@ -13,6 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verifies A1 fix: unbanWorker correctly removes a banned player and returns
@@ -58,5 +59,34 @@ class JobBanTest {
 
         assertEquals(BanWorkerResponse.ALREADY_UNBANNED, result,
                 "unbanWorker should return ALREADY_UNBANNED for a player who was never banned");
+    }
+
+    @Test
+    void banWorker_owner_isRejected() {
+        Job job = new Job();
+        PlayerMock owner = server.addPlayer();
+        job.setOwner(owner.getUniqueId());
+
+        BanWorkerResponse result = job.banWorker(List.of((OfflinePlayer) owner));
+
+        assertEquals(BanWorkerResponse.CANNOT_BAN_OWNER, result,
+                "the owner can never be banned from their own job");
+        assertFalse(job.getBannedWorkers().contains(owner.getUniqueId()),
+                "the owner's UUID must not be added to the banned list");
+    }
+
+    @Test
+    void banWorker_nonOwner_succeeds() {
+        Job job = new Job();
+        PlayerMock owner = server.addPlayer();
+        PlayerMock worker = server.addPlayer();
+        job.setOwner(owner.getUniqueId());
+
+        BanWorkerResponse result = job.banWorker(List.of((OfflinePlayer) worker));
+
+        assertEquals(BanWorkerResponse.BAN_SUCCESS, result,
+                "a non-owner should still be bannable");
+        assertTrue(job.getBannedWorkers().contains(worker.getUniqueId()),
+                "the banned worker's UUID should be on the banned list");
     }
 }

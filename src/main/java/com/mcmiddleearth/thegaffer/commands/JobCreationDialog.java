@@ -32,6 +32,7 @@ import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
@@ -40,6 +41,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 /**
@@ -52,7 +54,13 @@ import org.bukkit.entity.Player;
  * in {@link #onSubmit} and handed to the shared {@link JobCreationService}, which
  * fires the same job-start pipeline (broadcast, Discord, border, map) as before.
  */
-public class JobCreationDialog implements CommandExecutor {
+public class JobCreationDialog implements CommandExecutor, TabCompleter {
+
+    /** {@code /createjob} takes no arguments — return no suggestions (not player names). */
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        return Collections.emptyList();
+    }
 
     private static final String KEY_NAME = "name";
     private static final String KEY_DESC = "description";
