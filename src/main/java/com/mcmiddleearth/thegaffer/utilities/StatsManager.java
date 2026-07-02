@@ -439,11 +439,40 @@ public class StatsManager {
      */
     public static File exportAll(long stamp) {
         File out = new File(statsDir(), "export-" + stamp + ".csv");
+        return writeCsvFile(out, JobStatsStorage.readAll(statsDir()));
+    }
+
+    /**
+     * Writes only the finished records belonging to {@code projectName} (canonical match)
+     * to {@code stats/export-<safeProjectName>-<stamp>.csv} and returns the file.
+     * Returns {@code null} if the write fails or if there are no matching rows (error already logged).
+     */
+    public static File exportProject(String projectName, long stamp) {
+        String canon = Project.canonical(projectName);
+        // Derive a filesystem-safe name: replace any character that isn't alphanumeric, hyphen, or
+        // apostrophe with an underscore (project names allow spaces — keep them readable as underscores).
+        String safeName = projectName.replaceAll("[^A-Za-z0-9'\\-]", "_");
+        File out = new File(statsDir(), "export-" + safeName + "-" + stamp + ".csv");
+        List<JobStats> filtered = new ArrayList<>();
+        for (JobStats s : JobStatsStorage.readAll(statsDir())) {
+            if (Project.canonical(s.getProject()).equals(canon)) {
+                filtered.add(s);
+            }
+        }
+        return writeCsvFile(out, filtered);
+    }
+
+    /**
+     * Shared CSV file writer used by both {@link #exportAll} and {@link #exportProject}.
+     * Creates the parent directory if needed; uses explicit UTF-8. Returns the file on
+     * success, or {@code null} on failure (error already logged).
+     */
+    private static File writeCsvFile(File out, List<JobStats> rows) {
         out.getParentFile().mkdirs(); // no-op if it already exists; avoids a misleading "export failed" on a fresh install
         // Explicit UTF-8 so non-ASCII player/project names survive on a Windows server
         // (the platform-default FileWriter would use windows-1252).
         try (Writer w = new OutputStreamWriter(new FileOutputStream(out), StandardCharsets.UTF_8)) {
-            w.write(toCsv(JobStatsStorage.readAll(statsDir())));
+            w.write(toCsv(rows));
         } catch (IOException ex) {
             Util.severe("Stats export failed: " + ex.getMessage());
             return null;
