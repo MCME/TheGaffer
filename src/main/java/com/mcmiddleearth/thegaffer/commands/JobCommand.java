@@ -328,6 +328,79 @@ public class JobCommand implements TabExecutor {
                 }
                 return true;
             }
+            if (args[0].equalsIgnoreCase("who")) {
+                if (!player.hasPermission(PermissionsUtil.getJoinPermission())) {
+                    player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    return true;
+                }
+                // Resolve the job: named arg → active or inactive; else current job
+                Job whoJob = null;
+                if (args.length > 1) {
+                    String jobArg = args[1];
+                    if (JobDatabase.getActiveJobs().containsKey(jobArg)) {
+                        whoJob = JobDatabase.getActiveJobs().get(jobArg);
+                    } else if (JobDatabase.getInactiveJobs().containsKey(jobArg)) {
+                        whoJob = JobDatabase.getInactiveJobs().get(jobArg);
+                    } else {
+                        player.sendMessage(Component.text("No job found by the name of ", NamedTextColor.RED)
+                                .append(Component.text(jobArg, NamedTextColor.AQUA))
+                                .append(Component.text(".", NamedTextColor.RED)));
+                        return true;
+                    }
+                } else {
+                    whoJob = JobDatabase.getJobWorking(player);
+                    if (whoJob == null) {
+                        player.sendMessage(Component.text("You're not in a job — name one: ", NamedTextColor.GRAY)
+                                .append(Msg.button("/job who <job>", NamedTextColor.AQUA,
+                                        "/job check", "Run /job check to see running jobs")));
+                        return true;
+                    }
+                }
+                // Build the roster component
+                Component roster = Component.text(whoJob.getName(), NamedTextColor.AQUA);
+                // Owner
+                boolean ownerOnline = Bukkit.getPlayer(whoJob.getOwner()) != null;
+                roster = roster.append(Component.newline())
+                        .append(Component.text("Owner: ", NamedTextColor.GRAY))
+                        .append(Component.text(Util.nameOf(whoJob.getOwner()),
+                                ownerOnline ? NamedTextColor.GREEN : NamedTextColor.GRAY));
+                // Helpers
+                roster = roster.append(Component.newline())
+                        .append(Component.text("Helpers: ", NamedTextColor.GRAY));
+                if (whoJob.getHelpers().isEmpty()) {
+                    roster = roster.append(Component.text("none", NamedTextColor.GRAY));
+                } else {
+                    boolean firstHelper = true;
+                    for (java.util.UUID hUuid : whoJob.getHelpers()) {
+                        if (!firstHelper) {
+                            roster = roster.append(Component.text(", ", NamedTextColor.GRAY));
+                        }
+                        boolean hOnline = Bukkit.getPlayer(hUuid) != null;
+                        roster = roster.append(Component.text(Util.nameOf(hUuid),
+                                hOnline ? NamedTextColor.GREEN : NamedTextColor.GRAY));
+                        firstHelper = false;
+                    }
+                }
+                // Workers
+                roster = roster.append(Component.newline())
+                        .append(Component.text("Workers: ", NamedTextColor.GRAY));
+                if (whoJob.getWorkers().isEmpty()) {
+                    roster = roster.append(Component.text("none", NamedTextColor.GRAY));
+                } else {
+                    boolean firstWorker = true;
+                    for (java.util.UUID wUuid : whoJob.getWorkers()) {
+                        if (!firstWorker) {
+                            roster = roster.append(Component.text(", ", NamedTextColor.GRAY));
+                        }
+                        boolean wOnline = Bukkit.getPlayer(wUuid) != null;
+                        roster = roster.append(Component.text(Util.nameOf(wUuid),
+                                wOnline ? NamedTextColor.GREEN : NamedTextColor.GRAY));
+                        firstWorker = false;
+                    }
+                }
+                player.sendMessage(roster);
+                return true;
+            }
             if(args[0].equalsIgnoreCase("leave")){
                 if(player.hasPermission(PermissionsUtil.getJoinPermission())){
                     if (JobDatabase.getActiveJobs().size() > 0){
@@ -542,7 +615,7 @@ public class JobCommand implements TabExecutor {
             Player player = (Player) sender;
             Component help = Component.text("Job commands:", NamedTextColor.GRAY)
                     .append(Component.newline())
-                    .append(Component.text("  check, join, leave, mine, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
+                    .append(Component.text("  check, join, leave, mine, who, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
             if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                 help = help.append(Component.newline())
                         .append(Component.text("  create, stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
@@ -623,6 +696,17 @@ public class JobCommand implements TabExecutor {
             }
             return Collections.emptyList();
         }
+        // who: complete active job names (inactive jobs also valid but too many to list)
+        if (args[0].equalsIgnoreCase("who")) {
+            List<String> jobs = new ArrayList<>();
+            String prefix = args.length > 1 ? args[1] : "";
+            for (String s : JobDatabase.getActiveJobs().keySet()) {
+                if (s.startsWith(prefix)) {
+                    jobs.add(s);
+                }
+            }
+            return jobs;
+        }
         // B3 + info: complete job names even when no space typed yet (args.length == 1)
         if (args[0].equalsIgnoreCase("info")) {
             List<String> jobs = new ArrayList<>();
@@ -680,6 +764,7 @@ public class JobCommand implements TabExecutor {
         actions.add("check");
         actions.add("leave");
         actions.add("mine");
+        actions.add("who");
         actions.add("stats");
         actions.add("leaderboard");
         actions.add("top");

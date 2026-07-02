@@ -61,6 +61,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job archive [page]` | Browse finished (archived) jobs. |
 | `/job stats <job\|player>` | Show a job's recap, or a player's lifetime totals. |
 | `/job leaderboard [placed\|broke\|active]` | Top builders (alias: `/job top`). |
+| `/job who [job]` | Show the live roster for a job: Owner, Helpers, and Workers, each coloured **green** (online) or **grey** (offline). Omit `[job]` to see your current job's roster. |
 | `/job border` | Toggle the particle outline marking your current job's build-area perimeter (purely visual, fly-through — no movement effect). |
 | `/jobchat [message]` | Toggle job-only chat, or send a one-off message to your job (alias: `/jc`). |
 
