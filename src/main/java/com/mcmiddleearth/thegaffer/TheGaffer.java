@@ -19,7 +19,7 @@ package com.mcmiddleearth.thegaffer;
 import com.mcmiddleearth.thegaffer.commands.AdminCommands.JobAdminConversation;
 import com.mcmiddleearth.thegaffer.commands.JobCommand;
 import com.mcmiddleearth.thegaffer.commands.JobChatCommand;
-import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
+import com.mcmiddleearth.thegaffer.commands.JobCreationDialog;
 import com.mcmiddleearth.thegaffer.commands.ProjectCommand;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
 import com.mcmiddleearth.thegaffer.integrations.JobMapIntegration;
@@ -92,7 +92,7 @@ public class TheGaffer extends JavaPlugin {
         StatsManager.loadAggregate();
         StatsManager.loadActive();
 
-        getCommand("createjob").setExecutor(new JobCreationConversation());
+        getCommand("createjob").setExecutor(new JobCreationDialog());
         getCommand("job").setExecutor(new JobCommand());
         getCommand("jobadmin").setExecutor(new JobAdminConversation());
         getCommand("jobchat").setExecutor(new JobChatCommand());

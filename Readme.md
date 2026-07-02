@@ -7,7 +7,7 @@ The world map is read-only by default — nobody can place or break blocks. To l
 | | |
 |---|---|
 | **Version** | 2.8 |
-| **Minecraft / API** | Paper 1.19 (`api-version: 1.19`) |
+| **Minecraft / API** | Built against Paper **26.1.2** (for the Dialog API) · runs on 26.2+ · `api-version: 1.19` |
 | **Java** | 17 |
 | **Build** | Maven → `target/TheGaffer-2.8.jar` |
 | **Soft dependencies** | DiscordSRV, MCME-Connect, Dynmap (all optional) |
@@ -69,7 +69,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 
 | Command | Description |
 |---|---|
-| `/createjob` (or `/job create` / `/job start`) | Launch the guided job-creation conversation. |
+| `/createjob` (or `/job create` / `/job start`) | Open the job-creation form (a native Minecraft Dialog). |
 | `/job stop <job>` | End a running job (moves it to the archive). |
 | `/job pause <job>` / `/job unpause <job>` | Temporarily suspend / resume building in a job. |
 | `/job listen` | Toggle alerts when someone tries to edit the map outside a job. |
@@ -168,7 +168,7 @@ A **Project** (e.g. "Minas Tirith") is a named, managed collection of jobs, run 
 | `/project announce <name> <message>` | lead/manager | Send a prefixed message to every online member of every active job in this project (deduped). |
 | `/project export <name>` | lead/manager | Export stats for all jobs in this project to `stats/export-<name>-<timestamp>.csv`. |
 
-At `/createjob`, if any active projects exist you'll be asked which one this job belongs to (or `nothing`).
+In the `/createjob` form, if any active projects exist you can pick which one this job belongs to (or **No project**).
 
 ---
 
@@ -202,7 +202,7 @@ mvn test           # run the unit-test suite only
 
 Tests use **JUnit 5 + MockBukkit** (a mock Paper server) — no real server is needed for the suite. CI runs `mvn verify` on every push and pull request (`.github/workflows/build.yml`).
 
-> **Note:** MockBukkit cannot fully boot a Paper 1.19 plugin or reach Discord, so a handful of runtime behaviours (real block protection, glow, the cross-server broadcast, Discord delivery) are verified by in-game QA rather than the automated suite.
+> **Note:** MockBukkit (pinned to `mockbukkit-v26.1.2`, matching the compiled Paper version) cannot fully boot a plugin, render a Dialog, or reach Discord, so a handful of runtime behaviours (real block protection, glow, the cross-server broadcast, Discord delivery, and the `/createjob` Dialog form) are verified by in-game QA rather than the automated suite.
 
 ---
 
