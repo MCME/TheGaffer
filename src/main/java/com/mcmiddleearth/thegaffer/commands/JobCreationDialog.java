@@ -209,6 +209,9 @@ public class JobCreationDialog implements CommandExecutor {
     }
 
     private void onCancel(Player player) {
-        player.sendMessage(Component.text("Job creation cancelled. No job was created.", NamedTextColor.GRAY));
+        // Match onSubmit: the custom-click callback may fire off the main thread.
+        Bukkit.getScheduler().runTask(TheGaffer.getPluginInstance(), () ->
+                player.sendMessage(Component.text("Job creation cancelled. No job was created.",
+                        NamedTextColor.GRAY)));
     }
 }

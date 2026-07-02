@@ -77,11 +77,14 @@ public final class JobCreationService {
         if (normalizedName == null || normalizedName.isEmpty()) {
             return Outcome.EMPTY_NAME;
         }
-        if (existsInHistory) {
-            return Outcome.NAME_TAKEN_HISTORY;
-        }
+        // A currently-running name takes precedence so the clearer "already running"
+        // message wins: an active job also has a saved file (activateJob writes it), so
+        // checking history first would always mask a running-name clash as "run before".
         if (isActive) {
             return Outcome.NAME_RUNNING;
+        }
+        if (existsInHistory) {
+            return Outcome.NAME_TAKEN_HISTORY;
         }
         return Outcome.OK;
     }

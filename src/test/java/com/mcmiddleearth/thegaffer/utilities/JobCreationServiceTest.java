@@ -64,8 +64,9 @@ class JobCreationServiceTest {
     }
 
     @Test
-    void validateNameHistoryTakesPrecedenceOverRunning() {
-        assertEquals(Outcome.NAME_TAKEN_HISTORY, JobCreationService.validateName("old", true, true));
+    void validateNameRunningTakesPrecedenceOverHistory() {
+        // An active job always has a saved file too, so the clearer "already running" wins.
+        assertEquals(Outcome.NAME_RUNNING, JobCreationService.validateName("live", true, true));
     }
 
     @Test
