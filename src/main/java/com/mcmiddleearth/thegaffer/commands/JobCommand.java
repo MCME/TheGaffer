@@ -401,6 +401,99 @@ public class JobCommand implements TabExecutor {
                 player.sendMessage(roster);
                 return true;
             }
+            if (args[0].equalsIgnoreCase("manage")) {
+                if (!player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                    sendStaffDenied(player);
+                    return true;
+                }
+                // Resolve the job: named arg (active only) or the staff member's current job
+                Job manageJob = null;
+                if (args.length > 1) {
+                    manageJob = JobDatabase.getActiveJobs().get(args[1]);
+                    if (manageJob == null) {
+                        player.sendMessage(Component.text("No active job found by the name of ", NamedTextColor.RED)
+                                .append(Component.text(args[1], NamedTextColor.AQUA))
+                                .append(Component.text(".", NamedTextColor.RED)));
+                        return true;
+                    }
+                } else {
+                    manageJob = JobDatabase.getJobWorking(player);
+                    if (manageJob == null) {
+                        player.sendMessage(Component.text("You are not in a job — specify one: ", NamedTextColor.GRAY)
+                                .append(Msg.button("/job manage <job>", NamedTextColor.AQUA,
+                                        "/job check", "Run /job check to see running jobs")));
+                        return true;
+                    }
+                }
+                final Job mj = manageJob;
+                // Build the clickable roster panel
+                Component panel = Component.text("=== Manage: ", NamedTextColor.GOLD)
+                        .append(Component.text(mj.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(" ===", NamedTextColor.GOLD));
+                // Owner line (no action buttons — hint transfer)
+                panel = panel.append(Component.newline())
+                        .append(Component.text("Owner: ", NamedTextColor.GRAY))
+                        .append(Component.text(Util.nameOf(mj.getOwner()), NamedTextColor.GOLD))
+                        .append(Component.text("  ", NamedTextColor.GRAY))
+                        .append(Msg.button("[Transfer…]", NamedTextColor.YELLOW,
+                                "/job transfer", "Use /job transfer <player> (target must be a helper)"));
+                // Helpers (Kick, Ban, Demote)
+                if (!mj.getHelpers().isEmpty()) {
+                    panel = panel.append(Component.newline())
+                            .append(Component.text("Helpers:", NamedTextColor.GRAY));
+                    for (java.util.UUID hUuid : mj.getHelpers()) {
+                        String hName = Util.nameOf(hUuid);
+                        panel = panel.append(Component.newline())
+                                .append(Component.text("  " + hName, NamedTextColor.AQUA))
+                                .append(Component.text("  ", NamedTextColor.GRAY))
+                                .append(Msg.button("[Kick]", NamedTextColor.RED,
+                                        "/job admin " + mj.getName() + " kickworker " + hName,
+                                        "Kick " + hName))
+                                .append(Component.text(" ", NamedTextColor.GRAY))
+                                .append(Msg.button("[Ban]", NamedTextColor.DARK_RED,
+                                        "/job admin " + mj.getName() + " banworker " + hName,
+                                        "Ban " + hName))
+                                .append(Component.text(" ", NamedTextColor.GRAY))
+                                .append(Msg.button("[Demote]", NamedTextColor.YELLOW,
+                                        "/job admin " + mj.getName() + " demote " + hName,
+                                        "Demote " + hName + " back to worker"));
+                    }
+                }
+                // Workers (excluding those also in helpers list)
+                java.util.List<java.util.UUID> pureWorkers = new java.util.ArrayList<>();
+                for (java.util.UUID wUuid : mj.getWorkers()) {
+                    if (!mj.getHelpers().contains(wUuid)) {
+                        pureWorkers.add(wUuid);
+                    }
+                }
+                if (!pureWorkers.isEmpty()) {
+                    panel = panel.append(Component.newline())
+                            .append(Component.text("Workers:", NamedTextColor.GRAY));
+                    for (java.util.UUID wUuid : pureWorkers) {
+                        String wName = Util.nameOf(wUuid);
+                        panel = panel.append(Component.newline())
+                                .append(Component.text("  " + wName, NamedTextColor.AQUA))
+                                .append(Component.text("  ", NamedTextColor.GRAY))
+                                .append(Msg.button("[Kick]", NamedTextColor.RED,
+                                        "/job admin " + mj.getName() + " kickworker " + wName,
+                                        "Kick " + wName))
+                                .append(Component.text(" ", NamedTextColor.GRAY))
+                                .append(Msg.button("[Ban]", NamedTextColor.DARK_RED,
+                                        "/job admin " + mj.getName() + " banworker " + wName,
+                                        "Ban " + wName))
+                                .append(Component.text(" ", NamedTextColor.GRAY))
+                                .append(Msg.button("[Promote]", NamedTextColor.GREEN,
+                                        "/job admin " + mj.getName() + " promote " + wName,
+                                        "Promote " + wName + " to helper"));
+                    }
+                }
+                if (mj.getHelpers().isEmpty() && pureWorkers.isEmpty()) {
+                    panel = panel.append(Component.newline())
+                            .append(Component.text("  (no workers or helpers yet)", NamedTextColor.GRAY));
+                }
+                player.sendMessage(panel);
+                return true;
+            }
             if(args[0].equalsIgnoreCase("leave")){
                 if(player.hasPermission(PermissionsUtil.getJoinPermission())){
                     if (JobDatabase.getActiveJobs().size() > 0){
@@ -577,6 +670,63 @@ public class JobCommand implements TabExecutor {
                 player.sendMessage(out);
                 return true;
             }
+            if (args[0].equalsIgnoreCase("transfer")) {
+                if (!player.hasPermission(PermissionsUtil.getCreatePermission())) {
+                    sendStaffDenied(player);
+                    return true;
+                }
+                if (args.length < 2) {
+                    player.sendMessage(Component.text("Usage: /job transfer <player>", NamedTextColor.GRAY));
+                    return true;
+                }
+                // Resolve sender's current job — must be the owner (or admin override)
+                Job transferJob = JobDatabase.getJobWorking(player);
+                if (transferJob == null) {
+                    player.sendMessage(Component.text("You are not in a job. You can only transfer a job you own.", NamedTextColor.RED));
+                    return true;
+                }
+                boolean isOwner = transferJob.getOwner().equals(player.getUniqueId());
+                boolean isAdmin = player.hasPermission("thegaffer.project.admin");
+                if (!isOwner && !isAdmin) {
+                    player.sendMessage(Component.text("Only the job owner (or an admin) can transfer ownership.", NamedTextColor.RED));
+                    return true;
+                }
+                String targetName = args[1];
+                org.bukkit.OfflinePlayer targetOffline = Bukkit.getOfflinePlayer(targetName);
+                java.util.UUID targetUuid = targetOffline.getUniqueId();
+                // Target must already be a helper
+                if (!transferJob.getHelpers().contains(targetUuid)) {
+                    player.sendMessage(Component.text("You can only transfer to a helper — promote them first (", NamedTextColor.RED)
+                            .append(Msg.button("/job manage", NamedTextColor.AQUA,
+                                    "/job manage " + transferJob.getName(), "Open management panel"))
+                            .append(Component.text(").", NamedTextColor.RED)));
+                    return true;
+                }
+                // Execute the transfer
+                java.util.UUID oldOwner = transferJob.getOwner();
+                transferJob.setOwner(targetUuid);
+                // creator field is intentionally unchanged — /job info shows original "Started by"
+                // Add old owner as a helper (if not already)
+                if (!transferJob.getHelpers().contains(oldOwner)) {
+                    transferJob.getHelpers().add(oldOwner);
+                }
+                transferJob.setDirty(true);
+                // Message old owner
+                player.sendMessage(Component.text("You transferred ownership of ", NamedTextColor.GREEN)
+                        .append(Component.text(transferJob.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(" to ", NamedTextColor.GREEN))
+                        .append(Component.text(Util.nameOf(targetUuid), NamedTextColor.AQUA))
+                        .append(Component.text(". You are now a helper.", NamedTextColor.GREEN)));
+                // Message new owner if online
+                org.bukkit.entity.Player targetPlayer = Bukkit.getPlayer(targetUuid);
+                if (targetPlayer != null) {
+                    targetPlayer.sendMessage(Component.text(Util.nameOf(oldOwner), NamedTextColor.AQUA)
+                            .append(Component.text(" transferred ownership of ", NamedTextColor.GREEN))
+                            .append(Component.text(transferJob.getName(), NamedTextColor.AQUA))
+                            .append(Component.text(" to you. You are now the owner!", NamedTextColor.GREEN)));
+                }
+                return true;
+            }
             if (args[0].equalsIgnoreCase("admin")) {
                 // If no job/action supplied (/job admin alone), open the guided conversation
                 // so the behaviour mirrors bare /jobadmin.
@@ -618,7 +768,9 @@ public class JobCommand implements TabExecutor {
                     .append(Component.text("  check, join, leave, mine, who, border, warpto, info, archive, stats, leaderboard, top", NamedTextColor.AQUA));
             if (player.hasPermission(PermissionsUtil.getCreatePermission())) {
                 help = help.append(Component.newline())
-                        .append(Component.text("  create, stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA));
+                        .append(Component.text("  create, stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA))
+                        .append(Component.newline())
+                        .append(Component.text("  manage [job], transfer <player>", NamedTextColor.AQUA));
             }
             player.sendMessage(help);
             return true;
@@ -635,6 +787,10 @@ public class JobCommand implements TabExecutor {
                 || args[0].equalsIgnoreCase("border")
                 || args[0].equalsIgnoreCase("listen")
                 || args[0].equalsIgnoreCase("prep")) {
+            return Collections.emptyList();
+        }
+        // transfer: second arg is a player name — handled separately below with helper-name completions
+        if (args[0].equalsIgnoreCase("transfer") && args.length > 2) {
             return Collections.emptyList();
         }
         // B1 — route /job admin … tab-complete to JobAdminCommands
@@ -754,6 +910,39 @@ public class JobCommand implements TabExecutor {
             }
             return Collections.emptyList();
         }
+        // manage: complete active job names
+        if (args[0].equalsIgnoreCase("manage")) {
+            if (args.length == 2) {
+                String prefix = args[1];
+                List<String> jobs = new ArrayList<>();
+                for (String s : JobDatabase.getActiveJobs().keySet()) {
+                    if (s.startsWith(prefix)) {
+                        jobs.add(s);
+                    }
+                }
+                return jobs;
+            }
+            return Collections.emptyList();
+        }
+        // transfer: complete current job's helper names
+        if (args[0].equalsIgnoreCase("transfer")) {
+            if (args.length == 2 && sender instanceof Player) {
+                Player tSender = (Player) sender;
+                Job tJob = JobDatabase.getJobWorking(tSender);
+                if (tJob != null) {
+                    String prefix = args[1];
+                    List<String> helpers = new ArrayList<>();
+                    for (java.util.UUID hUuid : tJob.getHelpers()) {
+                        String hName = Util.nameOf(hUuid);
+                        if (hName.startsWith(prefix)) {
+                            helpers.add(hName);
+                        }
+                    }
+                    return helpers;
+                }
+            }
+            return Collections.emptyList();
+        }
         // Root tab-complete: subcommand list — B2 adds admin + listen
         List<String> actions = new ArrayList<>();
         actions.add("archive");
@@ -777,6 +966,8 @@ public class JobCommand implements TabExecutor {
             actions.add("unpause");
             actions.add("admin");   // B2
             actions.add("listen");  // B2
+            actions.add("manage");  // J2
+            actions.add("transfer"); // J2
         }
         // Filter by prefix if the user has started typing
         String prefix = args[0];

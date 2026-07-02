@@ -248,6 +248,55 @@ public class GafferResponses {
         }
     }
 
+    public enum PromoteResponse implements GafferResponse {
+
+        NOT_A_WORKER("%name% is not a worker on %job%.", false),
+        ALREADY_HELPER("%name% is already a helper on %job%.", false),
+        PROMOTE_SUCCESS("%name% promoted to helper on %job%.", true);
+
+        private final String message;
+        private final boolean successful;
+
+        PromoteResponse(String message, boolean wasSuccessful) {
+            this.message = message;
+            this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
+        }
+    }
+
+    public enum DemoteResponse implements GafferResponse {
+
+        NOT_A_HELPER("%name% is not a helper on %job%.", false),
+        DEMOTE_SUCCESS("%name% demoted to worker on %job%.", true);
+
+        private final String message;
+        private final boolean successful;
+
+        DemoteResponse(String message, boolean wasSuccessful) {
+            this.message = message;
+            this.successful = wasSuccessful;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean isSuccessful() {
+            return successful;
+        }
+    }
+
     public interface GafferResponse {
 
         String getMessage();

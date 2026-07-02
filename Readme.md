@@ -77,9 +77,20 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job stats export` | Export all recorded stats to a CSV file. |
 | `/jobadmin` (or `/job admin <job> <action> …`) | Manage a job — see below. |
 
+### `/job manage [job]` (staff)
+
+Print a clickable roster for a job (defaults to your current job). Each **worker** gets `[Kick]`, `[Ban]`, and `[Promote]` buttons; each **helper** gets `[Kick]`, `[Ban]`, and `[Demote]` buttons. The owner is shown with a `[Transfer…]` hint. Buttons fire the matching `/job admin` one-liners instantly.
+
+### `/job transfer <player>` (owner or `thegaffer.project.admin`)
+
+Transfer ownership of your current job to another player. The target **must already be a helper** (promote them first if needed). On transfer: the target becomes Owner; you become a Helper; the original "Started by" creator record is unchanged so `/job info` still shows who started the job.
+
 ### `/job admin <job> <action>` subcommands
 
-`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `setwarp`, `setradius <n>`, `clearworkerinven`, `teleportall`, `teleport <player>`, `listworkers`.
+`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `promote <player>`, `demote <player>`, `setwarp`, `setradius <n>`, `clearworkerinven`, `teleportall`, `teleport <player>`, `listworkers`.
+
+- **`promote <player>`** — promotes a worker to helper status. The player stays in the workers list, so they keep their build rights.
+- **`demote <player>`** — demotes a helper back to a standard worker. The player remains in the workers list so build rights are preserved.
 
 ---
 

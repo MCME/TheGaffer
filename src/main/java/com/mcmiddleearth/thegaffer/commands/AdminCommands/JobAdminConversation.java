@@ -59,6 +59,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("uninviteworker");
         actions.add("setradius");
         actions.add("clearworkerinven");
+        actions.add("promote");
+        actions.add("demote");
         Collections.sort(actions);
     }
 
@@ -246,6 +248,12 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 }
                 case "clearworkerinven": {
                     return new clearinven();
+                }
+                case "promote": {
+                    return new promoteWorkerPrompt();
+                }
+                case "demote": {
+                    return new demoteHelperPrompt();
                 }
                 default: {
                     return new whichActionPrompt();
@@ -480,6 +488,38 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 context.getForWhom().sendRawMessage(PromptStyle.HINT + "Cancelled.");
             }
             return Prompt.END_OF_CONVERSATION;
+        }
+    }
+
+    private class promoteWorkerPrompt extends StringPrompt {
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return PromptStyle.ask("Which worker would you like to promote to helper?")
+                    + PromptStyle.hint("enter the player's name");
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            context.setSessionData("inputname", input);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.promote(input), this);
+        }
+    }
+
+    private class demoteHelperPrompt extends StringPrompt {
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return PromptStyle.ask("Which helper would you like to demote to worker?")
+                    + PromptStyle.hint("enter the player's name");
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            context.setSessionData("inputname", input);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            return new responsePrompt(am.demote(input), this);
         }
     }
 }

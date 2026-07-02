@@ -38,6 +38,8 @@ class JobAdminCommandsTest {
         assertTrue(methods.containsKey("teleportall"), "teleportall must be registered (renamed from bringall)");
         assertTrue(methods.containsKey("teleport"), "teleport must be registered (new single-player action)");
         assertFalse(methods.containsKey("bringall"), "bringall must no longer be registered");
-        assertEquals(13, methods.size(), "all 13 admin actions must be registered");
+        assertTrue(methods.containsKey("promote"), "promote must be registered (worker→helper)");
+        assertTrue(methods.containsKey("demote"), "demote must be registered (helper→worker)");
+        assertEquals(15, methods.size(), "all 15 admin actions must be registered");
     }
 }
