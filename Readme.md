@@ -10,7 +10,7 @@ The world map is read-only by default — nobody can place or break blocks. To l
 | **Minecraft / API** | Paper 1.19 (`api-version: 1.19`) |
 | **Java** | 17 |
 | **Build** | Maven → `target/TheGaffer-2.8.jar` |
-| **Soft dependencies** | DiscordSRV, MCME-Connect (both optional) |
+| **Soft dependencies** | DiscordSRV, MCME-Connect, Dynmap (all optional) |
 
 ---
 
@@ -124,10 +124,11 @@ Transfer ownership of your current job to another player. The target **must alre
 
 ## Integrations
 
-Both are **soft dependencies** — TheGaffer runs fine without them; the relevant feature simply no-ops if the plugin is absent.
+All are **soft dependencies** — TheGaffer runs fine without any of them; the relevant feature simply no-ops if the plugin is absent.
 
 - **DiscordSRV** — posts a **rich embed** announcement (with relative timestamps that localize to each viewer) to a Discord channel when a job **starts** (pinging the roles in `allowRolePing` — e.g. a `Jobber` opt-in role — never `@everyone`), and a **rich embed recap** when it ends (duration, blocks placed/broken, builder count — inline fields; muted red colour). Both embeds fall back to plain-text automatically if the bot lacks the "Embed Links" permission in the channel. Controlled per-job by the "send to Discord" flag and globally by `discord.channel`.
 - **MCME-Connect** — broadcasts job-start announcements **across the BungeeCord network**, so players on other servers see that a job has started. Falls back to a local broadcast when not present.
+- **Dynmap → LiveAtlas** — when [Dynmap](https://github.com/webbukkit/dynmap) is installed (LiveAtlas is just its web frontend — it renders the same marker layer), active jobs are automatically drawn as coloured **area markers** on the live web map. Each marker shows the job's square build area (MinX/MaxX/MinZ/MaxZ corners), its project colour (hashed from the project name — unattached jobs use a neutral grey), and a clickable HTML popup with the job name, owner, project, radius, and a `/job join <name>` hint. Markers are added on job start, removed on job end, and updated whenever the radius or warp changes (`/job admin setradius` / `setwarp`). The marker layer is named `thegaffer.jobs` (visible in the LiveAtlas/Dynmap layer selector as "Jobs"). If Dynmap is absent or its MarkerAPI is unavailable, everything no-ops with a single informational log line.
 
 ---
 

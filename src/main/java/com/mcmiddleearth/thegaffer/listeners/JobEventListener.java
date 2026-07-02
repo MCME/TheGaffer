@@ -19,6 +19,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
+import com.mcmiddleearth.thegaffer.integrations.JobMapIntegration;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.storage.Job;
@@ -60,6 +61,8 @@ public class JobEventListener implements Listener {
         Job job = event.getJob();
         // Clear job borders for all participants before the job is deregistered.
         JobBorderManager.clearAll(job);
+        // Remove the Dynmap/LiveAtlas web-map marker for this job.
+        JobMapIntegration.removeJob(job);
         job.sendToAll(Component.text("The " + job.getName() + " job has ended.", NamedTextColor.GRAY));
         for (Player p : job.getAllAsPlayersArray()) {
             // Guarded (see onJobStart): a third-party sound-packet listener must not abort
@@ -213,6 +216,8 @@ public class JobEventListener implements Listener {
         if (owner != null) {
             JobBorderManager.refresh(owner);
         }
+        // Add/update the Dynmap/LiveAtlas web-map marker for this new job.
+        JobMapIntegration.showJob(job);
         if (job.isDiscordSend()) {
             // discord.channel is a DiscordSRV game-channel NAME, not a raw snowflake ID, so
             // getTextChannelById(...) returned null and the embed was silently skipped. Resolve it

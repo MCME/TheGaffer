@@ -20,6 +20,7 @@ package com.mcmiddleearth.thegaffer.commands.AdminCommands;
 
 import com.mcmiddleearth.thegaffer.GafferResponses;
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.integrations.JobMapIntegration;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
@@ -104,6 +105,7 @@ public class AdminMethods {
 
     public Object setwarp() {
         job.updateLocation((p).getLocation());
+        JobMapIntegration.updateJob(job);
         return true;
     }
 
@@ -202,6 +204,7 @@ public class AdminMethods {
                     "Radius must be a whole number between 1 and 1000.");
         }
         job.updateJobRadius(radius);
+        JobMapIntegration.updateJob(job);
         return new GafferResponses.SetRadiusResponse(radius);
     }
 

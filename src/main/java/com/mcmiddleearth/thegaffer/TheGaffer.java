@@ -22,6 +22,7 @@ import com.mcmiddleearth.thegaffer.commands.JobChatCommand;
 import com.mcmiddleearth.thegaffer.commands.JobCreationConversation;
 import com.mcmiddleearth.thegaffer.commands.ProjectCommand;
 import com.mcmiddleearth.thegaffer.ext.ExternalProtectionHandler;
+import com.mcmiddleearth.thegaffer.integrations.JobMapIntegration;
 import com.mcmiddleearth.thegaffer.listeners.CraftingListener;
 import com.mcmiddleearth.thegaffer.listeners.JobChatListener;
 import com.mcmiddleearth.thegaffer.listeners.JobEventListener;
@@ -133,6 +134,16 @@ public class TheGaffer extends JavaPlugin {
         // Start the particle-wall render task for the visual job boundary.
         // Runs every 10 ticks; draws END_ROD particles for players in active.
         JobBorderManager.startRenderTask(this);
+
+        // Dynmap / LiveAtlas web-map integration (soft dependency).
+        // Dynmap loads before TheGaffer (it is in softdepend), so MarkerAPI
+        // is ready by the time onEnable() runs.
+        JobMapIntegration.init(this);
+        if (JobMapIntegration.isEnabled()) {
+            for (Job activeJob : JobDatabase.getActiveJobs().values()) {
+                JobMapIntegration.showJob(activeJob);
+            }
+        }
     }
 
     @Override
