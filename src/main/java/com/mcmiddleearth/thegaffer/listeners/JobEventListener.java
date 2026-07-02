@@ -173,11 +173,37 @@ public class JobEventListener implements Listener {
                     embed.setDescription(desc);
                 }
                 final Message msg = new MessageBuilder().setContent(ping).setEmbed(embed.build()).build();
-                // Send off the main thread: sendMessageBlocking does a synchronous Discord
-                // REST call and must not block the server tick.
+                // Plain-text fallback (the SAME send path the job-end recap uses, which is proven to
+                // work) for when the embed doesn't post — e.g. the bot lacks the "Embed Links"
+                // permission in the channel, or a DiscordSRV/JDA API change rejects the embed.
+                final String fallbackText = (ping.isEmpty() ? "" : ping + " ")
+                        + "🛠 New job: **" + job.getName() + "** — Leader: " + Util.nameOf(job.getOwner())
+                        + " · World: " + job.getBukkitWorld().getName()
+                        + " · Started " + discordTimestamp(startMillis, 'R')
+                        + " · Join in-game: `/job join " + job.getName() + "`";
+                // Send off the main thread: sendMessageBlocking does a synchronous Discord REST
+                // call and must not block the server tick.
                 new BukkitRunnable() {
                     @Override
-                    public void run() { DiscordUtil.sendMessageBlocking(channel, msg, false); }
+                    public void run() {
+                        Exception error = null;
+                        boolean delivered = false;
+                        try {
+                            Message sent = DiscordUtil.sendMessageBlocking(channel, msg, false);
+                            delivered = (sent != null);
+                        } catch (Exception ex) {
+                            error = ex;
+                        }
+                        if (!delivered) {
+                            Logger.getLogger("TheGaffer").warning("Job-start Discord embed did not send"
+                                    + (error != null
+                                        ? " (" + error.getClass().getSimpleName() + ": " + error.getMessage() + ")"
+                                        : " (Discord returned no message)")
+                                    + " — falling back to a plain-text announcement. If this keeps happening,"
+                                    + " check that the bot has the 'Embed Links' permission in the target channel.");
+                            DiscordUtil.sendMessage(channel, fallbackText, 0, false);
+                        }
+                    }
                 }.runTaskAsynchronously(TheGaffer.getPluginInstance());
             } else {
                 Logger.getLogger("TheGaffer").warning("Discord channel '" + TheGaffer.getDiscordChannel()
