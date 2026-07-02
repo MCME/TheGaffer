@@ -57,7 +57,8 @@ public class AdminMethods {
         Methods.put("banworker", 1);
         Methods.put("unbanworker", 1);
         Methods.put("setwarp", 0);
-        Methods.put("bringall", 0);
+        Methods.put("teleportall", 0);
+        Methods.put("teleport", 1);
         Methods.put("listworkers", 0);
         Methods.put("inviteworker", 1);
         Methods.put("uninviteworker", 1);
@@ -104,9 +105,24 @@ public class AdminMethods {
         return true;
     }
 
-    public Object bringall() {
+    public Object teleportall() {
         job.bringAllWorkers((p.getLocation()));
         return true;
+    }
+
+    public GafferResponses.GafferResponse teleport(String arg) {
+        Player target = Bukkit.getPlayer(arg);
+        if (target == null || !target.isOnline()) {
+            return new GafferResponses.ValidationFailureResponse(
+                    "%name% is not online.");
+        }
+        if (!job.getWorkers().contains(target.getUniqueId())
+                && !job.getHelpers().contains(target.getUniqueId())) {
+            return new GafferResponses.ValidationFailureResponse(
+                    "%name% is not a worker on %job%.");
+        }
+        target.teleport(p.getLocation());
+        return new GafferResponses.TeleportWorkerResponse(arg);
     }
 
     public String listworkers() {

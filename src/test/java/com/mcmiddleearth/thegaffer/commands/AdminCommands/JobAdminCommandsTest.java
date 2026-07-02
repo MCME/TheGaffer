@@ -35,6 +35,9 @@ class JobAdminCommandsTest {
         assertTrue(methods.containsKey("setradius"), "setradius must be a known admin action");
         assertTrue(methods.containsKey("addhelper"));
         assertTrue(methods.containsKey("clearworkerinven"));
-        assertEquals(12, methods.size(), "all 12 admin actions must be registered");
+        assertTrue(methods.containsKey("teleportall"), "teleportall must be registered (renamed from bringall)");
+        assertTrue(methods.containsKey("teleport"), "teleport must be registered (new single-player action)");
+        assertFalse(methods.containsKey("bringall"), "bringall must no longer be registered");
+        assertEquals(13, methods.size(), "all 13 admin actions must be registered");
     }
 }

@@ -58,7 +58,8 @@ public class JobAdminCommands implements TabExecutor{
         Methods.put("banworker", 1);
         Methods.put("unbanworker", 1);
         Methods.put("setwarp", 0);
-        Methods.put("bringall", 0);
+        Methods.put("teleportall", 0);
+        Methods.put("teleport", 1);
         Methods.put("listworkers", 0);
         Methods.put("inviteworker", 1);
         Methods.put("uninviteworker", 1);
@@ -68,14 +69,14 @@ public class JobAdminCommands implements TabExecutor{
 
     /**
      * Actions that are destructive and require the trailing "confirm" token in the one-liner.
-     * These mirror the dialog's typed-confirm step for bringall and clearworkerinven.
+     * These mirror the dialog's typed-confirm step for teleportall and clearworkerinven.
      */
-    private static final Set<String> CONFIRM_ACTIONS = Set.of("bringall", "clearworkerinven");
+    private static final Set<String> CONFIRM_ACTIONS = Set.of("teleportall", "clearworkerinven");
 
     private static final List<String> ADMIN_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
         "inviteworker", "uninviteworker", "setwarp", "setradius",
-        "clearworkerinven", "bringall", "listworkers"
+        "clearworkerinven", "teleportall", "teleport", "listworkers"
     );
 
     // Player-taking actions (Methods value == 1, arg is a player name). NOTE: setradius
@@ -83,7 +84,7 @@ public class JobAdminCommands implements TabExecutor{
     // should not offer player names.
     private static final List<String> PLAYER_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
-        "inviteworker", "uninviteworker"
+        "inviteworker", "uninviteworker", "teleport"
     );
 
     @Override
@@ -187,9 +188,11 @@ public class JobAdminCommands implements TabExecutor{
                             boolean hasConfirm = args.length >= 4
                                     && "confirm".equalsIgnoreCase(args[3]);
                             if (!hasConfirm) {
-                                String msg = action + " teleports all online workers to your location."
-                                        + " Re-run: /job admin " + args[1] + " " + action + " confirm";
-                                if (action.equals("clearworkerinven")) {
+                                String msg;
+                                if (action.equals("teleportall")) {
+                                    msg = "teleportall teleports all online workers to your location."
+                                            + " Re-run: /job admin " + args[1] + " teleportall confirm";
+                                } else {
                                     msg = action + " wipes every worker's inventory."
                                             + " Re-run: /job admin " + args[1] + " " + action + " confirm";
                                 }
@@ -269,7 +272,7 @@ public class JobAdminCommands implements TabExecutor{
                 p.sendMessage(Component.text("Failure: " + msg, NamedTextColor.RED));
             }
         } else {
-            // void / Boolean / other — generic confirmation (e.g. setwarp, bringall)
+            // void / Boolean / other — generic confirmation (e.g. setwarp, teleportall)
             p.sendMessage(Component.text("Job Edited!", NamedTextColor.AQUA));
         }
     }

@@ -52,7 +52,8 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         actions.add("banworker");
         actions.add("unbanworker");
         actions.add("setwarp");
-        actions.add("bringall");
+        actions.add("teleportall");
+        actions.add("teleport");
         actions.add("listworkers");
         actions.add("inviteworker");
         actions.add("uninviteworker");
@@ -225,8 +226,11 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
                 case "setwarp": {
                     return new updateWarpPrompt();
                 }
-                case "bringall": {
-                    return new bringallWorkersPrompt();
+                case "teleportall": {
+                    return new teleportallWorkersPrompt();
+                }
+                case "teleport": {
+                    return new teleportWorkerPrompt();
                 }
                 case "listworkers": {
                     return new listWorkersPrompt();
@@ -345,7 +349,7 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         }
     }
 
-    private class bringallWorkersPrompt extends StringPrompt {
+    private class teleportallWorkersPrompt extends StringPrompt {
 
         @Override
         public String getPromptText(ConversationContext context) {
@@ -357,12 +361,29 @@ public class JobAdminConversation implements CommandExecutor, ConversationAbando
         public Prompt acceptInput(ConversationContext context, String input) {
             if (input.equalsIgnoreCase("confirm")) {
                 AdminMethods am = (AdminMethods) context.getSessionData("am");
-                am.bringall();
-                context.getForWhom().sendRawMessage(PromptStyle.OK + "Brought all online workers to your location.");
+                am.teleportall();
+                context.getForWhom().sendRawMessage(PromptStyle.OK + "Teleported all online workers to your location.");
             } else {
                 context.getForWhom().sendRawMessage(PromptStyle.HINT + "Cancelled.");
             }
             return Prompt.END_OF_CONVERSATION;
+        }
+    }
+
+    private class teleportWorkerPrompt extends StringPrompt {
+
+        @Override
+        public String getPromptText(ConversationContext context) {
+            return PromptStyle.ask("Which worker would you like to teleport to you?")
+                    + PromptStyle.hint("enter the player's name");
+        }
+
+        @Override
+        public Prompt acceptInput(ConversationContext context, String input) {
+            context.setSessionData("inputname", input);
+            AdminMethods am = (AdminMethods) context.getSessionData("am");
+            GafferResponse result = am.teleport(input);
+            return new responsePrompt(result, this);
         }
     }
 
