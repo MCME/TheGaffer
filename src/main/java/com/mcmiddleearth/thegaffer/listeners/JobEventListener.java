@@ -35,6 +35,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import github.scarsz.discordsrv.util.DiscordUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -68,13 +69,38 @@ public class JobEventListener implements Listener {
             PlayerListener.revertToSurvivalIfSwitched(p);
         }
         if(job.isDiscordSend()) {
-            String emoji =(TheGaffer.getDiscordJobEmoji()==null 
-                          || TheGaffer.getDiscordJobEmoji().equals("")?"":":"+TheGaffer.getDiscordJobEmoji()+":");
-            sendDiscord(emoji+" __**Info:**__ The job " + job.getName()
-                           + " has ended " + discordTimestamp(System.currentTimeMillis(), 'R') + ".");
-            JobStats stats = StatsManager.findJobStats(job.getName());
-            if (stats != null) {
-                sendDiscord(StatsManager.buildDiscordSummary(stats));
+            String emoji = (TheGaffer.getDiscordJobEmoji() == null
+                           || TheGaffer.getDiscordJobEmoji().equals("") ? "" : ":" + TheGaffer.getDiscordJobEmoji() + ":");
+            DiscordSRV discordPlugin = DiscordSRV.getPlugin();
+            TextChannel channel = (discordPlugin != null)
+                    ? discordPlugin.getDestinationTextChannelForGameChannelName(TheGaffer.getDiscordChannel())
+                    : null;
+            if (channel != null) {
+                long endMillis = System.currentTimeMillis();
+                JobStats stats = StatsManager.findJobStats(job.getName());
+                String title = "🏁 Job ended: " + job.getName();
+                if (title.length() > 256) { title = title.substring(0, 256); }
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setColor(new java.awt.Color(170, 70, 70))
+                        .setTitle(title)
+                        .setFooter("MCME")
+                        .setTimestamp(Instant.now());
+                if (stats != null) {
+                    embed.addField("Duration", StatsManager.formatDuration(stats.getDurationMillis()), true)
+                         .addField("Blocks placed", String.valueOf(stats.getTotalPlaced()), true)
+                         .addField("Blocks broken", String.valueOf(stats.getTotalBroke()), true)
+                         .addField("Builders", String.valueOf(stats.getParticipants().size()), true);
+                }
+                // Plain-text fallback matching the old behaviour: "has ended" line + stats recap.
+                final String endTimestamp = discordTimestamp(endMillis, 'R');
+                final String fallbackText = emoji + " __**Info:**__ The job " + job.getName()
+                        + " has ended " + endTimestamp + "."
+                        + (stats != null ? "\n" + StatsManager.buildDiscordSummary(stats) : "");
+                final Message endMsg = new MessageBuilder().setEmbed(embed.build()).build();
+                sendEmbedWithFallback(channel, endMsg, fallbackText);
+            } else {
+                Logger.getLogger("TheGaffer").warning("Discord channel '" + TheGaffer.getDiscordChannel()
+                        + "' not found — job-end embed not sent.");
             }
         }
     }
@@ -117,9 +143,10 @@ public class JobEventListener implements Listener {
         // announcement above is delivered network-wide as legacy text via the MCME-Connect proxy,
         // which strips Adventure click data — so the clickable button is sent locally here, to the
         // only players who can act on it in one click (remote players must switch servers first).
-        Component joinButton = Component.text("» ", NamedTextColor.DARK_GREEN)
-                .append(Msg.button("Click here to join " + job.getName(), NamedTextColor.GREEN,
-                        "/job join " + job.getName(), "Join " + job.getName()));
+        Component joinButton = Component.text("  ▶ ", NamedTextColor.GREEN)
+                .append(Msg.button("[ Click to join " + job.getName() + " ]", NamedTextColor.GREEN,
+                        "/job join " + job.getName(), "Join " + job.getName() + " — one click")
+                        .decorate(TextDecoration.BOLD));
         for (Player p : TheGaffer.getServerInstance().getOnlinePlayers()) {
             p.sendMessage(joinButton);
             // Guarded: a third-party outbound-packet listener (e.g. PremiumVanish's NamedSoundEffect
@@ -173,38 +200,14 @@ public class JobEventListener implements Listener {
                     embed.setDescription(desc);
                 }
                 final Message msg = new MessageBuilder().setContent(ping).setEmbed(embed.build()).build();
-                // Plain-text fallback (the SAME send path the job-end recap uses, which is proven to
-                // work) for when the embed doesn't post — e.g. the bot lacks the "Embed Links"
-                // permission in the channel, or a DiscordSRV/JDA API change rejects the embed.
+                // Plain-text fallback for when the embed doesn't post — e.g. the bot lacks the
+                // "Embed Links" permission in the channel, or a DiscordSRV/JDA API change rejects the embed.
                 final String fallbackText = (ping.isEmpty() ? "" : ping + " ")
                         + "🛠 New job: **" + job.getName() + "** — Leader: " + Util.nameOf(job.getOwner())
                         + " · World: " + job.getBukkitWorld().getName()
                         + " · Started " + discordTimestamp(startMillis, 'R')
                         + " · Join in-game: `/job join " + job.getName() + "`";
-                // Send off the main thread: sendMessageBlocking does a synchronous Discord REST
-                // call and must not block the server tick.
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Exception error = null;
-                        boolean delivered = false;
-                        try {
-                            Message sent = DiscordUtil.sendMessageBlocking(channel, msg, false);
-                            delivered = (sent != null);
-                        } catch (Exception ex) {
-                            error = ex;
-                        }
-                        if (!delivered) {
-                            Logger.getLogger("TheGaffer").warning("Job-start Discord embed did not send"
-                                    + (error != null
-                                        ? " (" + error.getClass().getSimpleName() + ": " + error.getMessage() + ")"
-                                        : " (Discord returned no message)")
-                                    + " — falling back to a plain-text announcement. If this keeps happening,"
-                                    + " check that the bot has the 'Embed Links' permission in the target channel.");
-                            DiscordUtil.sendMessage(channel, fallbackText, 0, false);
-                        }
-                    }
-                }.runTaskAsynchronously(TheGaffer.getPluginInstance());
+                sendEmbedWithFallback(channel, msg, fallbackText);
             } else {
                 Logger.getLogger("TheGaffer").warning("Discord channel '" + TheGaffer.getDiscordChannel()
                         + "' not found — job-start embed not sent.");
@@ -215,6 +218,38 @@ public class JobEventListener implements Listener {
     /** A Discord timestamp token, e.g. {@code <t:1719774000:R>} (R = relative "x ago", f = full local). */
     static String discordTimestamp(long epochMillis, char style) {
         return "<t:" + (epochMillis / 1000L) + ":" + style + ">";
+    }
+
+    /**
+     * Sends {@code embedMsg} to {@code channel} asynchronously via a blocking REST call.
+     * If the send returns null (Discord rejected it) or throws, logs the reason and falls back
+     * to posting {@code fallbackText} as a plain-text message instead.
+     * <p>
+     * Shared by {@code onJobStart} and {@code onJobEnd} so both have identical delivery semantics.
+     */
+    private void sendEmbedWithFallback(TextChannel channel, Message embedMsg, String fallbackText) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Exception error = null;
+                boolean delivered = false;
+                try {
+                    Message sent = DiscordUtil.sendMessageBlocking(channel, embedMsg, false);
+                    delivered = (sent != null);
+                } catch (Exception ex) {
+                    error = ex;
+                }
+                if (!delivered) {
+                    Logger.getLogger("TheGaffer").warning("Discord embed did not send"
+                            + (error != null
+                                ? " (" + error.getClass().getSimpleName() + ": " + error.getMessage() + ")"
+                                : " (Discord returned no message)")
+                            + " — falling back to a plain-text announcement. If this keeps happening,"
+                            + " check that the bot has the 'Embed Links' permission in the target channel.");
+                    DiscordUtil.sendMessage(channel, fallbackText, 0, false);
+                }
+            }
+        }.runTaskAsynchronously(TheGaffer.getPluginInstance());
     }
 
     private void sendDiscord(String message) {
