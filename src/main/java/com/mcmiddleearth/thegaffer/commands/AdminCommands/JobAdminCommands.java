@@ -65,6 +65,8 @@ public class JobAdminCommands implements TabExecutor{
         Methods.put("uninviteworker", 1);
         Methods.put("setradius", 1);
         Methods.put("clearworkerinven", 0);
+        Methods.put("promote", 1);
+        Methods.put("demote", 1);
     }
 
     /**
@@ -76,7 +78,8 @@ public class JobAdminCommands implements TabExecutor{
     private static final List<String> ADMIN_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
         "inviteworker", "uninviteworker", "setwarp", "setradius",
-        "clearworkerinven", "teleportall", "teleport", "listworkers"
+        "clearworkerinven", "teleportall", "teleport", "listworkers",
+        "promote", "demote"
     );
 
     // Player-taking actions (Methods value == 1, arg is a player name). NOTE: setradius
@@ -84,7 +87,7 @@ public class JobAdminCommands implements TabExecutor{
     // should not offer player names.
     private static final List<String> PLAYER_ACTIONS = Arrays.asList(
         "addhelper", "removehelper", "kickworker", "banworker", "unbanworker",
-        "inviteworker", "uninviteworker", "teleport"
+        "inviteworker", "uninviteworker", "teleport", "promote", "demote"
     );
 
     @Override

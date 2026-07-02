@@ -318,6 +318,56 @@ public class Job implements Listener {
         return HelperResponse.REMOVE_SUCCESS;
     }
 
+    /**
+     * Promotes an existing worker to helper status.
+     * The player stays in the workers list so they retain build rights
+     * (isPlayerWorking still returns true). Only adds to helpers — does NOT
+     * re-run the online/permission checks that addHelper enforces (the player
+     * is already a member).
+     *
+     * @return PROMOTE_SUCCESS, or a failure HelperResponse if invalid
+     */
+    public PromoteResponse promoteWorkerToHelper(UUID uuid) {
+        if (!workers.contains(uuid)) {
+            return PromoteResponse.NOT_A_WORKER;
+        }
+        if (helpers.contains(uuid)) {
+            return PromoteResponse.ALREADY_HELPER;
+        }
+        helpers.add(uuid);
+        if (glowing) {
+            addHelperTeam(Util.nameOf(uuid));
+        }
+        setDirty(true);
+        return PromoteResponse.PROMOTE_SUCCESS;
+    }
+
+    /**
+     * Demotes a helper back to a standard worker.
+     * Removes from helpers; ensures the player remains in workers so that
+     * isPlayerWorking continues to return true and build rights are preserved.
+     *
+     * @return DEMOTE_SUCCESS, or a failure response if the player is not a helper
+     */
+    public DemoteResponse demoteHelper(UUID uuid) {
+        if (!helpers.contains(uuid)) {
+            return DemoteResponse.NOT_A_HELPER;
+        }
+        helpers.remove(uuid);
+        if (glowing) {
+            removeHelperTeam(Util.nameOf(uuid));
+        }
+        // Ensure the demoted helper is still a worker so build rights are kept
+        if (!workers.contains(uuid)) {
+            workers.add(uuid);
+            if (glowing) {
+                addWorkerTeam(Util.nameOf(uuid));
+            }
+        }
+        setDirty(true);
+        return DemoteResponse.DEMOTE_SUCCESS;
+    }
+
     public WorkerResponse addWorker(OfflinePlayer p) {
         if (workers.contains(p.getUniqueId())) {
             return WorkerResponse.ALREADY_WORKER;

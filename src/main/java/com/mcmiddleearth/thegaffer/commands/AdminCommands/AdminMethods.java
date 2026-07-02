@@ -64,6 +64,8 @@ public class AdminMethods {
         Methods.put("uninviteworker", 1);
         Methods.put("setradius", 1);
         Methods.put("clearworkerinven", 0);
+        Methods.put("promote", 1);
+        Methods.put("demote", 1);
     }
 
     public GafferResponses.GafferResponse addhelper(String arg) {
@@ -175,6 +177,16 @@ public class AdminMethods {
             ls.add(Bukkit.getOfflinePlayer(pname));
         }
         return job.uninviteWorker(ls);
+    }
+
+    public GafferResponses.GafferResponse promote(String arg) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(arg);
+        return job.promoteWorkerToHelper(target.getUniqueId());
+    }
+
+    public GafferResponses.GafferResponse demote(String arg) {
+        OfflinePlayer target = Bukkit.getOfflinePlayer(arg);
+        return job.demoteHelper(target.getUniqueId());
     }
 
     public GafferResponses.GafferResponse setradius(String arg) {
