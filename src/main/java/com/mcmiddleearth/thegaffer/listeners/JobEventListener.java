@@ -306,26 +306,6 @@ public class JobEventListener implements Listener {
         }.runTaskAsynchronously(TheGaffer.getPluginInstance());
     }
 
-    private void sendDiscord(String message) {
-        if ((TheGaffer.getDiscordChannel() != null) && (!TheGaffer.getDiscordChannel().equals("")))
-        {
-          DiscordSRV discordPlugin = DiscordSRV.getPlugin();
-          if (discordPlugin != null)
-          {
-            TextChannel channel = discordPlugin.getDestinationTextChannelForGameChannelName(TheGaffer.getDiscordChannel());
-            if (channel != null) {
-              DiscordUtil.sendMessage(channel, message, 0, false);
-            } else {
-              Logger.getLogger("TheGaffer").warning("Discord channel not found.");
-            }
-          }
-          else
-          {
-            Logger.getLogger("TheGaffer").warning("DiscordSRV plugin not found.");
-          }
-        }
-    }
-    
     // ---- /job listen protection warnings (QA item 1) ---------------------------------
     // /job listen fills TheGaffer.getListening(); these two handlers are what finally read
     // it. On a protection VIOLATION (event.isBlocked() == true) every online listener is

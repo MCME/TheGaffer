@@ -111,6 +111,7 @@ public class GafferResponses {
 
         ALREADY_BANNED("%name% is already banned from %job%.", false),
         ALREADY_UNBANNED("%name% was not banned from %job%.", false),
+        CANNOT_BAN_OWNER("You can't ban the owner of %job%.", false),
         BAN_SUCCESS("Successfully banned %name%.", true),
         UNBAN_SUCCESS("Successfully unbanned %name%.", true);
 

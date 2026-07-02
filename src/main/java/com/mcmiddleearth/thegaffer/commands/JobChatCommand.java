@@ -20,11 +20,14 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.JobChat;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import java.util.Collections;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 /**
@@ -32,7 +35,16 @@ import org.bukkit.entity.Player;
  * single message to the player's job. Runs on the main thread, so job lookups
  * are safe.
  */
-public class JobChatCommand implements CommandExecutor {
+public class JobChatCommand implements CommandExecutor, TabCompleter {
+
+    /**
+     * The argument is free-text chat, not a player target — return no suggestions so
+     * Bukkit doesn't fall back to offering online player names (which read as a target).
+     */
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        return Collections.emptyList();
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

@@ -455,6 +455,11 @@ public class Job implements Listener {
 
     public BanWorkerResponse banWorker(List<OfflinePlayer> ps) {
         for (OfflinePlayer p : ps) {
+            // The owner can never be banned from their own job (prevents self-ban and
+            // orphaning). They must transfer ownership or stop the job instead.
+            if (p.getUniqueId().equals(owner)) {
+                return BanWorkerResponse.CANNOT_BAN_OWNER;
+            }
             if (workers.contains(p.getUniqueId())) {
                 workers.remove(p.getUniqueId());
                 removeWorkerTeam(p.getName());

@@ -230,21 +230,41 @@ public class JobCommand implements TabExecutor {
                 return true;
             }
             if (args[0].equalsIgnoreCase("check")) {
-                if (player.hasPermission(PermissionsUtil.getJoinPermission())) {
-                    if (JobDatabase.getActiveJobs().size() > 0) {
-                        Component out = Component.text("Running Jobs:", NamedTextColor.GRAY);
-                        for (String jobName : JobDatabase.getActiveJobs().keySet()) {
-                            Job job = JobDatabase.getActiveJobs().get(jobName);
-                            out = out.append(Component.newline())
-                                    .append(Msg.button(jobName, NamedTextColor.AQUA, "/job join " + jobName, "Click to join " + jobName))
-                                    .append(Component.text(" with " + Util.nameOf(job.getOwner()) + " (" + job.getWorkers().size() + ")", NamedTextColor.GRAY));
-                        }
-                        player.sendMessage(out);
-                    } else {
-                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.GRAY));
-                    }
-                } else {
+                if (!player.hasPermission(PermissionsUtil.getJoinPermission())) {
                     player.sendMessage(Component.text("You don't have permission.", NamedTextColor.RED));
+                    return true;
+                }
+                // /job check <job> — show that job's details with a clickable Join, so the
+                // player gets a choice instead of joining straight from the list.
+                if (args.length > 1) {
+                    Job job = JobDatabase.getActiveJobs().get(args[1]);
+                    if (job == null) {
+                        player.sendMessage(Component.text("No job running by the name of ", NamedTextColor.RED)
+                                .append(Component.text(args[1], NamedTextColor.AQUA))
+                                .append(Component.text(" — use ", NamedTextColor.RED))
+                                .append(Msg.button("/job check", NamedTextColor.AQUA, "/job check", "List running jobs"))
+                                .append(Component.text(" to see running jobs.", NamedTextColor.RED)));
+                        return true;
+                    }
+                    player.sendMessage(job.getInfo());
+                    player.sendMessage(Component.text("  ")
+                            .append(Msg.button("[ ▶ Join " + job.getName() + " ]", NamedTextColor.GREEN,
+                                    "/job join " + job.getName(), "Join " + job.getName())));
+                    return true;
+                }
+                // /job check — list running jobs; clicking one opens its details (not an instant join).
+                if (JobDatabase.getActiveJobs().size() > 0) {
+                    Component out = Component.text("Running Jobs:", NamedTextColor.GRAY)
+                            .append(Component.text(" (click a job for details)", NamedTextColor.DARK_GRAY));
+                    for (String jobName : JobDatabase.getActiveJobs().keySet()) {
+                        Job job = JobDatabase.getActiveJobs().get(jobName);
+                        out = out.append(Component.newline())
+                                .append(Msg.button(jobName, NamedTextColor.AQUA, "/job check " + jobName, "View details for " + jobName))
+                                .append(Component.text(" with " + Util.nameOf(job.getOwner()) + " (" + job.getWorkers().size() + ")", NamedTextColor.GRAY));
+                    }
+                    player.sendMessage(out);
+                } else {
+                    player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.GRAY));
                 }
                 return true;
             }
@@ -326,6 +346,52 @@ public class JobCommand implements TabExecutor {
                 } else {
                     player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
                 }
+                return true;
+            }
+            // Owner/helper convenience aliases for the admin summon actions, scoped to the
+            // caller's own running job (the /job admin <job> teleport* forms still exist).
+            if (args[0].equalsIgnoreCase("teleportall")) {
+                Job job = JobDatabase.getJobWorking(player);
+                if (job == null || !(job.getOwner().equals(player.getUniqueId())
+                        || job.getHelpers().contains(player.getUniqueId()))) {
+                    player.sendMessage(Component.text("You must be the owner or a helper of a running job to summon its workers.", NamedTextColor.RED));
+                    return true;
+                }
+                job.bringAllWorkers(player.getLocation());
+                player.sendMessage(Component.text("Teleported all online workers in ", NamedTextColor.GREEN)
+                        .append(Component.text(job.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(" to you.", NamedTextColor.GREEN)));
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("teleport")) {
+                Job job = JobDatabase.getJobWorking(player);
+                if (job == null || !(job.getOwner().equals(player.getUniqueId())
+                        || job.getHelpers().contains(player.getUniqueId()))) {
+                    player.sendMessage(Component.text("You must be the owner or a helper of a running job to summon a worker.", NamedTextColor.RED));
+                    return true;
+                }
+                if (args.length < 2) {
+                    player.sendMessage(Component.text("Usage: ", NamedTextColor.GRAY)
+                            .append(Component.text("/job teleport <player>", NamedTextColor.AQUA)));
+                    return true;
+                }
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null || !target.isOnline()) {
+                    player.sendMessage(Component.text(args[1] + " is not online.", NamedTextColor.RED));
+                    return true;
+                }
+                if (!job.getWorkers().contains(target.getUniqueId())
+                        && !job.getHelpers().contains(target.getUniqueId())) {
+                    player.sendMessage(Component.text(target.getName() + " is not a worker on ", NamedTextColor.RED)
+                            .append(Component.text(job.getName(), NamedTextColor.AQUA))
+                            .append(Component.text(".", NamedTextColor.RED)));
+                    return true;
+                }
+                target.teleport(player.getLocation());
+                player.sendMessage(Component.text("Teleported ", NamedTextColor.GREEN)
+                        .append(Component.text(target.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(" to you.", NamedTextColor.GREEN)));
+                target.sendMessage(Component.text("You were summoned to the job leader.", NamedTextColor.GRAY));
                 return true;
             }
             if (args[0].equalsIgnoreCase("who")) {
@@ -499,6 +565,21 @@ public class JobCommand implements TabExecutor {
                     if (JobDatabase.getActiveJobs().size() > 0){
                         Job jobToLeave = JobDatabase.getJobWorking(player);
                         if(jobToLeave != null) {
+                            // The owner can't just leave — that would orphan the job (they'd
+                            // stay owner-of-record with no way back). Direct them to hand off
+                            // or close it instead.
+                            if (jobToLeave.getOwner().equals(player.getUniqueId())) {
+                                player.sendMessage(Component.text("You own ", NamedTextColor.RED)
+                                        .append(Component.text(jobToLeave.getName(), NamedTextColor.AQUA))
+                                        .append(Component.text(" — hand it off with ", NamedTextColor.RED))
+                                        .append(Msg.button("/job transfer <helper>", NamedTextColor.AQUA,
+                                                "/job transfer ", "Transfer ownership to a helper"))
+                                        .append(Component.text(" or close it with ", NamedTextColor.RED))
+                                        .append(Msg.button("/job stop", NamedTextColor.AQUA,
+                                                "/job stop " + jobToLeave.getName(), "Stop " + jobToLeave.getName()))
+                                        .append(Component.text(" instead.", NamedTextColor.RED)));
+                                return true;
+                            }
                             GafferResponse resp = jobToLeave.leaveJob(player);
                             if (resp.isSuccessful()) {
                                 player.sendMessage(Component.text("You left the job ", NamedTextColor.GRAY)
@@ -770,7 +851,7 @@ public class JobCommand implements TabExecutor {
                 help = help.append(Component.newline())
                         .append(Component.text("  create, stop, pause, unpause, prep, listen, admin, debug", NamedTextColor.AQUA))
                         .append(Component.newline())
-                        .append(Component.text("  manage [job], transfer <player>", NamedTextColor.AQUA));
+                        .append(Component.text("  manage [job], transfer <player>, teleportall, teleport <player>", NamedTextColor.AQUA));
             }
             player.sendMessage(help);
             return true;
@@ -780,13 +861,53 @@ public class JobCommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        // B4 — no-arg subcommands: return empty list so Bukkit doesn't show player names
-        if (args[0].equalsIgnoreCase("check")
-                || args[0].equalsIgnoreCase("leave")
+        // First word only: complete the subcommand name. Never re-suggest a subcommand
+        // once a space is typed — this is what made /job create <tab> keep offering
+        // "create" and no-arg subcommands leak completions into later argument slots.
+        if (args.length == 1) {
+            List<String> actions = new ArrayList<>();
+            actions.add("archive");
+            actions.add("border");
+            actions.add("warpto");
+            actions.add("info");
+            actions.add("join");
+            actions.add("check");
+            actions.add("leave");
+            actions.add("mine");
+            actions.add("who");
+            actions.add("stats");
+            actions.add("leaderboard");
+            actions.add("top");
+            if (sender.hasPermission(PermissionsUtil.getCreatePermission())) {
+                actions.add("create");
+                actions.add("stop");
+                actions.add("debug");
+                actions.add("prep");
+                actions.add("pause");
+                actions.add("unpause");
+                actions.add("admin");
+                actions.add("listen");
+                actions.add("manage");
+                actions.add("transfer");
+                actions.add("teleportall");
+                actions.add("teleport");
+            }
+            String prefix = args[0];
+            if (!prefix.isEmpty()) {
+                actions.removeIf(a -> !a.startsWith(prefix.toLowerCase()));
+            }
+            Collections.sort(actions);
+            return actions;
+        }
+        // No-argument subcommands: return empty (never player names) for arg slots 2+.
+        if (args[0].equalsIgnoreCase("leave")
                 || args[0].equalsIgnoreCase("mine")
                 || args[0].equalsIgnoreCase("border")
                 || args[0].equalsIgnoreCase("listen")
-                || args[0].equalsIgnoreCase("prep")) {
+                || args[0].equalsIgnoreCase("prep")
+                || args[0].equalsIgnoreCase("teleportall")
+                || args[0].equalsIgnoreCase("create")
+                || args[0].equalsIgnoreCase("debug")) {
             return Collections.emptyList();
         }
         // transfer: second arg is a player name — handled separately below with helper-name completions
@@ -852,10 +973,13 @@ public class JobCommand implements TabExecutor {
             }
             return Collections.emptyList();
         }
-        // who: complete active job names (inactive jobs also valid but too many to list)
+        // who: complete active job names at the job-name slot only
         if (args[0].equalsIgnoreCase("who")) {
+            if (args.length != 2) {
+                return Collections.emptyList();
+            }
             List<String> jobs = new ArrayList<>();
-            String prefix = args.length > 1 ? args[1] : "";
+            String prefix = args[1];
             for (String s : JobDatabase.getActiveJobs().keySet()) {
                 if (s.startsWith(prefix)) {
                     jobs.add(s);
@@ -863,10 +987,13 @@ public class JobCommand implements TabExecutor {
             }
             return jobs;
         }
-        // B3 + info: complete job names even when no space typed yet (args.length == 1)
+        // info: complete active job names at the job-name slot only
         if (args[0].equalsIgnoreCase("info")) {
+            if (args.length != 2) {
+                return Collections.emptyList();
+            }
             List<String> jobs = new ArrayList<>();
-            String prefix = args.length > 1 ? args[1] : "";
+            String prefix = args[1];
             for (String s : JobDatabase.getActiveJobs().keySet()) {
                 if (s.startsWith(prefix)) {
                     jobs.add(s);
@@ -880,11 +1007,14 @@ public class JobCommand implements TabExecutor {
             jobs.addAll(jobsUnique);
             return jobs;
         }
-        // B3 — active-job completions for join/stop/pause/unpause/warpto
+        // Active-job-name completions for check/join/stop/pause/unpause/warpto (job-name slot only)
         if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("stop")
                 || args[0].equalsIgnoreCase("pause") || args[0].equalsIgnoreCase("unpause")
-                || args[0].equalsIgnoreCase("warpto")) {
-            String prefix = args.length > 1 ? args[1] : "";
+                || args[0].equalsIgnoreCase("warpto") || args[0].equalsIgnoreCase("check")) {
+            if (args.length != 2) {
+                return Collections.emptyList();
+            }
+            String prefix = args[1];
             List<String> jobs = new ArrayList<>();
             for (String s : JobDatabase.getActiveJobs().keySet()) {
                 if (s.startsWith(prefix)) {
@@ -943,38 +1073,28 @@ public class JobCommand implements TabExecutor {
             }
             return Collections.emptyList();
         }
-        // Root tab-complete: subcommand list — B2 adds admin + listen
-        List<String> actions = new ArrayList<>();
-        actions.add("archive");
-        actions.add("border");
-        actions.add("warpto");
-        actions.add("info");
-        actions.add("join");
-        actions.add("check");
-        actions.add("leave");
-        actions.add("mine");
-        actions.add("who");
-        actions.add("stats");
-        actions.add("leaderboard");
-        actions.add("top");
-        if (sender.hasPermission(PermissionsUtil.getCreatePermission())) {
-            actions.add("create");  // #1
-            actions.add("stop");
-            actions.add("debug");
-            actions.add("prep");
-            actions.add("pause");
-            actions.add("unpause");
-            actions.add("admin");   // B2
-            actions.add("listen");  // B2
-            actions.add("manage");  // J2
-            actions.add("transfer"); // J2
+        // teleport: complete the caller's own job's worker/helper names (name slot only)
+        if (args[0].equalsIgnoreCase("teleport")) {
+            if (args.length == 2 && sender instanceof Player) {
+                Job tpJob = JobDatabase.getJobWorking((Player) sender);
+                if (tpJob != null) {
+                    String prefix = args[1];
+                    List<String> names = new ArrayList<>();
+                    for (java.util.UUID u : tpJob.getWorkers()) {
+                        String n = Util.nameOf(u);
+                        if (n.startsWith(prefix)) { names.add(n); }
+                    }
+                    for (java.util.UUID u : tpJob.getHelpers()) {
+                        String n = Util.nameOf(u);
+                        if (n.startsWith(prefix)) { names.add(n); }
+                    }
+                    return names;
+                }
+            }
+            return Collections.emptyList();
         }
-        // Filter by prefix if the user has started typing
-        String prefix = args[0];
-        if (!prefix.isEmpty()) {
-            actions.removeIf(a -> !a.startsWith(prefix.toLowerCase()));
-        }
-        Collections.sort(actions);
-        return actions;
+        // Any 2nd+ argument not handled above: no suggestions (prevents stray player-name
+        // completions and re-suggesting subcommands in later slots).
+        return Collections.emptyList();
     }
 }
