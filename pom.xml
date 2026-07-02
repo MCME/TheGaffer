@@ -41,6 +41,10 @@
             <id>Scarsz-Nexus</id>
             <url>https://nexus.scarsz.me/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>mikeprimm</id>
+            <url>https://repo.mikeprimm.com/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -85,6 +89,14 @@
                     <artifactId>adventure-platform-facet</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Dynmap Marker API — soft dependency (absent at runtime without Dynmap loaded) -->
+        <dependency>
+            <groupId>us.dynmap</groupId>
+            <artifactId>DynmapCoreAPI</artifactId>
+            <version>3.4</version>
             <scope>provided</scope>
         </dependency>
 
