@@ -705,7 +705,7 @@ public class JobCommand implements TabExecutor {
                     if (args.length > 2 && args[2].equalsIgnoreCase("json")) {
                         java.io.File f = StatsManager.writeFeed();
                         player.sendMessage(Component.text(
-                                "Feed queued → " + f.getName(), NamedTextColor.GREEN));
+                                "Feed queued → " + f.getAbsolutePath(), NamedTextColor.GREEN));
                         return true;
                     }
                     // /job stats export        → CSV (existing behaviour)

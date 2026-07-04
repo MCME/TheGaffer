@@ -60,7 +60,7 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job warpto <job>` | Teleport to a job's warp point. |
 | `/job archive [page]` | Browse finished (archived) jobs. |
 | `/job stats <job\|player>` | Show a job's recap, or a player's lifetime totals. |
-| `/job leaderboard [placed\|broke\|active]` | Top builders (alias: `/job top`). |
+| `/job leaderboard [placed\|broke\|active\|time]` | Top builders ranked by the chosen metric (`time` = active build time). Alias: `/job top`. |
 | `/job who [job]` | Show the live roster for a job: Owner, Helpers, and Workers, each coloured **green** (online) or **grey** (offline). Omit `[job]` to see your current job's roster. |
 | `/job border` | Toggle the particle outline marking your current job's build-area perimeter (purely visual, fly-through — no movement effect). |
 | `/jobchat [message]` | Toggle job-only chat, or send a one-off message to your job (alias: `/jc`). |
@@ -74,7 +74,8 @@ A player can be in **only one job at a time** (enforced). Jobs may be **private*
 | `/job pause <job>` / `/job unpause <job>` | Temporarily suspend / resume building in a job. |
 | `/job listen` | Toggle alerts when someone tries to edit the map outside a job. |
 | `/job prep` | Stash your inventory (and restore it) while setting up. |
-| `/job stats export` | Export all recorded stats to a CSV file. |
+| `/job stats export` | Export all recorded stats to a CSV file (`stats/export-<timestamp>.csv`). |
+| `/job stats export json` | Write the machine-readable JSON feed (`stats/leaderboard.json`); reports the full path on completion. |
 | `/jobadmin` (or `/job admin <job> <action> …`) | Manage a job — see below. |
 
 ### `/job manage [job]` (staff)
@@ -117,6 +118,7 @@ Transfer ownership of your current job to another player. The target **must alre
 | `allowRolePing` | Discord roles pinged when a job is announced (e.g. `Jobber`). Only these roles are pinged — never `@everyone` or individual players. Empty/omit = announce with no ping. |
 | `glowing.enabled` / `glowing.helperColor` / `glowing.workerColor` | Team-glow toggle and colours. |
 | `showJobBorder` | Show players a particle outline (`END_ROD`, white glow) tracing the job's build-area perimeter while they're in a job. Purely visual — no movement effect, players can cross freely. Toggle per-player with `/job border`. |
+| `stats.activeIdleThresholdSeconds` | Idle gap (in seconds, default **60**) that separates "still building" from "walked away" when calculating active build time. A gap longer than this value is not counted as build time. |
 | `unprotectedworlds` | Worlds where the map protection does not apply. |
 | `externalProtectionHandlers` | Allow/deny hooks for integrating other protection plugins. |
 
@@ -136,11 +138,15 @@ All are **soft dependencies** — TheGaffer runs fine without any of them; the r
 
 TheGaffer records what happens during each job and exposes it four ways.
 
-- **What's tracked:** per job — owner, project, world, location, duration, the set of participants, and per-builder **blocks placed / broken**. Only *successful, in-job, in-bounds* actions are counted (staff building outside a job's area are not credited).
-- **`/job stats <job>`** — a recap of a finished (or running) job. **`/job stats <player>`** — a player's lifetime totals.
-- **`/job leaderboard [placed|broke|active]`** — cross-job rankings, with clickable names.
+- **What's tracked:** per job — owner, project, world, location, duration, the set of participants, and per-builder **blocks placed / broken / active build time**. Only *successful, in-job, in-bounds* actions are counted (staff building outside a job's area are not credited).
+- **Active build time** — the total duration a builder was actively placing or breaking blocks, ignoring idle gaps. An idle gap longer than `stats.activeIdleThresholdSeconds` (default **60 s**) resets the "still building" window, so AFK time is not counted. Accessible via `/job stats <player>` ("Active build time" line) and ranked by `/job leaderboard time`.
+- **`/job stats <job>`** — a recap of a finished (or running) job. **`/job stats <player>`** — a player's lifetime totals (placed, broken, active build time, tier, streak).
+- **`/job leaderboard [placed|broke|active|time]`** — cross-job rankings. `time` ranks builders by active build time; the existing `placed`, `broke`, and `active` keys still work. Clickable names. Alias: `/job top`.
 - **Discord recap** — appended to the job-end Discord post.
 - **`/job stats export`** — writes every record to `plugins/TheGaffer/stats/export-<timestamp>.csv` (UTF-8) for spreadsheets or dashboards.
+- **`/job stats export json`** — writes a machine-readable JSON feed to `plugins/TheGaffer/stats/leaderboard.json`. The feed is also rebuilt automatically on every job-end. It contains per-player and per-project aggregates, progression tiers/milestones/streaks, and week/month + all-time leaderboards — intended for a website or infographics frontend.
+
+> **Pending — custom-block placements:** block events fired by MCME-Architect's special blocks are not yet wired into stats. TheGaffer already exposes a `recordExternalBuild` hook for this; the integration is tracked in `MCME-Architect/docs/TODO-thegaffer-stats-integration.md` and will land with the Architect rework. Until then, stats and active-time reflect vanilla-block building only.
 
 Live counts survive a restart (they ride the same periodic save as jobs), so stats aren't lost if the server cycles mid-job.
 
@@ -184,7 +190,8 @@ plugins/TheGaffer/
 └── stats/
     ├── <job>-<endMillis>.yml      # one record per finished job
     ├── active/<job>-0.yml         # in-progress counters (durable across restarts)
-    └── export-<timestamp>.csv     # produced by /job stats export
+    ├── export-<timestamp>.csv     # produced by /job stats export
+    └── leaderboard.json           # machine-readable feed (rebuilt on job-end & /job stats export json)
 ```
 
 Players are identified by **UUID** throughout (so a rename can't dodge a ban or lose job membership); names are resolved for display only.
