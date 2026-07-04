@@ -31,7 +31,7 @@ public class StatsManager {
 
     private static final Map<String, JobStats> live = new HashMap<>();
 
-    public enum SortKey { PLACED, BROKE, ACTIVE }
+    public enum SortKey { PLACED, BROKE, ACTIVE, TIME }
 
     public static class PlayerAggregate {
         private final UUID id;
@@ -39,12 +39,14 @@ public class StatsManager {
         private long broke;
         private int jobs;
         private long durationMillis;
+        private long activeBuildMillis;
         public PlayerAggregate(UUID id) { this.id = id; }
         public UUID getId() { return id; }
         public long getPlaced() { return placed; }
         public long getBroke() { return broke; }
         public int getJobs() { return jobs; }
         public long getDurationMillis() { return durationMillis; }
+        public long getActiveBuildMillis() { return activeBuildMillis; }
     }
 
     public static class ProjectAggregate {
@@ -56,6 +58,7 @@ public class StatsManager {
         private long durationMillis;
         private long firstStart = Long.MAX_VALUE;
         private long lastEnd;
+        private long activeBuildMillis;
         private final Map<UUID, JobStats.BuilderStat> perBuilder = new HashMap<>();
         private final List<String> jobNames = new ArrayList<>();
 
@@ -67,6 +70,7 @@ public class StatsManager {
         public long getPlaced() { return placed; }
         public long getBroke() { return broke; }
         public long getDurationMillis() { return durationMillis; }
+        public long getActiveBuildMillis() { return activeBuildMillis; }
         public long getFirstStart() { return firstStart == Long.MAX_VALUE ? 0L : firstStart; }
         public long getLastEnd() { return lastEnd; }
         public Map<UUID, JobStats.BuilderStat> getPerBuilder() { return java.util.Collections.unmodifiableMap(perBuilder); }
@@ -179,6 +183,7 @@ public class StatsManager {
             PlayerAggregate a = aggregate.computeIfAbsent(e.getKey(), PlayerAggregate::new);
             a.placed += e.getValue().getPlaced();
             a.broke += e.getValue().getBroke();
+            a.activeBuildMillis += e.getValue().getActiveMillis();
         }
     }
 
@@ -208,6 +213,7 @@ public class StatsManager {
         switch (key) {
             case BROKE:  cmp = Comparator.comparingLong(PlayerAggregate::getBroke); break;
             case ACTIVE: cmp = Comparator.comparingInt(PlayerAggregate::getJobs); break;
+            case TIME:   cmp = Comparator.comparingLong(PlayerAggregate::getActiveBuildMillis); break;
             default:     cmp = Comparator.comparingLong(PlayerAggregate::getPlaced); break;
         }
         all.sort(cmp.reversed());
@@ -248,6 +254,7 @@ public class StatsManager {
             JobStats.BuilderStat acc = agg.perBuilder.computeIfAbsent(e.getKey(), k -> new JobStats.BuilderStat());
             acc.addPlaced(e.getValue().getPlaced());
             acc.addBroke(e.getValue().getBroke());
+            agg.activeBuildMillis += e.getValue().getActiveMillis();
         }
     }
 
