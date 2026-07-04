@@ -208,7 +208,8 @@ public class TheGaffer extends JavaPlugin {
 
     /** External build hook: a cooperating plugin (Architect) reports a place/break it performed
      *  programmatically, so TheGaffer counts it like a vanilla block event. No-op if the player
-     *  isn't working a job or the location is out of bounds. Main thread. */
+     *  isn't working a job or the location is out of bounds. Must be called from the server main
+     *  thread; async invocation races the live-stats map and corrupts counts. */
     public static void recordExternalBuild(Player player, Location location, boolean place) {
         StatsManager.recordBuild(player, location, place);
     }

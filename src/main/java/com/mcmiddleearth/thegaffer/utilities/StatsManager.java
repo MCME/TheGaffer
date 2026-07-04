@@ -11,6 +11,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -128,7 +130,7 @@ public class StatsManager {
      * listener, or a cooperating plugin via {@link TheGaffer#recordExternalBuild}) is
      * responsible for filtering blocked events. Main thread.
      */
-    public static void recordBuild(org.bukkit.entity.Player player, org.bukkit.Location location, boolean place) {
+    public static void recordBuild(Player player, Location location, boolean place) {
         if (player == null || location == null) { return; }
         Job job = JobDatabase.getJobWorking(player);
         if (job == null || job.getBounds() == null) { return; }
