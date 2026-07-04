@@ -103,7 +103,12 @@ public class JobEventListener implements Listener {
                 final String fallbackText = emoji + " __**Info:**__ The job " + job.getName()
                         + " has ended " + endTimestamp + "."
                         + (stats != null ? "\n" + StatsManager.buildDiscordSummary(stats) : "");
-                final Message endMsg = new MessageBuilder().setEmbed(embed.build()).build();
+                // DiscordSRV's sendMessageBlocking returns null for a content-less
+                // (embed-only) message, so the embed silently never posts. Give it a short
+                // content line — the configured job emoji, or a default — the way the
+                // job-start message always carries the role-ping as content.
+                final String endContent = emoji.isEmpty() ? "🏁" : emoji;
+                final Message endMsg = new MessageBuilder().setContent(endContent).setEmbed(embed.build()).build();
                 sendEmbedWithFallback(channel, endMsg, fallbackText);
             } else {
                 Logger.getLogger("TheGaffer").warning("Discord channel '" + TheGaffer.getDiscordChannel()
@@ -253,7 +258,11 @@ public class JobEventListener implements Listener {
                     if (desc.length() > 4096) { desc = desc.substring(0, 4096); }
                     embed.setDescription(desc);
                 }
-                final Message msg = new MessageBuilder().setContent(ping).setEmbed(embed.build()).build();
+                // Content must be non-empty or DiscordSRV drops the embed (see onJobEnd):
+                // use the role-ping when configured, otherwise a small marker.
+                final Message msg = new MessageBuilder()
+                        .setContent(ping.isEmpty() ? "🛠" : ping)
+                        .setEmbed(embed.build()).build();
                 // Plain-text fallback for when the embed doesn't post — e.g. the bot lacks the
                 // "Embed Links" permission in the channel, or a DiscordSRV/JDA API change rejects the embed.
                 final String fallbackText = (ping.isEmpty() ? "" : ping + " ")
