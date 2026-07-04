@@ -38,6 +38,7 @@ public class JobStatsStorage {
         for (Map.Entry<UUID, JobStats.BuilderStat> e : s.getBuilders().entrySet()) {
             c.set("builders." + e.getKey() + ".placed", e.getValue().getPlaced());
             c.set("builders." + e.getKey() + ".broke", e.getValue().getBroke());
+            c.set("builders." + e.getKey() + ".activeMillis", e.getValue().getActiveMillis());
         }
         return c;
     }
@@ -59,7 +60,8 @@ public class JobStatsStorage {
             for (String key : builders.getKeys(false)) {
                 try {
                     UUID id = UUID.fromString(key);
-                    s.setBuilderStat(id, builders.getInt(key + ".placed"), builders.getInt(key + ".broke"));
+                    s.setBuilderStat(id, builders.getInt(key + ".placed"), builders.getInt(key + ".broke"),
+                            builders.getLong(key + ".activeMillis", 0L));
                 } catch (IllegalArgumentException ignored) { }
             }
         }

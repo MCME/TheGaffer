@@ -26,8 +26,9 @@ class JobStatsStorageTest {
         JobStats stats = new JobStats("river", owner, "nothing", "world", 10, -20, 100, 1000L, 5000L);
         stats.addParticipant(owner);
         stats.addParticipant(builder);
-        stats.recordPlace(builder, 7);
-        stats.recordBreak(builder, 3);
+        stats.recordPlace(builder, 7, 1_000L, 60_000L);
+        stats.recordPlace(builder, 0, 5_000L, 60_000L); // 4 s gap → accrues 4000 ms
+        stats.recordBreak(builder, 3, 200_000L, 60_000L); // gap >threshold → no accrual
 
         String yaml = JobStatsStorage.toYaml(stats).saveToString();
         YamlConfiguration reloaded = new YamlConfiguration();
@@ -45,5 +46,6 @@ class JobStatsStorageTest {
         assertTrue(loaded.getParticipants().contains(builder));
         assertEquals(7, loaded.getBuilders().get(builder).getPlaced());
         assertEquals(3, loaded.getBuilders().get(builder).getBroke());
+        assertEquals(4_000L, loaded.getBuilders().get(builder).getActiveMillis());
     }
 }
