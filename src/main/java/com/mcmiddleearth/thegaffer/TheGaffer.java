@@ -73,6 +73,7 @@ public class TheGaffer extends JavaPlugin {
     static boolean discordEnabled;
     static boolean jobBorderEnabled;
     static boolean jobDescription;
+    static int activeIdleThresholdSeconds;
     static boolean glowing;
     static String helperColor;
     static String workerColor;
@@ -159,6 +160,7 @@ public class TheGaffer extends JavaPlugin {
     public static void setupConfig() {
         pluginConfig = TheGaffer.getPluginInstance().getConfig();
         jobDescription = pluginConfig.getBoolean("jobDescription", false);
+        activeIdleThresholdSeconds = pluginConfig.getInt("stats.activeIdleThresholdSeconds", 60);
         discordEnabled = pluginConfig.contains("discord");
         discordChannel = pluginConfig.getString("discord.channel", null);
         discordJobEmoji = pluginConfig.getString("discord.emoji", "");
@@ -277,6 +279,10 @@ public class TheGaffer extends JavaPlugin {
 
     public static boolean isJobDescription() {
         return jobDescription;
+    }
+
+    public static int getActiveIdleThresholdSeconds() {
+        return activeIdleThresholdSeconds;
     }
 
     public static boolean isGlowing() {

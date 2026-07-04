@@ -12,6 +12,8 @@ public class JobStats {
     public static class BuilderStat {
         private int placed;
         private int broke;
+        private long activeMillis;
+        private transient long lastBuildMillis;
 
         public BuilderStat() { }
         public BuilderStat(int placed, int broke) { this.placed = placed; this.broke = broke; }
@@ -20,6 +22,15 @@ public class JobStats {
         public int getBroke() { return broke; }
         public void addPlaced(int n) { this.placed += n; }
         public void addBroke(int n) { this.broke += n; }
+        public long getActiveMillis() { return activeMillis; }
+        public void setActiveMillis(long activeMillis) { this.activeMillis = activeMillis; }
+
+        public void recordActivity(long nowMillis, long thresholdMillis) {
+            if (lastBuildMillis > 0 && nowMillis - lastBuildMillis <= thresholdMillis) {
+                activeMillis += nowMillis - lastBuildMillis;
+            }
+            lastBuildMillis = nowMillis;
+        }
     }
 
     private String name;
@@ -55,20 +66,40 @@ public class JobStats {
         }
     }
 
-    public void recordPlace(UUID id, int n) {
-        builders.computeIfAbsent(id, k -> new BuilderStat()).addPlaced(n);
+    public void recordPlace(UUID id, int n, long now, long threshold) {
+        BuilderStat stat = builders.computeIfAbsent(id, k -> new BuilderStat());
+        stat.addPlaced(n);
+        stat.recordActivity(now, threshold);
         addParticipant(id);
     }
 
-    public void recordBreak(UUID id, int n) {
-        builders.computeIfAbsent(id, k -> new BuilderStat()).addBroke(n);
+    /** Convenience overload for callers that do not track time (e.g. test helpers). */
+    public void recordPlace(UUID id, int n) {
+        recordPlace(id, n, System.currentTimeMillis(), Long.MAX_VALUE);
+    }
+
+    public void recordBreak(UUID id, int n, long now, long threshold) {
+        BuilderStat stat = builders.computeIfAbsent(id, k -> new BuilderStat());
+        stat.addBroke(n);
+        stat.recordActivity(now, threshold);
         addParticipant(id);
+    }
+
+    /** Convenience overload for callers that do not track time (e.g. test helpers). */
+    public void recordBreak(UUID id, int n) {
+        recordBreak(id, n, System.currentTimeMillis(), Long.MAX_VALUE);
     }
 
     /** Restores stored counts directly (idempotent, unlike the additive recordPlace/recordBreak). */
     public void setBuilderStat(UUID id, int placed, int broke) {
         builders.put(id, new BuilderStat(placed, broke));
         addParticipant(id);
+    }
+
+    /** Restores stored counts and active millis directly (idempotent). */
+    public void setBuilderStat(UUID id, int placed, int broke, long activeMillis) {
+        setBuilderStat(id, placed, broke);
+        builders.get(id).setActiveMillis(activeMillis);
     }
 
     public long getDurationMillis() {

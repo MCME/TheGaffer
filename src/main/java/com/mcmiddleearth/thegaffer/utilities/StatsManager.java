@@ -114,12 +114,12 @@ public class StatsManager {
 
     public static void recordPlace(String jobName, UUID id) {
         JobStats s = live.get(jobName);
-        if (s != null) { s.recordPlace(id, 1); }
+        if (s != null) { s.recordPlace(id, 1, System.currentTimeMillis(), TheGaffer.getActiveIdleThresholdSeconds() * 1000L); }
     }
 
     public static void recordBreak(String jobName, UUID id) {
         JobStats s = live.get(jobName);
-        if (s != null) { s.recordBreak(id, 1); }
+        if (s != null) { s.recordBreak(id, 1, System.currentTimeMillis(), TheGaffer.getActiveIdleThresholdSeconds() * 1000L); }
     }
 
     /**

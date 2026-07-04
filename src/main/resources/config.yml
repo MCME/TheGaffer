@@ -54,3 +54,8 @@ glowing:
 # in a job. Purely visual (no damage / no blocking). Players can also toggle it per-person
 # with /job border. Set false to disable the feature server-wide.
 showJobBorder: true
+# Statistics configuration
+stats:
+  # Maximum gap (in seconds) between two consecutive block events that still counts as
+  # active build time. Gaps larger than this are treated as idle and not accumulated.
+  activeIdleThresholdSeconds: 60
