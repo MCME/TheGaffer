@@ -17,11 +17,7 @@ package com.mcmiddleearth.thegaffer.listeners;
 
 import com.mcmiddleearth.thegaffer.events.JobProtectionBlockBreakEvent;
 import com.mcmiddleearth.thegaffer.events.JobProtectionBlockPlaceEvent;
-import com.mcmiddleearth.thegaffer.storage.Job;
-import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.StatsManager;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -30,32 +26,15 @@ public class StatsListener implements Listener {
 
     @EventHandler
     public void onPlace(JobProtectionBlockPlaceEvent event) {
-        Job job = countableJob(event.getPlayer(), event.getLocation(), event.isBlocked());
-        if (job != null) {
-            StatsManager.recordPlace(job.getName(), event.getPlayer().getUniqueId());
+        if (!event.isBlocked()) {
+            StatsManager.recordBuild(event.getPlayer(), event.getLocation(), true);
         }
     }
 
     @EventHandler
     public void onBreak(JobProtectionBlockBreakEvent event) {
-        Job job = countableJob(event.getPlayer(), event.getLocation(), event.isBlocked());
-        if (job != null) {
-            StatsManager.recordBreak(job.getName(), event.getPlayer().getUniqueId());
+        if (!event.isBlocked()) {
+            StatsManager.recordBuild(event.getPlayer(), event.getLocation(), false);
         }
-    }
-
-    /** Returns the player's active job iff the action was successful and inside that job's bounds. */
-    private Job countableJob(Player player, Location loc, boolean blocked) {
-        if (blocked || player == null || loc == null) {
-            return null;
-        }
-        Job job = JobDatabase.getJobWorking(player);
-        if (job == null || job.getBounds() == null) {
-            return null;
-        }
-        if (!job.getBounds().contains(loc.getBlockX(), loc.getBlockZ())) {
-            return null;
-        }
-        return job;
     }
 }

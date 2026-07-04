@@ -206,6 +206,13 @@ public class TheGaffer extends JavaPlugin {
         return getBuildProtection(player, location).getMessage();
     }
 
+    /** External build hook: a cooperating plugin (Architect) reports a place/break it performed
+     *  programmatically, so TheGaffer counts it like a vanilla block event. No-op if the player
+     *  isn't working a job or the location is out of bounds. Main thread. */
+    public static void recordExternalBuild(Player player, Location location, boolean place) {
+        StatsManager.recordBuild(player, location, place);
+    }
+
     public static Server getServerInstance() {
         return serverInstance;
     }

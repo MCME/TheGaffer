@@ -44,4 +44,11 @@ class ProtectionApiContractTest {
         assertTrue(Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers()),
                 "getBuildProtectionMessage must remain public static");
     }
+
+    @Test
+    void recordExternalBuildSignatureIsStable() throws NoSuchMethodException {
+        Method m = TheGaffer.class.getMethod("recordExternalBuild", Player.class, Location.class, boolean.class);
+        assertEquals(void.class, m.getReturnType(), "recordExternalBuild must return void (reflective contract with MCME-Architect)");
+        assertTrue(Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers()), "recordExternalBuild must remain public static");
+    }
 }

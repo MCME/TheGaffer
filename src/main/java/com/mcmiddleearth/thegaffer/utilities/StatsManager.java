@@ -120,6 +120,26 @@ public class StatsManager {
         if (s != null) { s.recordBreak(id, 1); }
     }
 
+    /**
+     * Unified counting path for a successful, in-bounds block action: resolves the player's
+     * active job and folds one place ({@code place == true}) or break into its live stats.
+     * No-op if the player isn't working a job, the job has no bounds, or the location is
+     * outside those bounds. <b>Assumes the action is allowed</b> — the caller (the block-event
+     * listener, or a cooperating plugin via {@link TheGaffer#recordExternalBuild}) is
+     * responsible for filtering blocked events. Main thread.
+     */
+    public static void recordBuild(org.bukkit.entity.Player player, org.bukkit.Location location, boolean place) {
+        if (player == null || location == null) { return; }
+        Job job = JobDatabase.getJobWorking(player);
+        if (job == null || job.getBounds() == null) { return; }
+        if (!job.getBounds().contains(location.getBlockX(), location.getBlockZ())) { return; }
+        if (place) {
+            recordPlace(job.getName(), player.getUniqueId());
+        } else {
+            recordBreak(job.getName(), player.getUniqueId());
+        }
+    }
+
     /** Finalizes a job: stamps endTime, persists the record, clears the live entry. */
     public static JobStats finish(Job job) {
         return finishInternal(job.getName(), System.currentTimeMillis(), true);
