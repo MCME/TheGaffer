@@ -2,7 +2,7 @@ package com.mcmiddleearth.thegaffer.utilities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.mcmiddleearth.thegaffer.utilities.JobCreationService.Outcome;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -53,29 +53,31 @@ class JobCreationServiceTest {
     }
 
     @Test
-    void validateNameRejectsEmptyName() {
-        assertEquals(Outcome.EMPTY_NAME, JobCreationService.validateName("", false, false));
-        assertEquals(Outcome.EMPTY_NAME, JobCreationService.validateName(null, false, false));
+    void resolveFreeNameReturnsBaseWhenFree() {
+        assertEquals("Wall", JobCreationService.resolveFreeName("Wall", n -> false));
     }
 
     @Test
-    void validateNameRejectsHistoricalName() {
-        assertEquals(Outcome.NAME_TAKEN_HISTORY, JobCreationService.validateName("old", true, false));
+    void resolveFreeNameAppendsTwoWhenBaseTaken() {
+        Set<String> taken = Set.of("Wall");
+        assertEquals("Wall-2", JobCreationService.resolveFreeName("Wall", taken::contains));
     }
 
     @Test
-    void validateNameRunningTakesPrecedenceOverHistory() {
-        // An active job always has a saved file too, so the clearer "already running" wins.
-        assertEquals(Outcome.NAME_RUNNING, JobCreationService.validateName("live", true, true));
+    void resolveFreeNameSkipsTakenSuffixes() {
+        Set<String> taken = Set.of("Wall", "Wall-2", "Wall-3");
+        assertEquals("Wall-4", JobCreationService.resolveFreeName("Wall", taken::contains));
     }
 
     @Test
-    void validateNameRejectsRunningName() {
-        assertEquals(Outcome.NAME_RUNNING, JobCreationService.validateName("live", false, true));
+    void resolveFreeNameFillsTheFirstGap() {
+        // base and -2 taken, -3 free → -3 (smallest free suffix, not the largest+1).
+        Set<String> taken = Set.of("Wall", "Wall-2");
+        assertEquals("Wall-3", JobCreationService.resolveFreeName("Wall", taken::contains));
     }
 
     @Test
-    void validateNameAcceptsFreshName() {
-        assertEquals(Outcome.OK, JobCreationService.validateName("brand_new", false, false));
+    void resolveFreeNameReturnsBlankBaseUnchanged() {
+        assertEquals("", JobCreationService.resolveFreeName("", n -> true));
     }
 }

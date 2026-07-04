@@ -184,7 +184,7 @@ public class JobCreationDialog implements CommandExecutor, TabCompleter {
                 return;
             }
 
-            JobCreationService.Outcome outcome = JobCreationService.create(player, name,
+            String created = JobCreationService.create(player, name,
                     description == null ? "" : description,
                     priv != null && priv,
                     radiusInt,
@@ -192,26 +192,23 @@ public class JobCreationDialog implements CommandExecutor, TabCompleter {
                     project == null ? "nothing" : project,
                     glow != null && glow);
 
-            switch (outcome) {
-                case OK:
-                    player.sendMessage(Component.text("Created the ", NamedTextColor.GREEN)
-                            .append(Component.text(JobCreationService.normalizeName(name), NamedTextColor.AQUA))
-                            .append(Component.text(" job!", NamedTextColor.GREEN)));
-                    break;
-                case EMPTY_NAME:
-                    player.sendMessage(Component.text("A job name is required — nothing was created.",
-                            NamedTextColor.RED));
-                    break;
-                case NAME_TAKEN_HISTORY:
-                    player.sendMessage(Component.text(
-                            "A job by that name has been run before — pick a different name.", NamedTextColor.RED));
-                    break;
-                case NAME_RUNNING:
-                    player.sendMessage(Component.text(
-                            "A job by that name is already running — pick another name.", NamedTextColor.RED));
-                    break;
-                default:
-                    break;
+            if (created == null) {
+                player.sendMessage(Component.text("A job name is required — nothing was created.",
+                        NamedTextColor.RED));
+                return;
+            }
+            String requested = JobCreationService.normalizeName(name);
+            if (created.equals(requested)) {
+                player.sendMessage(Component.text("Created the ", NamedTextColor.GREEN)
+                        .append(Component.text(created, NamedTextColor.AQUA))
+                        .append(Component.text(" job!", NamedTextColor.GREEN)));
+            } else {
+                // The requested name was taken, so the service auto-numbered it.
+                player.sendMessage(Component.text("Name ", NamedTextColor.YELLOW)
+                        .append(Component.text(requested, NamedTextColor.AQUA))
+                        .append(Component.text(" was taken — created ", NamedTextColor.YELLOW))
+                        .append(Component.text(created, NamedTextColor.AQUA))
+                        .append(Component.text(" instead.", NamedTextColor.YELLOW)));
             }
         });
     }
