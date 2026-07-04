@@ -717,7 +717,10 @@ public class JobCommand implements TabExecutor {
                         if (a != null) {
                             player.sendMessage(Component.text(Util.nameOf(a.getId()) + ": ", NamedTextColor.AQUA)
                                     .append(Component.text(a.getPlaced() + " placed, " + a.getBroke()
-                                            + " broken across " + a.getJobs() + " jobs", NamedTextColor.GRAY)));
+                                            + " broken across " + a.getJobs() + " jobs", NamedTextColor.GRAY))
+                                    .append(Component.newline())
+                                    .append(Component.text("Active build time: ", NamedTextColor.GRAY))
+                                    .append(Component.text(StatsManager.formatDuration(a.getActiveBuildMillis()), NamedTextColor.AQUA)));
                         } else {
                             player.sendMessage(Component.text("No job or player found by that name.", NamedTextColor.RED));
                         }
@@ -735,6 +738,7 @@ public class JobCommand implements TabExecutor {
                 StatsManager.SortKey key = StatsManager.SortKey.PLACED;
                 if (args.length > 1 && args[1].equalsIgnoreCase("broke")) { key = StatsManager.SortKey.BROKE; }
                 else if (args.length > 1 && args[1].equalsIgnoreCase("active")) { key = StatsManager.SortKey.ACTIVE; }
+                else if (args.length > 1 && args[1].equalsIgnoreCase("time")) { key = StatsManager.SortKey.TIME; }
                 Component out = Component.text("Top builders (" + key.name().toLowerCase() + "):", NamedTextColor.GRAY);
                 int rank = 1;
                 for (StatsManager.PlayerAggregate a : StatsManager.getLeaderboard(key, 10)) {
@@ -1031,7 +1035,7 @@ public class JobCommand implements TabExecutor {
             if (args.length > 1) {
                 String prefix = args[1];
                 List<String> keys = new ArrayList<>();
-                for (String k : new String[]{"placed", "broke", "active"}) {
+                for (String k : new String[]{"placed", "broke", "active", "time"}) {
                     if (k.startsWith(prefix)) {
                         keys.add(k);
                     }
