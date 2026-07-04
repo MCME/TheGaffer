@@ -20,34 +20,28 @@ import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobWarp;
 import java.io.File;
+import java.util.function.Predicate;
 import org.bukkit.entity.Player;
 
 /**
  * The single job-creation path shared by every entry point (currently the
  * {@code /createjob} Dialog). Extracting it here keeps one authoritative
- * "build and activate a job" routine and lets the name/radius rules be
- * unit-tested without standing up a server.
+ * "build and activate a job" routine and lets the naming rules be unit-tested
+ * without standing up a server.
  *
- * <p>The pure decision helpers ({@link #normalizeName}, {@link #clampRadius},
- * {@link #validateName}) carry the logic worth testing; {@link #create} wires
- * them to the live filesystem / {@link JobDatabase} and is exercised by
- * in-game QA.
+ * <p>Job names must stay globally unique (the name is the job's key, filename,
+ * and stats grouping), but builders should never have to invent a fresh one:
+ * a taken name is auto-numbered ({@code Wall} → {@code Wall-2} → …) rather than
+ * rejected. The pure helpers ({@link #normalizeName}, {@link #clampRadius},
+ * {@link #resolveFreeName}) carry the testable logic; {@link #create} wires them
+ * to the live filesystem / {@link JobDatabase}.
  */
 public final class JobCreationService {
 
     private JobCreationService() {}
 
-    /** Result of a creation attempt, so callers can render an appropriate message. */
-    public enum Outcome {
-        /** Job was created and activated. */
-        OK,
-        /** The name was blank after normalisation. */
-        EMPTY_NAME,
-        /** A job file with this name exists — the name was used by a past job. */
-        NAME_TAKEN_HISTORY,
-        /** A job with this name is currently running. */
-        NAME_RUNNING
-    }
+    /** Highest suffix we'll try before giving up (effectively unreachable in practice). */
+    private static final int MAX_SUFFIX = 10000;
 
     /** Trim and replace spaces with underscores, matching the old conversation's naming rule. */
     public static String normalizeName(String raw) {
@@ -69,24 +63,27 @@ public final class JobCreationService {
     }
 
     /**
-     * Pure name validation: given whether a name already exists in history (a saved
-     * job file) and whether it is currently active, decide the outcome. Kept free of
-     * I/O so it can be tested exhaustively.
+     * Return the first free variant of a normalised base name: the base itself if free,
+     * otherwise {@code base-2}, {@code base-3}, … The {@code isTaken} predicate decides
+     * availability, so the numbering is unit-testable without touching the filesystem.
+     *
+     * @return the free name, or {@code null} only if the base and {@value #MAX_SUFFIX}
+     *         suffixes are all taken (not reachable under normal use).
      */
-    public static Outcome validateName(String normalizedName, boolean existsInHistory, boolean isActive) {
-        if (normalizedName == null || normalizedName.isEmpty()) {
-            return Outcome.EMPTY_NAME;
+    public static String resolveFreeName(String normalizedBase, Predicate<String> isTaken) {
+        if (normalizedBase == null || normalizedBase.isEmpty()) {
+            return normalizedBase;
         }
-        // A currently-running name takes precedence so the clearer "already running"
-        // message wins: an active job also has a saved file (activateJob writes it), so
-        // checking history first would always mask a running-name clash as "run before".
-        if (isActive) {
-            return Outcome.NAME_RUNNING;
+        if (!isTaken.test(normalizedBase)) {
+            return normalizedBase;
         }
-        if (existsInHistory) {
-            return Outcome.NAME_TAKEN_HISTORY;
+        for (int n = 2; n <= MAX_SUFFIX; n++) {
+            String candidate = normalizedBase + "-" + n;
+            if (!isTaken.test(candidate)) {
+                return candidate;
+            }
         }
-        return Outcome.OK;
+        return null;
     }
 
     /** Location of the saved-job file for a (already normalised) name. */
@@ -95,27 +92,37 @@ public final class JobCreationService {
                 + TheGaffer.getFileSeperator() + normalizedName + TheGaffer.getFileExtension());
     }
 
+    /** A name is taken if a job with it is running, or a past job saved a file under it. */
+    private static boolean isNameTaken(String normalizedName) {
+        return jobFile(normalizedName).exists()
+                || JobDatabase.getActiveJobs().containsKey(normalizedName);
+    }
+
     /**
-     * Validate, build and activate a job from the collected fields. On {@link Outcome#OK}
-     * the job is live and {@code activateJob} has fired the start event (broadcast,
-     * Discord, border, map). Any non-OK outcome makes no changes.
+     * Build and activate a job from the collected fields, auto-numbering the name if the
+     * requested one is taken. On success the job is live and {@code activateJob} has fired
+     * the start event (broadcast, Discord, border, map).
      *
      * @param owner       the creating player (becomes owner; their location seeds the warp)
-     * @param rawName     user-entered name (spaces are converted to underscores)
+     * @param rawName     user-entered name (spaces → underscores; auto-numbered if taken)
      * @param description short description, or "" when descriptions are disabled
      * @param priv        private (invite-only) job
      * @param radius      build-area radius (clamped to 1–1000)
      * @param discordSend announce on Discord
      * @param project     canonical project name, or "nothing"
      * @param glowing     give workers/helpers a glow outline
+     * @return the actual job name created (may differ from the request if auto-numbered),
+     *         or {@code null} if the name was blank (nothing is created).
      */
-    public static Outcome create(Player owner, String rawName, String description, boolean priv,
+    public static String create(Player owner, String rawName, String description, boolean priv,
             int radius, boolean discordSend, String project, boolean glowing) {
-        String name = normalizeName(rawName);
-        Outcome verdict = validateName(name, jobFile(name).exists(),
-                JobDatabase.getActiveJobs().containsKey(name));
-        if (verdict != Outcome.OK) {
-            return verdict;
+        String base = normalizeName(rawName);
+        if (base.isEmpty()) {
+            return null;
+        }
+        String name = resolveFreeName(base, JobCreationService::isNameTaken);
+        if (name == null) {
+            return null;
         }
 
         JobWarp warp = new JobWarp(owner.getLocation());
@@ -126,6 +133,6 @@ public final class JobCreationService {
             job.setGlowing();
         }
         JobDatabase.activateJob(job);
-        return Outcome.OK;
+        return name;
     }
 }
