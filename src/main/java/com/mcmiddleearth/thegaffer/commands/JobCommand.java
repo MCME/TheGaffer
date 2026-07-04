@@ -701,6 +701,14 @@ public class JobCommand implements TabExecutor {
                         sendStaffDenied(player);
                         return true;
                     }
+                    // /job stats export json  → write leaderboard.json feed
+                    if (args.length > 2 && args[2].equalsIgnoreCase("json")) {
+                        java.io.File f = StatsManager.writeFeed();
+                        player.sendMessage(Component.text(
+                                "Feed queued → " + f.getName(), NamedTextColor.GREEN));
+                        return true;
+                    }
+                    // /job stats export        → CSV (existing behaviour)
                     java.io.File f = StatsManager.exportAll(System.currentTimeMillis());
                     player.sendMessage(f != null
                             ? Component.text("Exported to " + f.getName(), NamedTextColor.GREEN)
@@ -974,6 +982,13 @@ public class JobCommand implements TabExecutor {
                     }
                 }
                 return unique;
+            }
+            // /job stats export <tab> → suggest "json"
+            if (args.length == 3 && args[1].equalsIgnoreCase("export")) {
+                String prefix = args[2];
+                if ("json".startsWith(prefix)) {
+                    return Collections.singletonList("json");
+                }
             }
             return Collections.emptyList();
         }

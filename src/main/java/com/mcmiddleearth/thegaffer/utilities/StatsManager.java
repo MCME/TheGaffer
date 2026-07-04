@@ -6,6 +6,7 @@ import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.storage.JobStats;
 import com.mcmiddleearth.thegaffer.storage.JobStatsStorage;
 import com.mcmiddleearth.thegaffer.storage.Project;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -181,6 +183,9 @@ public class StatsManager {
             new File(activeDir(), JobStatsStorage.recordFileName(jobName, 0L)).delete();
         }
         ingest(s);
+        if (persist) {
+            writeFeed(); // async (or inline in tests where pluginInstance is null)
+        }
         return s;
     }
 
@@ -247,6 +252,27 @@ public class StatsManager {
         }
         all.sort(cmp.reversed());
         return all.size() > limit ? all.subList(0, limit) : all;
+    }
+
+    /** Returns an unmodifiable view of all player aggregates. Used by the feed writer. */
+    public static Collection<PlayerAggregate> getAllPlayerTotals() {
+        return java.util.Collections.unmodifiableCollection(aggregate.values());
+    }
+
+    /**
+     * Returns one {@link ProjectAggregate} per distinct project name found across all
+     * finished records on disk (ignoring live in-progress jobs — the feed is written
+     * on job-end, so the just-finished job is already on disk). Used by the feed writer.
+     */
+    public static Collection<ProjectAggregate> getAllProjectAggregates() {
+        List<JobStats> all = JobStatsStorage.readAll(statsDir());
+        Map<String, ProjectAggregate> byCanon = new HashMap<>();
+        for (JobStats s : all) {
+            String canon = Project.canonical(s.getProject());
+            ProjectAggregate agg = byCanon.computeIfAbsent(canon, k -> new ProjectAggregate(s.getProject()));
+            foldIntoProject(agg, s);
+        }
+        return byCanon.values();
     }
 
     /**
@@ -536,6 +562,54 @@ public class StatsManager {
             return null;
         }
         return out;
+    }
+
+    /**
+     * Writes {@code stats/leaderboard.json} using a temp-file+rename pattern (mirrors
+     * {@link JobStatsStorage#save}).  Reads all finished records + collects aggregates,
+     * builds the JSON string via {@link StatsFeed#buildJson}, then writes the file.
+     *
+     * <p>Must be called AFTER {@link #ingest(JobStats)} so the just-finished record is
+     * already in the in-memory aggregate. If the plugin instance is available the write
+     * is performed asynchronously; otherwise it runs inline (test / early-startup path).
+     *
+     * <p>Snapshot note: {@code getAllPlayerTotals()} returns an unmodifiable view of
+     * {@code aggregate.values()}. The contents of each {@link PlayerAggregate} are not
+     * themselves thread-safe, so we collect the feed JSON on the calling (main) thread
+     * before handing the String off to the async writer.
+     */
+    public static File writeFeed() {
+        // Snapshot everything on the calling thread (safe: this runs on the main thread
+        // immediately after ingest() on job-end, or synchronously on command).
+        final List<JobStats> records  = JobStatsStorage.readAll(statsDir());
+        final List<PlayerAggregate> players = new ArrayList<>(getAllPlayerTotals());
+        final List<ProjectAggregate> projects = new ArrayList<>(getAllProjectAggregates());
+        final long now = System.currentTimeMillis();
+        final String json = StatsFeed.buildJson(records, players, projects, now);
+
+        final File dir    = statsDir();
+        final File target = new File(dir, "leaderboard.json");
+
+        Runnable write = () -> {
+            if (!dir.exists()) { dir.mkdirs(); }
+            File tmp = new File(dir, "leaderboard.json.new");
+            try (Writer w = new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8)) {
+                w.write(json);
+            } catch (IOException ex) {
+                Util.severe("Stats feed write failed: " + ex.getMessage());
+                return;
+            }
+            if (target.exists()) { target.delete(); }
+            tmp.renameTo(target);
+        };
+
+        if (TheGaffer.getPluginInstance() != null) {
+            new BukkitRunnable() { @Override public void run() { write.run(); } }
+                    .runTaskAsynchronously(TheGaffer.getPluginInstance());
+        } else {
+            write.run(); // synchronous fallback (tests, or before the plugin instance is set)
+        }
+        return target;
     }
 
     /** Plain-text recap for the Discord job-end post. Pure (no Bukkit/JDA), so it's unit-testable. */
