@@ -40,6 +40,16 @@ public class StatsManager {
         private int jobs;
         private long durationMillis;
         private long activeBuildMillis;
+        // Folded engagement fields
+        private final Set<Integer> activeDays = new HashSet<>();
+        private final Set<UUID> coBuilders = new HashSet<>();
+        private final Set<String> worlds = new HashSet<>();
+        private final Set<String> projects = new HashSet<>();
+        private long firstSeen = Long.MAX_VALUE;
+        private long lastSeen;
+        private int biggestJobBlocks;
+        private long longestSessionMillis;
+
         public PlayerAggregate(UUID id) { this.id = id; }
         public UUID getId() { return id; }
         public long getPlaced() { return placed; }
@@ -47,6 +57,14 @@ public class StatsManager {
         public int getJobs() { return jobs; }
         public long getDurationMillis() { return durationMillis; }
         public long getActiveBuildMillis() { return activeBuildMillis; }
+        public Set<Integer> getActiveDays() { return java.util.Collections.unmodifiableSet(activeDays); }
+        public Set<UUID> getCoBuilders() { return java.util.Collections.unmodifiableSet(coBuilders); }
+        public Set<String> getWorlds() { return java.util.Collections.unmodifiableSet(worlds); }
+        public Set<String> getProjects() { return java.util.Collections.unmodifiableSet(projects); }
+        public long getFirstSeen() { return firstSeen == Long.MAX_VALUE ? 0L : firstSeen; }
+        public long getLastSeen() { return lastSeen; }
+        public int getBiggestJobBlocks() { return biggestJobBlocks; }
+        public long getLongestSessionMillis() { return longestSessionMillis; }
     }
 
     public static class ProjectAggregate {
@@ -178,12 +196,23 @@ public class StatsManager {
             PlayerAggregate a = aggregate.computeIfAbsent(id, PlayerAggregate::new);
             a.jobs += 1;
             a.durationMillis += s.getDurationMillis();
+            a.activeDays.add((int)(s.getEndTime() / 86_400_000L));
+            a.worlds.add(s.getWorld());
+            a.projects.add(s.getProject());
+            a.firstSeen = Math.min(a.firstSeen, s.getStartTime());
+            a.lastSeen = Math.max(a.lastSeen, s.getEndTime());
+            for (UUID other : s.getParticipants()) {
+                if (!other.equals(id)) { a.coBuilders.add(other); }
+            }
         }
         for (Map.Entry<UUID, JobStats.BuilderStat> e : s.getBuilders().entrySet()) {
             PlayerAggregate a = aggregate.computeIfAbsent(e.getKey(), PlayerAggregate::new);
             a.placed += e.getValue().getPlaced();
             a.broke += e.getValue().getBroke();
             a.activeBuildMillis += e.getValue().getActiveMillis();
+            int blocks = e.getValue().getPlaced() + e.getValue().getBroke();
+            a.biggestJobBlocks = Math.max(a.biggestJobBlocks, blocks);
+            a.longestSessionMillis = Math.max(a.longestSessionMillis, e.getValue().getActiveMillis());
         }
     }
 
