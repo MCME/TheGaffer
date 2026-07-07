@@ -6,3 +6,15 @@ target
 .idea
 *.iml
 dependency-reduced-pom.xml
+# ── Claude Code / superpowers / AI working docs — internal-only, NEVER commit ──
+# MCME policy: keep these local (OneDrive-backed), not in the (public) repo.
+CLAUDE.md
+.claude/
+docs/superpowers/
+IMPROVEMENT_PLAN.md
+AUDIT.md
+audit.md
+AUDIT_LOG.md
+AUDIT-REMEDIATION-PLAN.md
+Audit-*.html
+BRAINSTORM-*.md
