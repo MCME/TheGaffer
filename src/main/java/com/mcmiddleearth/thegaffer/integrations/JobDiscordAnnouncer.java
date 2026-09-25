@@ -29,17 +29,21 @@ import java.util.logging.Logger;
  *
  * <h3>Why this class exists</h3>
  * These announcements used to live inline in {@code JobEventListener}, which also carries
- * {@code onProtectionBlockPlace} and {@code onProtectionBlockBreak} — the two handlers that feed
- * job statistics. Bukkit registers listeners <b>per class</b>, so on a server without DiscordSRV
- * the listener failed to register in its entirety:
+ * {@code onProtectionBlockPlace} and {@code onProtectionBlockBreak} — the handlers that drive the
+ * <b>{@code /job listen} moderation warnings</b>, telling subscribed staff when someone hits build
+ * protection. Bukkit registers listeners <b>per class</b>, so on a server without DiscordSRV the
+ * listener failed to register in its entirety:
  *
  * <pre>
  * Failed to register events for class ...JobEventListener because
  * github/scarsz/discordsrv/dependencies/jda/api/entities/TextChannel does not exist
  * </pre>
  *
- * Block counting was therefore silently dead wherever DiscordSRV was absent or disabled — observed
- * on a clean Paper 26.2 server on 2026-09-26, and applicable to any backend running without it.
+ * The listen warnings were therefore silently dead wherever DiscordSRV was absent or disabled —
+ * observed on a clean Paper 26.2 server on 2026-09-26, and applicable to any backend running
+ * without it. (Job <i>statistics</i> were never affected: they are fed by {@code StatsListener},
+ * a separate class. An earlier version of this note claimed otherwise; live testing on
+ * 2026-09-26 showed stats counting correctly per builder while this listener was failing.)
  *
  * <h3>Class-load isolation</h3>
  * This is the same discipline {@link JobMapIntegration} applies to Dynmap, and for the same reason.
