@@ -11,11 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # JDK 25, not 17: paper-api 26.2 ships Java 25 class files (major 69), and a
+      # javac that cannot READ them fails with "cannot access org.bukkit.*" on every
+      # import. The modules still compile to 17/21 bytecode -- the poms use
+      # -source/-target rather than --release, so a newer javac can read the newer
+      # API jar while still emitting for the older target.
+      - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '25'
           cache: maven
 
       # Compiles, runs the JUnit/MockBukkit suite, and builds the jar.
