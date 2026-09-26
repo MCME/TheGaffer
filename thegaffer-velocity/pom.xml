@@ -1,0 +1,100 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mcmiddleearth</groupId>
+        <artifactId>thegaffer-parent</artifactId>
+        <version>2.8</version>
+    </parent>
+
+    <artifactId>thegaffer-velocity</artifactId>
+    <packaging>jar</packaging>
+    <name>TheGaffer (Velocity proxy)</name>
+
+    <properties>
+        <!-- MCME's proxy runs Velocity 4. 4.2.1-SNAPSHOT matches the proxy build in production. Ported from a branch built against 3.4.0-SNAPSHOT;
+             the code needed no change, because it already uses com.google.inject.Inject rather
+             than javax.inject, which Guice 7 (shipped with Velocity 4) dropped. -->
+        <velocity.version>4.2.1-SNAPSHOT</velocity.version>
+        <!-- Overrides the parent's 17, which exists for the Paper plugin. This module uses
+             pattern matching for switch (finalised in Java 21) and runs on the proxy's JDK 25. -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mcmiddleearth</groupId>
+            <artifactId>thegaffer-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.velocitypowered</groupId>
+            <artifactId>velocity-api</artifactId>
+            <version>${velocity.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- velocity-api carries the annotation processor that generates velocity-plugin.json
+                 from @Plugin. It must be named explicitly on annotationProcessorPaths: declaring
+                 velocity-api only as a dependency does NOT run it, and the build then produces a
+                 jar with no descriptor that Velocity silently refuses to load. Drayz's Gradle build
+                 declared it twice for the same reason (compileOnly + annotationProcessor). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.velocitypowered</groupId>
+                            <artifactId>velocity-api</artifactId>
+                            <version>${velocity.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <project.version>${project.version}</project.version>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

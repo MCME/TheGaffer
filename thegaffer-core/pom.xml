@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mcmiddleearth</groupId>
+        <artifactId>thegaffer-parent</artifactId>
+        <version>2.8</version>
+    </parent>
+
+    <artifactId>thegaffer-core</artifactId>
+    <packaging>jar</packaging>
+    <name>TheGaffer (shared protocol)</name>
+
+    <!--
+      Kept as thin as possible: these classes are shared by a Paper plugin and a Velocity
+      plugin, so anything server-specific pulled in here would break one of them.
+
+      Guava is the one dependency, for ByteArrayDataOutput / ByteStreams — the standard way
+      to encode a Minecraft plugin message. Both Paper and Velocity ship it, hence 'provided'.
+    -->
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.3.1-jre</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>
