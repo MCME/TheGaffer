@@ -20,6 +20,9 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.events.*;
 import com.mcmiddleearth.thegaffer.integrations.JobDiscordAnnouncer;
+import com.mcmiddleearth.thegaffer.messages.JobCreateMessage;
+import com.mcmiddleearth.thegaffer.messages.JobDeleteMessage;
+import com.mcmiddleearth.thegaffer.utilities.PluginMessenger;
 import com.mcmiddleearth.thegaffer.integrations.JobMapIntegration;
 import com.mcmiddleearth.thegaffer.listeners.PlayerListener;
 import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
@@ -68,6 +71,12 @@ public class JobEventListener implements Listener {
             // #15: Immediately revert to Survival any member we switched to Creative.
             PlayerListener.revertToSurvivalIfSwitched(p);
         }
+        // Tell the proxy to drop this job from its network-wide registry, so /job join elsewhere
+        // stops offering it. Prefer a participant's connection — they were just here — and fall
+        // back to any online player.
+        PluginMessenger.sendViaAnyPlayer(firstOnline(job), new JobDeleteMessage(job.getName()),
+                "the end of job " + job.getName());
+
         JobDiscordAnnouncer.announceJobEnd(job);
         // Batch P — Completion prompt: if this job belonged to a project, check whether all
         // active jobs in the project have now finished. If yes and the project is still ACTIVE,
@@ -176,7 +185,23 @@ public class JobEventListener implements Listener {
         }
         // Add/update the Dynmap/LiveAtlas web-map marker for this new job.
         JobMapIntegration.showJob(job);
+        // Register the job with the proxy so it can be joined from any server on the network.
+        PluginMessenger.sendViaAnyPlayer(Bukkit.getPlayer(job.getOwner()),
+                new JobCreateMessage(job.getName(),
+                        job.getDescription() == null ? "" : job.getDescription()),
+                "the start of job " + job.getName());
+
         JobDiscordAnnouncer.announceJobStart(job);
+    }
+
+    /** A participant who is still online, or null. Used to carry a plugin message to the proxy. */
+    private static Player firstOnline(Job job) {
+        for (Player p : job.getAllAsPlayersArray()) {
+            if (p != null && p.isOnline()) {
+                return p;
+            }
+        }
+        return null;
     }
 
     // ---- /job listen protection warnings (QA item 1) ---------------------------------
