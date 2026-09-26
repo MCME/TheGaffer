@@ -26,6 +26,29 @@
             </resource>
         </resources>
         <plugins>
+            <!-- thegaffer-core is a separate module but not a separate plugin: Paper loads one
+                 jar, so the shared protocol classes must travel inside it. Without this the
+                 plugin loads fine and then throws NoClassDefFoundError the first time a job
+                 starts, because that is the first line that touches JobCreateMessage. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.mcmiddleearth:thegaffer-core</include>
+                                </includes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
