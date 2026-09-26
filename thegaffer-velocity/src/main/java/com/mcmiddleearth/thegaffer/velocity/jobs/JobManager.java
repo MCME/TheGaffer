@@ -32,6 +32,11 @@ public class JobManager {
         serverJobs.removeIf(job -> job.equals(jobName, serverName));
     }
 
+    /** An unmodifiable snapshot of every job known across all backends. */
+    public static Set<Job> allJobs() {
+        return Set.copyOf(serverJobs);
+    }
+
     public static Optional<Job> getSingleJob() {
        if (serverJobs.isEmpty()) return Optional.empty();
        if (serverJobs.size() > 1) return Optional.empty();

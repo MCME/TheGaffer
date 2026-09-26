@@ -5,6 +5,7 @@ import com.mcmiddleearth.thegaffer.velocity.Emojis;
 import com.mcmiddleearth.thegaffer.velocity.helpers.ServerConnectUtils;
 import com.mcmiddleearth.thegaffer.velocity.jobs.Job;
 import com.mcmiddleearth.thegaffer.velocity.jobs.JobManager;
+import com.mcmiddleearth.thegaffer.velocity.jobs.JoinRouting;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -24,10 +25,43 @@ public class CommandExecuteListener {
         if (command.startsWith("job check")) {
             handleJobCheck(event, sender);
         }
-        // Q: Intercept /job join <name> as well? Warn the player to just use /job join???
         else if (command.equals("job join")) {
             handleJobJoin(event, sender);
         }
+        else {
+            handleNamedJobJoin(event, sender, command);
+        }
+    }
+
+    /**
+     * {@code /job join <name>} typed by hand. The backend answers this fine for its own jobs, so the
+     * proxy only steps in when the named job is on a different backend -- otherwise the command falls
+     * through untouched and the backend keeps ownership of its own replies. {@link JoinRouting} holds
+     * the decision and is unit-tested; this method only carries it out.
+     *
+     * <p>The permission is checked before moving anyone: without it the remote backend would refuse
+     * the join anyway, and being teleported across the network first is worse than a plain refusal
+     * from the server you are already standing on.
+     */
+    private void handleNamedJobJoin(CommandExecuteEvent event, Player sender, String command) {
+        String currentServer = sender.getCurrentServer()
+            .map(serverConnection -> serverConnection.getServerInfo().getName())
+            .orElse("");
+
+        JoinRouting.routeNamedJoin(command, currentServer, JobManager.allJobs())
+            .ifPresent(transfer -> {
+                if (!sender.hasPermission(Permission.JOIN.getNode())) {
+                    return;
+                }
+
+                event.setResult(CommandExecuteEvent.CommandResult.denied());
+                ServerConnectUtils.connectPlayerToServer(
+                    sender,
+                    transfer.targetServer(),
+                    // Same reason as the bare form: forwardToServer would forward to the OLD server.
+                    newConnection -> sender.spoofChatInput(transfer.commandToReplay())
+                );
+            });
     }
 
     private void handleJobCheck(CommandExecuteEvent event, Player sender) {
