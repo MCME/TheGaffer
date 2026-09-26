@@ -1,0 +1,11 @@
+id = "thegaffer"
+name = "TheGaffer Proxy"
+version = "0.1.0-SNAPSHOT"
+authors = ["MCME"]
+description = "Proxy-side groundwork for TheGaffer: allow players to request joining jobs from any backend."
+
+# The plugin's main class (kept for clarity). The annotation in the class is used at runtime by Velocity.
+main = "com.mcmiddleearth.thegaffer.velocity.VelocityGafferPlugin"
+
+# Compatibility note: adjust according to the target Velocity server version.
+compatibility = "3.x"
