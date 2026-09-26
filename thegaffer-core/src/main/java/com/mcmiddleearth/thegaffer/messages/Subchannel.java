@@ -2,7 +2,9 @@ package com.mcmiddleearth.thegaffer.messages;
 
 public enum Subchannel {
     JOB_CREATED,
-    JOB_DELETED;
+    JOB_DELETED,
+    /** A backend restating a job it already has, so the proxy can rebuild its list silently. */
+    JOB_SYNC;
 
     /**
      * @return the matching subchannel, or {@code null} if the wire value is not one we know.

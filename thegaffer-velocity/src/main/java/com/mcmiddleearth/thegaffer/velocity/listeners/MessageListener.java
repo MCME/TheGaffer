@@ -4,6 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.thegaffer.messages.JobCreateMessage;
 import com.mcmiddleearth.thegaffer.messages.JobDeleteMessage;
+import com.mcmiddleearth.thegaffer.messages.JobSyncMessage;
 import com.mcmiddleearth.thegaffer.messages.Subchannel;
 import com.mcmiddleearth.thegaffer.velocity.ChannelIdentifiers;
 import com.mcmiddleearth.thegaffer.velocity.Emojis;
@@ -48,6 +49,13 @@ public class MessageListener {
             case JOB_DELETED -> {
                 JobDeleteMessage message = JobDeleteMessage.deserialise(in);
                 JobManager.removeJob(backendName, message.jobName());
+            }
+            case JOB_SYNC -> {
+                // A backend restating a job it already has. Registry only: no broadcast, no sound,
+                // or every login would re-announce every running job to the whole network.
+                JobSyncMessage message = JobSyncMessage.deserialise(in);
+                JobManager.addJob(new Job(
+                    message.jobName(), message.creator(), backendName, message.description()));
             }
             case null, default -> VelocityGafferPlugin.getLogger().warn("Subchannel '{}' from '{}' has no handler!", subchannel, backendName);
         }

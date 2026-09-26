@@ -16,16 +16,20 @@
 package com.mcmiddleearth.thegaffer.listeners;
 
 import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.messages.JobSyncMessage;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
 import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
 import com.mcmiddleearth.thegaffer.utilities.Msg;
 import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.PluginMessenger;
 import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
+import com.mcmiddleearth.thegaffer.utilities.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -44,10 +48,49 @@ import java.util.UUID;
 
 public class PlayerListener implements Listener {
 
+    /**
+     * Restates this server's running jobs to the proxy.
+     *
+     * <p>The proxy holds its job list in memory only, and it is told about a job by a plugin message
+     * -- which needs a player connection, so a backend cannot say anything at boot. That leaves two
+     * ways for the proxy to be wrong: restart the proxy and it forgets every job, or restart a
+     * backend holding a persisted running job and the proxy never hears about it. Either way
+     * {@code /job check} shows nothing and a cross-server {@code /job join <name>} answers
+     * "No jobs currently running" while the job is running perfectly well.
+     *
+     * <p>A join is the first moment this server can speak, so it restates then. Sending it on every
+     * join rather than only the first is deliberate: it costs one short message per running job and
+     * it is what makes the whole thing self-healing, because a proxy restart disconnects everyone
+     * and the next login repairs the list.
+     *
+     * <p>{@code JOB_SYNC}, not {@code JOB_CREATED}: a create makes the proxy broadcast
+     * "NEW JOB AVAILABLE" with a sound to the entire network, which on every login would be spam.
+     *
+     * <p>Deferred by a tick. At {@code PlayerJoinEvent} the player is on this server but the
+     * backend-to-proxy plugin channel is not reliably ready to carry a message yet.
+     */
+    private static void resyncJobsWithProxy(Player player) {
+        if (JobDatabase.getActiveJobs().isEmpty()) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(TheGaffer.getPluginInstance(), () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            for (Job job : JobDatabase.getActiveJobs().values()) {
+                PluginMessenger.sendToPlayer(player, new JobSyncMessage(
+                        job.getName(),
+                        Util.nameOf(job.getOwner()),
+                        job.getDescription() == null ? "" : job.getDescription()));
+            }
+        }, 1L);
+    }
+
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         player.setGlowing(false);
+        resyncJobsWithProxy(player);
         if (!JobDatabase.getActiveJobs().isEmpty() && player.hasPermission(PermissionsUtil.getJoinPermission())) {
             player.sendMessage(Component.text("There is a job running! ", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
                     .append(Msg.button("[Click to check]", NamedTextColor.AQUA, "/job check", "Run /job check")));
