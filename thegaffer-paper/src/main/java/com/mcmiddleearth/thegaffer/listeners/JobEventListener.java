@@ -147,7 +147,9 @@ public class JobEventListener implements Listener {
                           + "\n"+ first + second;
         Plugin connectPlugin = Bukkit.getPluginManager().getPlugin("MCME-Connect");
         Player player = Bukkit.getOnlinePlayers().stream().findFirst().orElse(null);
-        if(player !=null && connectPlugin != null && connectPlugin.isEnabled()) {
+        if(shouldRelayNetworkWide(TheGaffer.isProxyAnnouncingJobs(),
+                                  connectPlugin != null && connectPlugin.isEnabled(),
+                                  player != null)) {
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF("Message");
             out.writeUTF("ALL");
@@ -192,6 +194,26 @@ public class JobEventListener implements Listener {
                 "the start of job " + job.getName());
 
         JobDiscordAnnouncer.announceJobStart(job);
+    }
+
+    /**
+     * Whether this server should relay its own job announcement to the whole network.
+     *
+     * <p>The relay sends plain legacy text through MCME-Connect, which strips Adventure click data,
+     * so remote players used to get an announcement they could not act on. The proxy plugin now
+     * posts its own network-wide announcement with a button that transfers the player to the job's
+     * server, and if both run, every player sees the same job announced twice. So when the proxy is
+     * doing the announcing this server keeps quiet outside its own player list.
+     *
+     * <p>The proxy flag deliberately wins: MCME-Connect being installed must not re-enable the
+     * relay, because Connect's presence says nothing about whether the proxy runs TheGaffer.
+     *
+     * @param proxyAnnounces  config {@code proxyAnnouncesJobs} -- the proxy runs thegaffer-velocity
+     * @param connectEnabled  MCME-Connect is present and enabled, i.e. a relay exists at all
+     * @param anyoneOnline    somebody is online here; a plugin message needs a player connection
+     */
+    static boolean shouldRelayNetworkWide(boolean proxyAnnounces, boolean connectEnabled, boolean anyoneOnline) {
+        return !proxyAnnounces && connectEnabled && anyoneOnline;
     }
 
     /** A participant who is still online, or null. Used to carry a plugin message to the proxy. */

@@ -67,11 +67,26 @@ public class MessageListener {
 
         Component announcement = JobManager.buildJobBlock(
             newJob,
-            "    %s NEW JOB AVAILABLE %s".formatted(Emojis.CLIPBOARD, Emojis.CLIPBOARD)
+            "%s NEW JOB AVAILABLE %s".formatted(Emojis.CLIPBOARD, Emojis.CLIPBOARD)
         );
-        VelocityGafferPlugin.getProxy().sendMessage(announcement);
 
-        // To play a sound with Velocity an emitter is required
-        VelocityGafferPlugin.getProxy().playSound(Sounds.ActiveJob, Sound.Emitter.self());
+        // Announce to the rest of the network only. The backend that started the job already told
+        // its own players, with a world-specific message and a one-click button that needs no
+        // transfer -- broadcasting to everyone would show them the same job twice. This is the half
+        // the backend cannot do: reach players who would have to change server to take part.
+        VelocityGafferPlugin.getProxy().getAllPlayers().stream()
+            .filter(player -> !isOn(player, backendName))
+            .forEach(player -> {
+                player.sendMessage(announcement);
+                // To play a sound with Velocity an emitter is required
+                player.playSound(Sounds.ActiveJob, Sound.Emitter.self());
+            });
+    }
+
+    /** True when {@code player} is currently connected to the backend called {@code serverName}. */
+    private static boolean isOn(Player player, String serverName) {
+        return player.getCurrentServer()
+            .map(connection -> connection.getServerInfo().getName().equalsIgnoreCase(serverName))
+            .orElse(false);
     }
 }

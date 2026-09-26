@@ -44,10 +44,20 @@ public class JobManager {
        return Optional.of(serverJobs.iterator().next());
     }
 
-    // TODO: Auto-indent / centre the header & scale the border
+    /**
+     * Everything here is left-aligned on purpose, and the former "centre the header, scale the
+     * border" TODO is deliberately not done.
+     *
+     * <p>Minecraft's default font is proportional while {@code minecraft:uniform} (Force Unicode
+     * Font) is near double-width per glyph, so padding with spaces cannot line up under both -- and
+     * plenty of MCME staff play with Force Unicode on. The old fixed 4- and 10-space indents lined
+     * up under neither: they left the header and the button floating away from a border of 25 fixed
+     * tildes that was narrower than the job name above it. Left alignment renders identically in
+     * both fonts, which beats being centred in one of them.
+     */
     public static Component buildJobBlock(Job job, String header) {
         Component border = VelocityGafferPlugin.mm.deserialize(
-            "<gradient:#5e4fa2:red:#5e4fa2>~~~~~~~~~~~~~~~~~~~~~~~~~</gradient>"
+            "<gradient:#5e4fa2:red:#5e4fa2>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</gradient>"
         );
 
         Component title = Component.text(header)
@@ -65,7 +75,7 @@ public class JobManager {
         Component descriptionLine = Component.text(" Description: ", NamedTextColor.GRAY)
             .append(Component.text(job.description(), TextColor.fromHexString("#dedede")));
 
-        Component joinButton = Component.text("          ")
+        Component joinButton = Component.text(" ")
             .append(buildJoinButton(job, "⟫ Click to Join ⟪"));
 
         return Component.empty()
@@ -78,7 +88,7 @@ public class JobManager {
             .append(border);
     }
 
-    // TODO: Auto-indent / centre the header
+    // Left-aligned for the same font reason as buildJobBlock above.
     public static Component buildJobsList(String header) {
         if (serverJobs.isEmpty()) {
             return Component.text("There are no active jobs.")

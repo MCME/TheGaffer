@@ -73,6 +73,7 @@ public class TheGaffer extends JavaPlugin {
     static boolean discordEnabled;
     static boolean jobBorderEnabled;
     static boolean jobDescription;
+    static boolean proxyAnnouncesJobs;
     static int activeIdleThresholdSeconds;
     static boolean glowing;
     static String helperColor;
@@ -164,6 +165,9 @@ public class TheGaffer extends JavaPlugin {
     public static void setupConfig() {
         pluginConfig = TheGaffer.getPluginInstance().getConfig();
         jobDescription = pluginConfig.getBoolean("jobDescription", false);
+        // Defaults to false so an upgrade never silently stops remote players hearing about
+        // jobs: without the proxy plugin, this server relaying is the only thing they get.
+        proxyAnnouncesJobs = pluginConfig.getBoolean("proxyAnnouncesJobs", false);
         activeIdleThresholdSeconds = pluginConfig.getInt("stats.activeIdleThresholdSeconds", 60);
         discordEnabled = pluginConfig.contains("discord");
         discordChannel = pluginConfig.getString("discord.channel", null);
@@ -283,6 +287,11 @@ public class TheGaffer extends JavaPlugin {
 
     public static boolean isJobDescription() {
         return jobDescription;
+    }
+
+    /** True when the proxy runs thegaffer-velocity and announces job starts network-wide itself. */
+    public static boolean isProxyAnnouncingJobs() {
+        return proxyAnnouncesJobs;
     }
 
     public static int getActiveIdleThresholdSeconds() {

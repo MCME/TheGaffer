@@ -73,7 +73,7 @@ public class CommandExecuteListener {
         }
 
         sender.sendMessage(JobManager.buildJobsList(
-            "  " + Emojis.CLIPBOARD + " Available Jobs " + Emojis.CLIPBOARD
+            Emojis.CLIPBOARD + " Available Jobs " + Emojis.CLIPBOARD
         ));
     }
 
