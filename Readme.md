@@ -1,170 +1,237 @@
-# The Gaffer
-[![Build Status](https://travis-ci.org/MCME/TheGaffer.svg?branch=master)](https://travis-ci.org/MCME/TheGaffer)
+# TheGaffer
 
-#### Current author: DonoA
-#### Authors: Meggawatts, DonoA, q220
+**A build-protection and "jobs" plugin for the MCME (MC Middle Earth) Paper server.**
 
-*The Gaffer* is a bukkit plugin that adds a job system to the MCME Server.
+The world map is read-only by default — nobody can place or break blocks. To let builders work on a specific area without opening up the whole map, a staff member starts a **job**: a bounded region where invited players may build for the duration of the session. When the job ends, the area is protected again. Staff with a bypass permission can build anywhere.
 
-### What is a "Job"
-A job is basically a glorified list. This list contains who is working on the job, who is managing the workers, and where the job is. With MCME 2.0 we have decided to implement a more strict policy on building. In order to build on the new map, you must be a staff member, or be part of a job. *The Gaffer* handles building protection on its own, so it is very important to understand how the tool works.
-##### Helpers
-The list of helpers on a job is crucial. A few minutes after the main runner of the job goes offline, *The Gaffer* will select another person from the list of helpers to continue the job. If *The Gaffer* cannot find another online helper to continue the job, the job is put on hold and held in the archive.
+| | |
+|---|---|
+| **Version** | 2.8 |
+| **Minecraft / API** | Built against Paper **26.1.2** (for the Dialog API) · runs on 26.2+ · `api-version: 1.19` |
+| **Java** | 17 |
+| **Build** | Maven → `target/TheGaffer-2.8.jar` |
+| **Soft dependencies** | DiscordSRV, MCME-Connect, Dynmap (all optional) |
 
-# Usage
-Staff have access to 3 commands, /createjob, /job, and /jobadmin.
+---
 
-/job is used to check running jobs and some plugin maintenance things.
+## How protection works
 
-/jobadmin is used to modify a currently running job.
+Every block place / break / interact is checked against `getBuildProtection(player, location)`. A player is allowed to build only when **one** of these is true:
 
-/createjob is used to create a new job.
+1. they have the **`thegaffer.ignoreprotection`** permission (staff build anywhere), or
+2. the world is listed under `unprotectedworlds` in the config, or
+3. they are a **worker in a running job**, the location is **inside that job's area**, and the job is **not paused**.
 
-#### The Createjob command
+Anything else is blocked, with a message explaining why (no active job, wrong world, out of the job's bounds, job paused, etc.).
 
-The createjob command is used to start a new job. Simply use _/createjob_ and you will be launched into an interactive conversation. Simply follow the in chat instructions, and chat your responses.
+While a worker stands inside their job's area they are automatically switched to **Creative**, and back to **Survival** when they leave it or the job ends. (Staff with the bypass permission manage their own gamemode.)
 
+---
 
-#### The Job Command
+## Jobs & roles
 
-The job command is used to list, manage, and get info on jobs.
+A job is a named, bounded build session. It has an owner, an area (a centre point + radius), a world, an optional description, and three kinds of participant:
 
-The job command takes 2 arguments.
+| Role | Who | What they can do |
+|---|---|---|
+| **Owner** | The staff member who started the job | Full control; can manage members; counts as a builder. Usually has `thegaffer.ignoreprotection`. |
+| **Helper** | Staff assisting the owner | Help run and build the job; can manage it; added via `/job admin <job> addhelper`. |
+| **Worker** | Players who `/job join` | Build inside the job area while it runs; auto-switched to Creative in-bounds. |
 
-The first argument is the action you would like to perform. The current actions are:
+A player can be in **only one job at a time** (enforced). Jobs may be **private** (invite-only) and support **banned** and **invited** lists. Optionally, helpers and workers can be given a coloured **glow** (scoreboard teams) so everyone can see who's on the job.
 
-* __stop__
-* __pause__
-* __unpause__
-* check
-* join
-* leave
-* warpto
-* info
-* archive
-* admit
-* start
-* create
+**Why helpers matter:** if the owner logs off, after a short grace period TheGaffer promotes an online **helper** to keep the job running. If no helper is online, the job is paused and moved to the archive. Workers who stay offline too long are removed automatically. A helper-takeover changes who is listed as **Owner** in `/job info`, but the original starter is recorded separately and shown as "Started by" whenever it differs from the current owner.
 
-*Those in bold are only available to Staff*
+**Lifecycle:** a job is created → started (broadcast in-game, and optionally to Discord and across the network) → run → stopped, at which point it moves to the **archive**. Jobs are **persisted to disk** and reload when the server restarts.
 
-###### Example
-/job start river *This will start a job called **river**.
-/job start river private *This will start a job called **river** that is invite only.
+---
 
-### Stop
-This is the action that will stop a job. When a job is stopped, the world becomes locked again, and the job is moved to the archive.
+## Commands
 
-###### Example
-/job stop river *This will stop the job called river, but __not__ River*
+### For everyone (permission: `thegaffer.join`, default **true**)
 
-### Pause
-This is the action that will pause the job to be used at a later date.
+| Command | Description |
+|---|---|
+| `/job check` | List the running jobs (click a name to join). |
+| `/job join <job>` | Join a running job (or the only one running). |
+| `/job leave` | Leave your current job. |
+| `/job mine` | Show your current job status: name, role (Owner / Helper / Worker), paused/glow state, and clickable `[warpto]` / `[leave]` shortcuts. |
+| `/job info <job>` | Show a job's details: current owner, helpers (by name), worker count, location, and status. If the job was taken over by a helper, also shows the original starter ("Started by"). |
+| `/job warpto <job>` | Teleport to a job's warp point. |
+| `/job archive [page]` | Browse finished (archived) jobs. |
+| `/job stats <job\|player>` | Show a job's recap, or a player's lifetime totals. |
+| `/job leaderboard [placed\|broke\|active\|time]` | Top builders ranked by the chosen metric (`time` = active build time). Alias: `/job top`. |
+| `/job who [job]` | Show the live roster for a job: Owner, Helpers, and Workers, each coloured **green** (online) or **grey** (offline). Omit `[job]` to see your current job's roster. |
+| `/job border` | Toggle the particle outline marking your current job's build-area perimeter (purely visual, fly-through — no movement effect). |
+| `/jobchat [message]` | Toggle job-only chat, or send a one-off message to your job (alias: `/jc`). |
 
-###### Example
-/job pause river *This will pause the job called road, but __not__ Road*
+### For staff (permission: `thegaffer.create`, default **op**)
 
-### Unpause
-This is the action that will unpause a job that was paused, it will not restart a stoped job though.
+| Command | Description |
+|---|---|
+| `/createjob` (or `/job create` / `/job start`) | Open the job-creation form (a native Minecraft Dialog). |
+| `/job stop <job>` | End a running job (moves it to the archive). |
+| `/job pause <job>` / `/job unpause <job>` | Temporarily suspend / resume building in a job. |
+| `/job listen` | Toggle alerts when someone tries to edit the map outside a job. |
+| `/job prep` | Stash your inventory (and restore it) while setting up. |
+| `/job stats export` | Export all recorded stats to a CSV file (`stats/export-<timestamp>.csv`). |
+| `/job stats export json` | Write the machine-readable JSON feed (`stats/leaderboard.json`); reports the full path on completion. |
+| `/jobadmin` (or `/job admin <job> <action> …`) | Manage a job — see below. |
 
-###### Example
-/job unpause river *This will unpause the job called road, but __not__ Road*
+### `/job manage [job]` (staff)
 
-### Check
-This is the action that allows any player to see the list of currently running jobs.
+Print a clickable roster for a job (defaults to your current job). Each **worker** gets `[Kick]`, `[Ban]`, and `[Promote]` buttons; each **helper** gets `[Kick]`, `[Ban]`, and `[Demote]` buttons. The owner is shown with a `[Transfer…]` hint. Buttons fire the matching `/job admin` one-liners instantly.
 
-### Join
-This is the action that allows someone to join a job. Once a user joins a job, they can build in the world. The name of the job is __case-sensitive__.
+### `/job transfer <player>` (owner or `thegaffer.project.admin`)
 
-###### Example
-/job join river *This will join the job river but __not__ River or rIVer*
+Transfer ownership of your current job to another player. The target **must already be a helper** (promote them first if needed). On transfer: the target becomes Owner; you become a Helper; the original "Started by" creator record is unchanged so `/job info` still shows who started the job.
 
-### Leave
-This is the action that allows someone to leave the currently joined job.
+### `/job admin <job> <action>` subcommands
 
-###### Example
-/job leave *This will let you leave the currently joined job*
+`addhelper <player>`, `removehelper <player>`, `kickworker <player>`, `banworker <player>`, `unbanworker <player>`, `inviteworker <player>`, `uninviteworker <player>`, `promote <player>`, `demote <player>`, `setwarp`, `setradius <n>`, `clearworkerinven`, `teleportall`, `teleport <player>`, `listworkers`.
 
-### Warpto
-This is the action that will warp you to the jobs location.
+- **`promote <player>`** — promotes a worker to helper status. The player stays in the workers list, so they keep their build rights.
+- **`demote <player>`** — demotes a helper back to a standard worker. The player remains in the workers list so build rights are preserved.
 
-###### Example
-/job warpto river *This will warp you to the location of river but __not__ River*
+---
 
-### Info
-This action allows you to see the info of any past or present job.
+## Permissions
 
-###### Example
-/job info river
+| Node | Default | Grants |
+|---|---|---|
+| `thegaffer.join` | `true` | Join and use jobs; view stats/leaderboard. |
+| `thegaffer.create` | `op` | Create, manage, stop jobs; export stats; admin commands. |
+| `thegaffer.ignoreprotection` | `op` | Bypass build protection — build anywhere. |
+| `thegaffer.project.create` | `op` | Create and lead projects. |
+| `thegaffer.project.admin` | `op` | Manage any project (head-builder bypass). |
 
-### Archive
-This action will list all of the past jobs that are no longer running.
+---
 
-###### Example
-/job archive
+## Configuration (`config.yml`)
 
-### Admit
-The admit command works with TeamSpeak, it can only be called by the job owner or a player that has already been admitted. The command will teleport the target player to the Job Warp, this can only be done once to each player. (This will soon be automatic) 
+| Key | Purpose |
+|---|---|
+| `general.debug` | Verbose debug logging. |
+| `jobDescription` | Prompt for a job description during creation. |
+| `discord.channel` | DiscordSRV channel name for job announcements (omit to disable). |
+| `discord.emoji` | Emoji prefix for Discord messages. |
+| `allowRolePing` | Discord roles pinged when a job is announced (e.g. `Jobber`). Only these roles are pinged — never `@everyone` or individual players. Empty/omit = announce with no ping. |
+| `glowing.enabled` / `glowing.helperColor` / `glowing.workerColor` | Team-glow toggle and colours. |
+| `showJobBorder` | Show players a particle outline (`END_ROD`, white glow) tracing the job's build-area perimeter while they're in a job. Purely visual — no movement effect, players can cross freely. Toggle per-player with `/job border`. |
+| `stats.activeIdleThresholdSeconds` | Idle gap (in seconds, default **60**) that separates "still building" from "walked away" when calculating active build time. A gap longer than this value is not counted as build time. |
+| `unprotectedworlds` | Worlds where the map protection does not apply. |
+| `externalProtectionHandlers` | Allow/deny hooks for integrating other protection plugins. |
 
-###### Example
-/job admit q220
+---
 
-#### The Jobadmin Command
+## Integrations
 
-The jobadmin commad will launch you into an interactive conversation that allows ou to edit jobs. SImply follow the in chat instructions, and chat your response.
+All are **soft dependencies** — TheGaffer runs fine without any of them; the relevant feature simply no-ops if the plugin is absent.
 
-The current actions you can perform are:
+- **DiscordSRV** — posts a **rich embed** announcement (with relative timestamps that localize to each viewer) to a Discord channel when a job **starts** (pinging the roles in `allowRolePing` — e.g. a `Jobber` opt-in role — never `@everyone`), and a **rich embed recap** when it ends (duration, blocks placed/broken, builder count — inline fields; muted red colour). Both embeds fall back to plain-text automatically if the bot lacks the "Embed Links" permission in the channel. Controlled per-job by the "send to Discord" flag and globally by `discord.channel`.
+- **MCME-Connect** — broadcasts job-start announcements **across the BungeeCord network**, so players on other servers see that a job has started. Falls back to a local broadcast when not present.
+- **Dynmap → LiveAtlas** — when [Dynmap](https://github.com/webbukkit/dynmap) is installed (LiveAtlas is just its web frontend — it renders the same marker layer), active jobs are automatically drawn as coloured **area markers** on the live web map. Each marker shows the job's square build area (MinX/MaxX/MinZ/MaxZ corners), its project colour (hashed from the project name — unattached jobs use a neutral grey), and a clickable HTML popup with the job name, owner, project, radius, and a `/job join <name>` hint. Markers are added on job start, removed on job end, and updated whenever the radius or warp changes (`/job admin setradius` / `setwarp`). The marker layer is named `thegaffer.jobs` (visible in the LiveAtlas/Dynmap layer selector as "Jobs"). If Dynmap is absent or its MarkerAPI is unavailable, everything no-ops with a single informational log line.
 
-* addhelper
-* removehelper
-* setwarp
-* listworkers
-* kickworker
-* banworker
-* unbanworker
-* bringall
-* inviteworker
-* uninviteworker
-* setkit
-* setradius 
-* clearworkerinven
-* setTeamSpeakwarp
+---
 
-The second argument is the Job you would like to perform the action on. This can be any Job that is currently running. The name of the job is __case-sensitive__.
+## Statistics
 
-The third argument is the name of the player that you would like to add or remove.
+TheGaffer records what happens during each job and exposes it four ways.
 
-Below is a description of each action and what they do.
+- **What's tracked:** per job — owner, project, world, location, duration, the set of participants, and per-builder **blocks placed / broken / active build time**. Only *successful, in-job, in-bounds* actions are counted (staff building outside a job's area are not credited).
+- **Active build time** — the total duration a builder was actively placing or breaking blocks, ignoring idle gaps. An idle gap longer than `stats.activeIdleThresholdSeconds` (default **60 s**) resets the "still building" window, so AFK time is not counted. Accessible via `/job stats <player>` ("Active build time" line) and ranked by `/job leaderboard time`.
+- **`/job stats <job>`** — a recap of a finished (or running) job. **`/job stats <player>`** — a player's lifetime totals (placed, broken, active build time, tier, streak).
+- **`/job leaderboard [placed|broke|active|time]`** — cross-job rankings. `time` ranks builders by active build time; the existing `placed`, `broke`, and `active` keys still work. Clickable names. Alias: `/job top`.
+- **Discord recap** — appended to the job-end Discord post.
+- **`/job stats export`** — writes every record to `plugins/TheGaffer/stats/export-<timestamp>.csv` (UTF-8) for spreadsheets or dashboards.
+- **`/job stats export json`** — writes a machine-readable JSON feed to `plugins/TheGaffer/stats/leaderboard.json`. The feed is also rebuilt automatically on every job-end. It contains per-player and per-project aggregates, progression tiers/milestones/streaks, and week/month + all-time leaderboards — intended for a website or infographics frontend.
 
-### addhelper
-This action allows you to add an additional Staff member to the job. This Staff member can modify the job information such as the warp and also add additional helpers. The name is __case-sensitive__.
+> **Pending — custom-block placements:** block events fired by MCME-Architect's special blocks are not yet wired into stats. TheGaffer already exposes a `recordExternalBuild` hook for this; the integration is tracked in `MCME-Architect/docs/TODO-thegaffer-stats-integration.md` and will land with the Architect rework. Until then, stats and active-time reflect vanilla-block building only.
 
-### removehelper
-This action allows you to remove a Staff member from the job. This Staff member will no longer be able to modify the job. The name is __case-sensitive__.
+Live counts survive a restart (they ride the same periodic save as jobs), so stats aren't lost if the server cycles mid-job.
 
-### kickworker
-This action allows you to kick a worker from the job. This worker will no longer be able to modify the world, but can rejoin. The name is __case-sensitive__.
+---
 
-### banworker
-This action allows you to ban a worker from the job. This worker will no longer be able to rejoin the job. The name is __case-sensitive__.
+## Projects
 
-### unbanworker
-This action allows you to unban a worker from the job. This worker will now be able to rejoin the job. The name is __case-sensitive__.
+A **Project** (e.g. "Minas Tirith") is a named, managed collection of jobs, run with `/project` (alias `/pj`). Stats from every job in a project roll up to the project level, so you can see total blocks, builders, and build time across an entire effort.
 
-### listworkers
-This action allows you to list the workers of a job.
+- **What it holds:** a description, a goal, a **lead** + optional **managers**, and a lifecycle status (active / completed / archived). Stored as plain YAML under `plugins/TheGaffer/projects/<name>.yml`.
+- **Membership** is by name: a job belongs to a project when it's created under it (picked at `/createjob`) or attached with `/project attach`. Project names match case-insensitively, so "Minas Tirith" and "minas tirith" are the same project.
+- **Ownership is enforced:** only a project's lead/managers may edit it, change its status, or attach jobs — except a holder of `thegaffer.project.admin` (the head-builder bypass), who may manage any project.
 
-### bringall
-This action allows you to bring all workers on the job to your location.
+| Command | Who | Description |
+|---|---|---|
+| `/project list [active\|completed\|archived]` | everyone | List projects (click a name for details). |
+| `/project info <name>` | everyone | Description, goal, lead, managers, status, and rolled-up stats. |
+| `/project create <name>` | `thegaffer.project.create` | Create a project; you become its lead. |
+| `/project setdescription\|setgoal <name> <text>` | lead/manager | Edit details. |
+| `/project setlead <name> <player>` | lead / admin | Reassign the lead. |
+| `/project addmanager\|removemanager <name> <player>` | lead/manager | Manage the manager list. |
+| `/project complete\|archive\|reopen <name>` | lead/manager | Change lifecycle status. |
+| `/project attach <name> <job>` / `/project detach <job>` | lead/manager | Link / unlink a job. |
+| `/project delete <name>` | lead / admin | Remove the project record (job & stats history keep the name). |
+| `/project announce <name> <message>` | lead/manager | Send a prefixed message to every online member of every active job in this project (deduped). |
+| `/project export <name>` | lead/manager | Export stats for all jobs in this project to `stats/export-<name>-<timestamp>.csv`. |
 
-### inviteworker
-This action allows you to invite a worker to a job.
+In the `/createjob` form, if any active projects exist you can pick which one this job belongs to (or **No project**).
 
-### uninviteworker
-This action allows you to invite a worker to a job.
+---
 
-### clearworkerinven
-This action allows you to clear a workers' inventory.
+## Data & storage
 
-### setTeamSpeakwarp
-This sets a warp for people not in TS. If a TS channel is specified and a TS warp set, then new workers will be sent to the TS warp. If there is no TS warp set workers are sent to the regular jobWarp. /job admit <playername> will send a player not in TS to the regular JobWarp.
+No database — everything is plain YAML under the plugin folder, so it's human-readable and dependency-free.
+
+```
+plugins/TheGaffer/
+├── config.yml
+├── jobs/
+│   └── <job>.yml                  # one file per active/archived job
+└── stats/
+    ├── <job>-<endMillis>.yml      # one record per finished job
+    ├── active/<job>-0.yml         # in-progress counters (durable across restarts)
+    ├── export-<timestamp>.csv     # produced by /job stats export
+    └── leaderboard.json           # machine-readable feed (rebuilt on job-end & /job stats export json)
+```
+
+Players are identified by **UUID** throughout (so a rename can't dodge a ban or lose job membership); names are resolved for display only.
+
+---
+
+## Building & testing
+
+Requires JDK 17+ and Maven.
+
+```bash
+mvn package        # compile, run tests, build target/TheGaffer-2.8.jar
+mvn test           # run the unit-test suite only
+```
+
+Tests use **JUnit 5 + MockBukkit** (a mock Paper server) — no real server is needed for the suite. CI runs `mvn verify` on every push and pull request (`.github/workflows/build.yml`).
+
+> **Note:** MockBukkit (pinned to `mockbukkit-v26.1.2`, matching the compiled Paper version) cannot fully boot a plugin, render a Dialog, or reach Discord, so a handful of runtime behaviours (real block protection, glow, the cross-server broadcast, Discord delivery, and the `/createjob` Dialog form) are verified by in-game QA rather than the automated suite.
+
+---
+
+## What's new in the 2026 rework
+
+This branch is a substantial overhaul focused on stability, performance, security, and UX:
+
+- **Persistence restored** — jobs survive restarts again, rebuilt on safe YAML (replacing a vulnerable library that had been removed in 2020, which left jobs ephemeral).
+- **UUID identity** — members, owners, and bans are keyed by UUID instead of name, closing a ban-evasion-by-rename hole and removing blocking name lookups.
+- **Statistics** — the full feature described above (new).
+- **Adventure UI** — chat output migrated to Adventure components with **clickable** actions (e.g. `/job check` entries join with one click).
+- **Visual job boundary** — workers see a per-player **particle outline** (`END_ROD`) tracing the active job's build-area perimeter. Purely visual — fly-through, zero movement effect. Toggle with `/job border`.
+- **Native `/jobchat`** — job-team chat without an external chat plugin.
+- **Performance** — the build-protection hot path and the player-move handler were optimised.
+- **Security & cleanup** — dead TeamSpeak code and a hard-coded password removed; the build is dependency-clean and reproducible from public repositories.
+- **Tests & CI** — the project's first automated test suite (MockBukkit) plus GitHub Actions.
+- **Projects** — jobs can be grouped into managed, owned **projects** with rolled-up stats; this replaces the old (defunct) McMeProject integration with a native, self-contained system.
+
+---
+
+## Credits
+
+Authors: meggawatts, DonoA, Eriol_Eandur, Planetology, Fraspace5, Jubo, q220.
+
+Licensed under the **GNU General Public License v3** — see the source-file headers.

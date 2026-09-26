@@ -1,0 +1,58 @@
+name: ${project.artifactId}
+main: com.mcmiddleearth.thegaffer.TheGaffer
+version: ${project.version}
+api-version: 1.19
+website: ${project.url}
+authors: [meggawatts, DonoA, Eriol_Eandur, Planetology, Fraspace5, Jubo]
+description: Job API for MCME.
+softdepend: [DiscordSRV, MCME-Connect, dynmap]
+author: meggawatts
+commands:
+  createjob:
+    description: Opens the job creation form (Dialog). Also available as /job start or /job create
+    usage: |
+           /createjob
+  job:
+    usage: |
+            /job stop <jobname>
+            /job check
+            /job archive
+            /job join <jobname>
+            /job leave
+            /job warpto <jobname>
+            /job info <jobname>
+            /job stats <job|player>
+            /job leaderboard [placed|broke|active]
+            /job create
+            /job start
+            /jobadmin
+  jobadmin:
+    description: Launches the jobadmin conversation can also be done with /job admin
+    usage: |
+           /jobadmin
+  jobchat:
+    description: Toggle job chat, or send a one-off message with /jc <message>
+    usage: |
+           /jobchat [message]
+    aliases: [jc]
+  project:
+    description: Manage build projects (collections of jobs)
+    usage: |
+           /project <create|list|info|setdescription|setgoal|setlead|addmanager|removemanager|complete|archive|reopen|attach|detach|delete>
+    aliases: [pj]
+permissions:
+  thegaffer.join:
+    description: Allows a player to join and use jobs
+    default: true
+  thegaffer.create:
+    description: Allows creating and managing jobs (staff)
+    default: op
+  thegaffer.ignoreprotection:
+    description: Bypass build protection (build anywhere)
+    default: op
+  thegaffer.project.create:
+    description: Create and lead build projects
+    default: op
+  thegaffer.project.admin:
+    description: Manage any build project regardless of lead/managers
+    default: op

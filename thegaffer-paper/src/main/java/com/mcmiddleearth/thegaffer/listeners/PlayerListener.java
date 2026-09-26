@@ -1,0 +1,217 @@
+/*  This file is part of TheGaffer.
+ * 
+ *  TheGaffer is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  TheGaffer is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with TheGaffer.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.mcmiddleearth.thegaffer.listeners;
+
+import com.mcmiddleearth.thegaffer.TheGaffer;
+import com.mcmiddleearth.thegaffer.messages.JobSyncMessage;
+import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
+import com.mcmiddleearth.thegaffer.utilities.BuildProtection;
+import com.mcmiddleearth.thegaffer.utilities.JobBorderManager;
+import com.mcmiddleearth.thegaffer.utilities.Msg;
+import com.mcmiddleearth.thegaffer.utilities.PermissionsUtil;
+import com.mcmiddleearth.thegaffer.utilities.PluginMessenger;
+import com.mcmiddleearth.thegaffer.utilities.ProtectionUtil;
+import com.mcmiddleearth.thegaffer.utilities.Util;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class PlayerListener implements Listener {
+
+    /**
+     * Restates this server's running jobs to the proxy.
+     *
+     * <p>The proxy holds its job list in memory only, and it is told about a job by a plugin message
+     * -- which needs a player connection, so a backend cannot say anything at boot. That leaves two
+     * ways for the proxy to be wrong: restart the proxy and it forgets every job, or restart a
+     * backend holding a persisted running job and the proxy never hears about it. Either way
+     * {@code /job check} shows nothing and a cross-server {@code /job join <name>} answers
+     * "No jobs currently running" while the job is running perfectly well.
+     *
+     * <p>A join is the first moment this server can speak, so it restates then. Sending it on every
+     * join rather than only the first is deliberate: it costs one short message per running job and
+     * it is what makes the whole thing self-healing, because a proxy restart disconnects everyone
+     * and the next login repairs the list.
+     *
+     * <p>{@code JOB_SYNC}, not {@code JOB_CREATED}: a create makes the proxy broadcast
+     * "NEW JOB AVAILABLE" with a sound to the entire network, which on every login would be spam.
+     *
+     * <p>Deferred by a tick. At {@code PlayerJoinEvent} the player is on this server but the
+     * backend-to-proxy plugin channel is not reliably ready to carry a message yet.
+     */
+    private static void resyncJobsWithProxy(Player player) {
+        if (JobDatabase.getActiveJobs().isEmpty()) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(TheGaffer.getPluginInstance(), () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            for (Job job : JobDatabase.getActiveJobs().values()) {
+                PluginMessenger.sendToPlayer(player, new JobSyncMessage(
+                        job.getName(),
+                        Util.nameOf(job.getOwner()),
+                        job.getDescription() == null ? "" : job.getDescription()));
+            }
+        }, 1L);
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        player.setGlowing(false);
+        resyncJobsWithProxy(player);
+        if (!JobDatabase.getActiveJobs().isEmpty() && player.hasPermission(PermissionsUtil.getJoinPermission())) {
+            player.sendMessage(Component.text("There is a job running! ", NamedTextColor.DARK_AQUA, TextDecoration.BOLD)
+                    .append(Msg.button("[Click to check]", NamedTextColor.AQUA, "/job check", "Run /job check")));
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 0.5f, 2f);
+        }
+        // Auto-resume: if this player is the owner (or a helper) of an active job that was
+        // auto-paused because everyone left (see CleanupUtil.selectNewOwner), un-pause it.
+        // A manually paused job has autoPaused == false, so it is never resumed here.
+        UUID uuid = player.getUniqueId();
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            if (job.isAutoPaused()
+                    && (uuid.equals(job.getOwner()) || job.getHelpers().contains(uuid))) {
+                job.setPaused(false);
+                job.setAutoPaused(false);
+                job.setDirty(true);
+                job.sendToAll(Component.text(player.getName() + " is back — the job has resumed.",
+                        NamedTextColor.GREEN, TextDecoration.BOLD));
+            }
+        }
+        // #13: If this player belongs to an active job that is paused, tell them
+        // right away so they know building is suspended.
+        for (Job job : JobDatabase.getActiveJobs().values()) {
+            if (job.isPaused()
+                    && (uuid.equals(job.getOwner())
+                        || job.getHelpers().contains(uuid)
+                        || job.getWorkers().contains(uuid))) {
+                player.sendMessage(Component.text("The ", NamedTextColor.YELLOW)
+                        .append(Component.text(job.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(
+                                " job you're in is paused — building is suspended until staff resume it.",
+                                NamedTextColor.YELLOW)));
+            }
+        }
+        // Restore the job border for players who relog while in a job.
+        JobBorderManager.refresh(player);
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        // Reapply (or clear) the job border when the player moves between worlds.
+        JobBorderManager.refresh(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        // The client-side border vanishes on disconnect; just clean up our tracking set.
+        JobBorderManager.forget(event.getPlayer().getUniqueId());
+    }
+
+    private static List<UUID> playersSwitchedToCreative = new ArrayList<>();
+
+    /**
+     * Reverts {@code p} to Survival if this plugin switched them to Creative.
+     * Does nothing if we never switched this player (e.g. staff who set their own gamemode).
+     * Mirrors the flight-restore logic in {@link #playerMove}.
+     */
+    public static void revertToSurvivalIfSwitched(Player p) {
+        if (!playersSwitchedToCreative.contains(p.getUniqueId())) {
+            return;
+        }
+        boolean flying = p.isFlying();
+        p.setGameMode(GameMode.SURVIVAL);
+        if (TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight", true)) {
+            p.setAllowFlight(true);
+            p.setFlying(flying);
+        }
+        p.sendMessage(net.kyori.adventure.text.Component.text(
+                "You left the job build area — back to Survival.",
+                NamedTextColor.GRAY));
+        playersSwitchedToCreative.remove(p.getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void playerMove(PlayerMoveEvent event) {
+        Location to = event.getTo();
+        if (to == null) {
+            return;
+        }
+        Location from = event.getFrom();
+        // Only act when the player actually crosses into a different block.
+        // (The old reference-equality check on getBlock() was always true, so this ran every tick.)
+        if (from.getBlockX() == to.getBlockX()
+                && from.getBlockY() == to.getBlockY()
+                && from.getBlockZ() == to.getBlockZ()) {
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.hasPermission(PermissionsUtil.getIgnoreWorldProtection())) {
+            playersSwitchedToCreative.remove(player.getUniqueId());
+            return;
+        }
+        // Single protection lookup decides the gamemode (no separate getJobWorking scan).
+        if (ProtectionUtil.getBuildProtection(player, to).equals(BuildProtection.ALLOWED)) {
+            if (player.getGameMode() == GameMode.SURVIVAL) {
+                if (!playersSwitchedToCreative.contains(player.getUniqueId())) {
+                    playersSwitchedToCreative.add(player.getUniqueId());
+                }
+                player.setGameMode(GameMode.CREATIVE);
+                // #4: Notify the worker once per transition into the build area (action bar, GREEN).
+                Job enteredJob = JobDatabase.getJobWorking(player);
+                String jobLabel = (enteredJob != null) ? enteredJob.getName() : "job";
+                player.sendActionBar(Component.text(
+                        "Entered the " + jobLabel + " build area — you can build here.",
+                        NamedTextColor.GREEN));
+            }
+        } else {
+            if (playersSwitchedToCreative.contains(player.getUniqueId())) {
+                boolean flying = player.isFlying();
+                player.setGameMode(GameMode.SURVIVAL);
+                if (TheGaffer.getPluginInstance().getConfig().getBoolean("enableFlight", true)) {
+                    player.setAllowFlight(true);
+                    player.setFlying(flying);
+                }
+                playersSwitchedToCreative.remove(player.getUniqueId());
+                // #4: Notify the worker once per transition out of the build area (action bar, GOLD).
+                // This is the critical cue — building silently drops off without it.
+                player.sendActionBar(Component.text(
+                        "You left the job build area — building is disabled out here.",
+                        NamedTextColor.GOLD));
+            }
+        }
+    }
+
+}
