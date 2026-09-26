@@ -313,6 +313,44 @@ public class StatsManager {
         }
     }
 
+    /**
+     * Moves a job's statistics into {@code project}, so its blocks, builders and build time count
+     * towards that project's totals.
+     *
+     * <p>Needed because {@code /project attach} changes {@link com.mcmiddleearth.thegaffer.storage.Job}
+     * only, while every project total is aggregated from the project stored inside the
+     * {@link JobStats} record. That field is set when the job begins, so without this the attach
+     * renamed a label and moved no numbers -- for a live job or a finished one.
+     *
+     * <p>A live job is updated in memory and its active snapshot rewritten at once, because that
+     * snapshot is what a crash recovers from; a finished one is rewritten on disk, which is where
+     * {@link #getProjectAggregate} reads it back. A job name can appear in more than one finished
+     * record if the name was freed and reused, and every one of them moves.
+     *
+     * @return true if at least one record was found and moved
+     */
+    public static boolean reassignProject(String jobName, String project) {
+        JobStats liveRecord = live.get(jobName);
+        if (liveRecord != null) {
+            liveRecord.setProject(project);
+            // Synchronous: the point is that a crash between here and job end must not resurrect
+            // the old project, and reassignment is a staff action, not a hot path.
+            JobStatsStorage.save(liveRecord, activeDir(), false);
+            return true;
+        }
+
+        boolean moved = false;
+        for (JobStats s : JobStatsStorage.readAll(statsDir())) {
+            if (!s.getName().equalsIgnoreCase(jobName)) {
+                continue;
+            }
+            s.setProject(project);
+            JobStatsStorage.save(s, statsDir(), false);
+            moved = true;
+        }
+        return moved;
+    }
+
     // ---- active snapshot (flush / reload) ----
 
     /** Snapshots every live job's counters to stats/active/{@code <job>-0.yml}. */

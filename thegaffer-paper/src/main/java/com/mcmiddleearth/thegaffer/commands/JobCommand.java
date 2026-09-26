@@ -264,7 +264,7 @@ public class JobCommand implements TabExecutor {
                     }
                     player.sendMessage(out);
                 } else {
-                    player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.GRAY));
+                    player.sendMessage(Component.text("No jobs are running on this server.", NamedTextColor.GRAY));
                 }
                 return true;
             }
@@ -309,7 +309,7 @@ public class JobCommand implements TabExecutor {
                                     .append(Component.text(" to see running jobs.", NamedTextColor.RED)));
                         }
                     } else {
-                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
+                        player.sendMessage(Component.text("No jobs are running on this server.", NamedTextColor.RED));
                     }
                 } else {
                     player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
@@ -595,7 +595,7 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage(Component.text("You are not part of a job.", NamedTextColor.RED));
                         }
                     }else {
-                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
+                        player.sendMessage(Component.text("No jobs are running on this server.", NamedTextColor.RED));
                     }
                 }else{
                     player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
@@ -642,7 +642,7 @@ public class JobCommand implements TabExecutor {
                             player.sendMessage(Component.text("You must provide the name of the job you would like to warp to.", NamedTextColor.RED));
                         }
                     } else {
-                        player.sendMessage(Component.text("No jobs currently running.", NamedTextColor.RED));
+                        player.sendMessage(Component.text("No jobs are running on this server.", NamedTextColor.RED));
                     }
                 } else {
                     player.sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
@@ -757,8 +757,13 @@ public class JobCommand implements TabExecutor {
                             .append(Component.text("  " + a.getPlaced() + " placed / " + a.getBroke() + " broken", NamedTextColor.GRAY));
                 }
                 if (rank == 1) {
+                    // The aggregate is fed by StatsManager.ingest, which runs at job end, so a job
+                    // that is running right now contributes nothing here however long it has run.
+                    String why = JobDatabase.getActiveJobs().isEmpty()
+                            ? "No finished jobs yet — the leaderboard counts a job once it ends."
+                            : "No finished jobs yet — jobs running now are counted once they end.";
                     out = out.append(Component.newline())
-                            .append(Component.text("No stats recorded yet.", NamedTextColor.GRAY));
+                            .append(Component.text(why, NamedTextColor.GRAY));
                 }
                 player.sendMessage(out);
                 return true;

@@ -30,7 +30,15 @@ import java.util.UUID;
 public class ProjectCommand implements CommandExecutor, TabCompleter {
 
     /** Allowed characters in a project name; keeps the derived YAML filename filesystem-safe. */
-    private static final String NAME_PATTERN = "[A-Za-z0-9 '-]+";
+    // Underscore included because job names are full of them: JobCreationService.normalizeName
+    // turns every space in a job name into one, so without it a project could not share the name
+    // of its own job (Minas_Tirith).
+    private static final String NAME_PATTERN = "[A-Za-z0-9 '_-]+";
+
+    /** Whether {@code name} is made only of characters a project name may contain. */
+    static boolean hasAllowedNameCharacters(String name) {
+        return name != null && name.matches(NAME_PATTERN);
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -82,8 +90,8 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("That is not a valid project name.", NamedTextColor.RED));
             return true;
         }
-        if (!name.matches(NAME_PATTERN)) {
-            sender.sendMessage(Component.text("Project names may only contain letters, digits, spaces, hyphens, and apostrophes.", NamedTextColor.RED));
+        if (!hasAllowedNameCharacters(name)) {
+            sender.sendMessage(Component.text("Project names may only contain letters, digits, spaces, underscores, hyphens, and apostrophes.", NamedTextColor.RED));
             return true;
         }
         Project p = new Project(name, ((Player) sender).getUniqueId(), System.currentTimeMillis());
@@ -119,9 +127,23 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
                 (Project p) -> placed.getOrDefault(Project.canonical(p.getName()), 0L)).reversed());
         Component out = Component.text("Projects (" + filter.name().toLowerCase() + "):", NamedTextColor.GRAY);
         if (shown.isEmpty()) {
+            // This list is filtered — ACTIVE unless asked otherwise — so "no projects yet" would be a
+            // flat untruth on a server with a dozen completed ones. Say which status is empty, and
+            // point at the others when they are where the projects actually are.
+            String word = filter.name().toLowerCase();
+            boolean othersExist = false;
+            for (Project.Status other : Project.Status.values()) {
+                if (other != filter && !ProjectDatabase.byStatus(other).isEmpty()) { othersExist = true; break; }
+            }
             // #16 — contextual empty state: suggest /project create if the sender has permission, else plain text
             out = out.append(Component.newline());
-            if (sender.hasPermission(PermissionsUtil.getProjectCreatePermission())
+            if (othersExist) {
+                out = out.append(Msg.suggest(
+                        "  No " + word + " projects — try /project list for another status.",
+                        NamedTextColor.DARK_GRAY,
+                        "/project list ",
+                        "Click to fill in /project list"));
+            } else if (sender.hasPermission(PermissionsUtil.getProjectCreatePermission())
                     || sender.hasPermission(PermissionsUtil.getProjectAdminPermission())) {
                 out = out.append(Msg.suggest(
                         "  No projects yet — /project create <name> to start one.",
@@ -335,6 +357,10 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         job.setProjectname(m.project.getName());
         job.setDirty(true);
         JobDatabase.saveJob(job);
+        // The Job carries the label, but every project total is aggregated from the project stored
+        // in the job's stats record -- set when the job began and never updated here, so without
+        // this the attach moved the name and left the blocks, builders and build time behind.
+        StatsManager.reassignProject(job.getName(), m.project.getName());
         if (isReassigned) {
             sender.sendMessage(Component.text("Moved job " + job.getName() + " from project " + prevProject + " to project " + m.project.getName() + ".", NamedTextColor.GREEN));
         } else {
@@ -365,6 +391,7 @@ public class ProjectCommand implements CommandExecutor, TabCompleter {
         job.setProjectname("nothing");
         job.setDirty(true);
         JobDatabase.saveJob(job);
+        StatsManager.reassignProject(job.getName(), "nothing");
         sender.sendMessage(Component.text("Detached job " + job.getName() + ".", NamedTextColor.GREEN));
         return true;
     }
