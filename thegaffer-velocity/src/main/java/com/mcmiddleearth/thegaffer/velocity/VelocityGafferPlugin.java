@@ -22,7 +22,9 @@ import java.util.Optional;
 // Keep this version in step with the pom. An annotation value must be a compile-time constant,
 // so Maven cannot substitute it — VelocityPluginDescriptorTest fails the build if the two drift.
 // (MCME-Connect shipped two different jars both declaring 2.0.1 for exactly this reason.)
-@Plugin(id = "thegaffer", name = "TheGaffer-Proxy", version = "2.8")
+@Plugin(id = "thegaffer", name = "TheGaffer-Proxy", version = "2.8",
+        description = "Proxy side of TheGaffer: lets builders join a job from any backend.",
+        authors = {"MCME"})
 public class VelocityGafferPlugin {
 
     public static final MiniMessage mm = MiniMessage.builder()
