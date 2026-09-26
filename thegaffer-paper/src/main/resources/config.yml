@@ -1,10 +1,6 @@
 # General options
 general:
     debug: false
-# Servlet configuration
-servlet:
-    enabled: false
-    port: 8080
 # Worlds configuration
 unprotectedworlds:
     - plotworld
@@ -35,6 +31,9 @@ unprotectedworlds:
 # Should jobs have a description that is shown in the job start messages.
 # Job leaders need to type in the Description during job start conversation
 jobDescription: true
+# Restore a player's flight when the plugin puts them back into Survival after they
+# leave a job area. Only affects players the plugin itself switched.
+enableFlight: true
 #Discord integration
 #name of the job channel where the job start message should appear
 #name of an emoji to decorate the job messages, remove for no emoji
