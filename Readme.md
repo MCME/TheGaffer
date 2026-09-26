@@ -309,8 +309,8 @@ mvn -B test        # 168 tests
 
 MockBukkit cannot boot a Paper plugin of this vintage, reach Discord or render a Dialog, and it does
 not deserialize `ItemStack`s from YAML — so kit round-trips are asserted at the serialize step only,
-and anything involving a real client is verified in game instead. QA records live outside this repo,
-in `_claude-workspace/thegaffer-qa/`.
+and anything involving a real client is verified in game instead. In-game QA records are kept
+internally by MCME staff rather than in this repository.
 
 ---
 

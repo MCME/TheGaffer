@@ -11,10 +11,17 @@ dependency-reduced-pom.xml
 CLAUDE.md
 .claude/
 docs/superpowers/
+# ...and docs/ as a whole: the internal design notes that leaked in 2026-06 were plain
+# .md files sitting directly here, which every pattern above walked straight past.
+# Public documentation belongs in Readme.md / CHANGELOG.md at the root; if something
+# genuinely public ever needs to live under docs/, add it with `git add -f`.
+docs/
 IMPROVEMENT_PLAN.md
 AUDIT.md
 audit.md
 AUDIT_LOG.md
 AUDIT-REMEDIATION-PLAN.md
 Audit-*.html
+*-Report.html
+*-Dossier.html
 BRAINSTORM-*.md
