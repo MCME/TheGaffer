@@ -106,6 +106,10 @@ public class TheGaffer extends JavaPlugin {
         serverInstance.getPluginManager().registerEvents(new StatsListener(), this);
 
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        // The proxy plugin (thegaffer-velocity) listens on this channel to learn which job is
+        // running on which server, so players can join a job from anywhere on the network.
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this,
+                com.mcmiddleearth.thegaffer.Channels.MAIN);
 
         // Runs SYNC (main thread): the cleanup reassigns job owners and removes
         // abandoned workers, which call the Bukkit API (scoreboards/teams, player
