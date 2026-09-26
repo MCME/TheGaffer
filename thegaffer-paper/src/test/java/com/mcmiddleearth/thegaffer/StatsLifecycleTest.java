@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Its {@code MockBukkitConfiguredPluginClassLoader.findClass()} throws
  * {@code "No jar file selected"} when {@code jarFile == null}, and the JAR is
  * only produced by the {@code mvn package} phase — not by {@code mvn test}.
- * Loading from the existing {@code target/TheGaffer-2.8.jar} also fails because
+ * Loading from the built {@code target/TheGaffer-<version>.jar} also fails because
  * Paper 1.19's {@code JavaPlugin} no-arg constructor enforces that the class
  * loader is a {@code ConfiguredPluginClassLoader}, which the reflection-based
  * instantiation path does not satisfy.
