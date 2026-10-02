@@ -122,6 +122,7 @@ handlers, the build-protection hot path, and the protection handler's placement.
 - Job cleanup ran asynchronously against non-thread-safe state.
 - Auto-paused jobs were left in the owner-timeout queue.
 - Uninviting a player who had already joined crashed on jobs created without member glow.
+- `addhelper` accepted a player who was banned from the job.
 - The Discord job-start embed resolved its channel by snowflake ID rather than DiscordSRV name, and the
   job-end embed was posted with no content.
 - Cosmetic job sounds could abort the whole announcement when a third-party packet listener threw.

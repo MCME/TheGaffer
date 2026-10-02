@@ -116,6 +116,17 @@ class JobRemovalTest {
     }
 
     @Test
+    void kickWorker_owner_isRefused() {
+        // The owner can be on the helpers list, for example a helper who took the job over.
+        job.setOwner(helper.getUniqueId());
+        makeAddedHelper();
+
+        assertEquals(KickWorkerResponse.CANNOT_KICK_OWNER,
+                job.kickWorker(List.of((OfflinePlayer) helper), "test"));
+        assertTrue(job.isPlayerHelper(helper), "a refused kick must change nothing");
+    }
+
+    @Test
     void kickWorker_nonMember_isNotInJob() {
         assertEquals(KickWorkerResponse.NOT_IN_JOB, job.kickWorker(List.of((OfflinePlayer) helper), "test"));
     }

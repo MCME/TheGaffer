@@ -298,6 +298,9 @@ public class Job implements Listener {
         if (helpers.contains(p.getUniqueId())) {
             return HelperResponse.ALREADY_HELPER;
         }
+        if (bannedWorkers.contains(p.getUniqueId())) {
+            return HelperResponse.WORKER_BANNED;
+        }
         Job current = JobDatabase.getJobWorking(p);
         if (current != null && !current.getName().equals(name)) {
             return HelperResponse.ALREADY_IN_JOB;
@@ -520,6 +523,11 @@ public class Job implements Listener {
 
     public KickWorkerResponse kickWorker(List<OfflinePlayer> ps, String reason) {
         for (OfflinePlayer p : ps) {
+            // Like ban: the owner can sit on the helpers list (a helper who took the job over),
+            // and dropping that entry would report a kick while they stay the owner.
+            if (p.getUniqueId().equals(owner)) {
+                return KickWorkerResponse.CANNOT_KICK_OWNER;
+            }
             if (!dropMembership(p)) {
                 return KickWorkerResponse.NOT_IN_JOB;
             }
