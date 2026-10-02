@@ -601,33 +601,37 @@ public class Job implements Listener {
     }
 
     public int sendToHelpers(Component message) {
-        int count = 0;
-        for (UUID hName : helpers) {
-            if (TheGaffer.getServerInstance().getOfflinePlayer(hName).isOnline()) {
-                TheGaffer.getServerInstance().getOfflinePlayer(hName).getPlayer().sendMessage(message);
-                count++;
-            }
-        }
-        if (getOwnerAsOfflinePlayer().isOnline()) {
-            getOwnerAsOfflinePlayer().getPlayer().sendMessage(message);
-            count++;
-        }
-        return count;
+        Set<UUID> recipients = new LinkedHashSet<>(helpers);
+        recipients.add(owner);
+        return sendTo(recipients, message);
     }
 
     public int sendToWorkers(Component message) {
+        return sendTo(workers, message);
+    }
+
+    public int sendToAll(Component message) {
+        Set<UUID> recipients = new LinkedHashSet<>(helpers);
+        recipients.add(owner);
+        recipients.addAll(workers);
+        return sendTo(recipients, message);
+    }
+
+    /**
+     * Sends {@code message} to each online player in {@code recipients}. Callers that combine
+     * lists pass a set: a promoted helper is on the workers and the helpers list, and a helper who
+     * took the job over is also the owner, yet each must get one copy (/jobchat included).
+     */
+    private int sendTo(Collection<UUID> recipients, Component message) {
         int count = 0;
-        for (UUID wName : workers) {
-            if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {
-                TheGaffer.getServerInstance().getOfflinePlayer(wName).getPlayer().sendMessage(message);
+        for (UUID id : recipients) {
+            OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(id);
+            if (p.isOnline()) {
+                p.getPlayer().sendMessage(message);
                 count++;
             }
         }
         return count;
-    }
-
-    public int sendToAll(Component message) {
-        return sendToHelpers(message) + sendToWorkers(message);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
