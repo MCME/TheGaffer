@@ -107,8 +107,7 @@ public class CleanupUtil {
             // and then shuffled — needlessly indirect; .get(0) after the shuffle is enough.)
             Collections.shuffle(possibles);
             OfflinePlayer choice = possibles.get(0);
-            job.addHelper(TheGaffer.getServerInstance().getOfflinePlayer(job.getOwner()));
-            job.setOwner(choice.getUniqueId());
+            job.transferOwnership(choice.getUniqueId());
             Util.debug("Selecting " + choice.getName() + " as " + job.getName() + "'s new owner.");
         } else {
             // No helper online to promote: instead of archiving the job (the old behaviour),

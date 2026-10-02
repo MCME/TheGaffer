@@ -99,6 +99,22 @@ class CleanupUtilTest {
     }
 
     @Test
+    void previousOwnerStaysOnAsHelperAfterTakeover() {
+        PlayerMock helper = server.addPlayer();
+        UUID oldOwner = UUID.randomUUID(); // offline owner
+        Job job = new Job();
+        job.setName("river");
+        job.setRunning(true);
+        job.setOwner(oldOwner);
+        job.getHelpers().add(helper.getUniqueId());
+
+        CleanupUtil.selectNewOwner(job);
+
+        assertTrue(job.getHelpers().contains(oldOwner),
+                "the old owner is offline, but must still be a helper when they come back");
+    }
+
+    @Test
     void bannedHelperIsNeverPromotedToOwner() {
         // A banned player can still be on the helpers list: job files saved by older builds kept
         // banned helpers there, and addhelper does not check the ban list.

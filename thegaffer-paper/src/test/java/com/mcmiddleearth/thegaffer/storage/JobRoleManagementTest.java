@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -174,17 +175,27 @@ class JobRoleManagementTest {
         job.getWorkers().add(helperUuid);
         job.getHelpers().add(helperUuid);
 
-        // Simulate transfer logic
-        UUID oldOwner = job.getOwner();
-        job.setOwner(helperUuid);
-        if (!job.getHelpers().contains(oldOwner)) {
-            job.getHelpers().add(oldOwner);
-        }
+        job.transferOwnership(helperUuid);
 
         assertEquals(helperUuid, job.getOwner(), "owner must change to the target");
         assertTrue(job.getHelpers().contains(ownerUuid),
                 "old owner must be added to helpers after transfer");
         assertEquals(ownerUuid, job.getCreator(),
                 "creator field must NOT change — /job info shows original 'Started by'");
+        assertTrue(job.isDirty(), "the new owner must be saved");
+    }
+
+    @Test
+    void transferOwnership_oldOwnerAlreadyAHelper_isListedOnce() {
+        Job job = new Job();
+        UUID ownerUuid = UUID.randomUUID();
+        UUID helperUuid = UUID.randomUUID();
+        job.setOwner(ownerUuid);
+        job.getHelpers().add(ownerUuid);
+        job.getHelpers().add(helperUuid);
+
+        job.transferOwnership(helperUuid);
+
+        assertEquals(1, Collections.frequency(job.getHelpers(), ownerUuid));
     }
 }

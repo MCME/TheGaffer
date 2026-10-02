@@ -382,6 +382,21 @@ public class Job implements Listener {
         return DemoteResponse.DEMOTE_SUCCESS;
     }
 
+    /**
+     * Hands the job to {@code newOwner}; the old owner stays on as a helper. Used by /job transfer
+     * and by the owner-timeout takeover. The old owner goes straight onto the helpers list:
+     * addHelper's online and permission checks are for staff adding someone, and a timed-out
+     * owner is offline by definition, so going through addHelper would silently drop them.
+     */
+    public void transferOwnership(UUID newOwner) {
+        UUID oldOwner = owner;
+        owner = newOwner;
+        if (!helpers.contains(oldOwner)) {
+            helpers.add(oldOwner);
+        }
+        setDirty(true);
+    }
+
     public WorkerResponse addWorker(OfflinePlayer p) {
         if (workers.contains(p.getUniqueId())) {
             return WorkerResponse.ALREADY_WORKER;
