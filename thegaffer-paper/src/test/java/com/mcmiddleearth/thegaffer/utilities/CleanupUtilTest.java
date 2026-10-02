@@ -5,6 +5,7 @@ import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
+import com.mcmiddleearth.thegaffer.storage.JobDatabase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ class CleanupUtilTest {
 
     @AfterEach
     void tearDown() throws Exception {
+        JobDatabase.getActiveJobs().clear();
         setTheGafferField("serverInstance", null);
         MockBukkit.unmock();
     }
@@ -131,5 +133,42 @@ class CleanupUtilTest {
 
         assertEquals(owner, job.getOwner(), "a banned helper must not inherit the job");
         assertTrue(job.isAutoPaused(), "with no eligible helper online, the job pauses instead");
+    }
+
+    /** Registers a running job whose worker {@code id} went offline six minutes ago. */
+    private Job activeJobWithAbsentWorker(UUID id) {
+        Job job = new Job();
+        job.setName("river");
+        job.setRunning(true);
+        job.setOwner(server.addPlayer().getUniqueId());
+        job.getWorkers().add(id);
+        job.getLeft().put(id, System.currentTimeMillis() - 360_000L);
+        JobDatabase.getActiveJobs().put(job.getName(), job);
+        return job;
+    }
+
+    @Test
+    void absentWorkerIsRemovedAfterFiveMinutes() {
+        UUID worker = UUID.randomUUID(); // never online, so offline
+        Job job = activeJobWithAbsentWorker(worker);
+
+        CleanupUtil.scheduledAbandonersCleanup();
+
+        assertFalse(job.getWorkers().contains(worker), "a worker away for over five minutes is removed");
+    }
+
+    @Test
+    void absentPromotedHelperKeepsBothRoles() {
+        // A helper added with addhelper is never tracked as away; a promoted helper must not be
+        // treated differently just because they are on the workers list too.
+        UUID promoted = UUID.randomUUID();
+        Job job = activeJobWithAbsentWorker(promoted);
+        job.getHelpers().add(promoted);
+
+        CleanupUtil.scheduledAbandonersCleanup();
+
+        assertTrue(job.getWorkers().contains(promoted), "the promoted helper keeps the worker role");
+        assertTrue(job.getHelpers().contains(promoted), "the promoted helper keeps the helper role");
+        assertFalse(job.getLeft().containsKey(promoted), "and is no longer tracked as away");
     }
 }

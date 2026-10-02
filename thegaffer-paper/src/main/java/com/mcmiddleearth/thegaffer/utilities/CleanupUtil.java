@@ -68,6 +68,11 @@ public class CleanupUtil {
                     if (p.isOnline()) {
                         Util.debug("Player: " + p.getName() + " was scheduled for abandonment, but is now online and was removed from abandoners list.");
                         removeList.add(p);
+                    } else if (job.isPlayerHelper(p)) {
+                        // Helpers are not removed for being away: one added with addhelper is
+                        // never tracked, and removeWorker would strip only a promoted helper's
+                        // worker role, leaving a helper who cannot build.
+                        removeList.add(p);
                     } else {
                         Long since = job.getLeft().get(p.getUniqueId());
                         Long For = System.currentTimeMillis() - since;
