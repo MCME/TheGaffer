@@ -42,6 +42,9 @@ If you missed the announcement:
 
 Job names are **case-sensitive**: `/job join Minas_Tirith` works, `minas_tirith` does not.
 
+If you leave the job's server for more than five minutes, you are taken off the job. Join it again
+when you are back.
+
 ### While you are building
 
 Inside the job's area you are switched to **Creative** automatically, and back to **Survival** when
@@ -116,6 +119,11 @@ Duplicate names are **auto-numbered** rather than rejected — start a second `G
 Workers and helpers can be made to **glow** in different colours so you can see who is who — set per
 job at creation, configured server-wide under `glowing` in the config.
 
+**If the owner goes offline**, a helper who is online takes the job over after a few minutes, and the
+old owner stays on as a helper. With no helper online the job pauses instead, and resumes when the
+owner or a helper comes back. Helpers stay in the job while they are away; workers are taken off
+after five minutes.
+
 ### Managing people
 
 `/jobadmin` walks you through it. The one-liner form is `/job admin <job> <action>`:
@@ -125,6 +133,13 @@ job at creation, configured server-wide under `glowing` in the config.
 `teleport` · `teleportall`
 
 **Bans are by UUID**, so they survive a rename.
+
+Kicking or banning someone takes every role they hold, so a helper stops being a helper too. The
+owner can be neither kicked nor banned — hand the job over with `/job transfer` first — and a banned
+player cannot be made a helper until they are unbanned.
+
+`setwarp` moves the whole job to where you stand: its area, its map marker and its statistics, even
+into another world.
 
 ### Projects
 
@@ -202,7 +217,8 @@ build when **one** of these holds:
 
 1. they have `thegaffer.ignoreprotection`, or
 2. the world is listed under `unprotectedworlds`, or
-3. they are a member of a **running, unpaused** job and are **inside its area**.
+3. they are a member of a **running, unpaused** job and are **inside its area** — in the job's
+   world and within its bounds.
 
 Everything else is refused with a reason.
 
@@ -304,7 +320,7 @@ alongside it, or the server loads both.
 ### Tests
 
 ```bash
-mvn -B test        # 168 tests
+mvn -B test        # 197 tests
 ```
 
 MockBukkit cannot boot a Paper plugin of this vintage, reach Discord or render a Dialog, and it does
