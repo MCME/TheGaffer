@@ -125,6 +125,8 @@ handlers, the build-protection hot path, and the protection handler's placement.
 - `addhelper` accepted a player who was banned from the job.
 - When a helper took over from an owner who had timed out, the old owner was meant to stay on as a helper,
   but adding them failed because they were offline, so they came back with no role in their own job.
+- `setwarp` from another world moved the warp and the build area but not the job's world, so protection,
+  the border and the map kept the old world. The job now moves with its warp.
 - The Discord job-start embed resolved its channel by snowflake ID rather than DiscordSRV name, and the
   job-end embed was posted with no content.
 - Cosmetic job sounds could abort the whole announcement when a third-party packet listener threw.
