@@ -110,12 +110,18 @@ handlers, the build-protection hot path, and the protection handler's placement.
   rectangle with no world attached, and build protection compared only the coordinates. With jobs running
   in two worlds, a worker of one could build in the other at the same X/Z. Statistics made the same
   mistake, so such blocks counted towards the job. Both now check the world as well.
+- **Removing a helper from a job left them in it.** A worker promoted to helper is on both the workers and
+  the helpers list, a helper added with `addhelper` only on the helpers list, and ban, kick, `/job leave`
+  and uninvite cleared just the workers list. The player stayed in the job: still a helper, unable to join
+  another job, and able to inherit it when the owner timed out, even after a ban. Every removal now clears
+  both lists, kick accepts a helper, and the owner takeover skips banned players.
 - `unbanWorker` had an inverted check, so unbanning did the opposite.
 - `clearworkerinvens` was misspelled, so `/job admin` never dispatched it.
 - The job boundary showed only to workers, not owners and helpers, and only rendered within 32 blocks —
   less than a typical job's radius, so it was invisible from the centre.
 - Job cleanup ran asynchronously against non-thread-safe state.
 - Auto-paused jobs were left in the owner-timeout queue.
+- Uninviting a player who had already joined crashed on jobs created without member glow.
 - The Discord job-start embed resolved its channel by snowflake ID rather than DiscordSRV name, and the
   job-end embed was posted with no content.
 - Cosmetic job sounds could abort the whole announcement when a third-party packet listener threw.

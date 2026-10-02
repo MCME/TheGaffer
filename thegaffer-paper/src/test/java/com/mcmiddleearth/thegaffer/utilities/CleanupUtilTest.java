@@ -2,6 +2,7 @@ package com.mcmiddleearth.thegaffer.utilities;
 
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
+import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import com.mcmiddleearth.thegaffer.TheGaffer;
 import com.mcmiddleearth.thegaffer.storage.Job;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,5 +82,38 @@ class CleanupUtilTest {
         assertTrue(job.isAutoPaused(), "owner gone + no helper online → auto-paused");
         assertFalse(CleanupUtil.getWaiting().containsKey(job),
                 "an auto-paused job must be dropped from the wait queue (prevents the re-pause loop)");
+    }
+
+    @Test
+    void onlineHelperIsPromotedToOwner() {
+        PlayerMock helper = server.addPlayer();
+        Job job = new Job();
+        job.setName("river");
+        job.setRunning(true);
+        job.setOwner(UUID.randomUUID()); // offline owner
+        job.getHelpers().add(helper.getUniqueId());
+
+        CleanupUtil.selectNewOwner(job);
+
+        assertEquals(helper.getUniqueId(), job.getOwner(), "the online helper takes over the job");
+    }
+
+    @Test
+    void bannedHelperIsNeverPromotedToOwner() {
+        // A banned player can still be on the helpers list: job files saved by older builds kept
+        // banned helpers there, and addhelper does not check the ban list.
+        PlayerMock banned = server.addPlayer();
+        UUID owner = UUID.randomUUID(); // offline owner
+        Job job = new Job();
+        job.setName("river");
+        job.setRunning(true);
+        job.setOwner(owner);
+        job.getHelpers().add(banned.getUniqueId());
+        job.getBannedWorkers().add(banned.getUniqueId());
+
+        CleanupUtil.selectNewOwner(job);
+
+        assertEquals(owner, job.getOwner(), "a banned helper must not inherit the job");
+        assertTrue(job.isAutoPaused(), "with no eligible helper online, the job pauses instead");
     }
 }

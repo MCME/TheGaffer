@@ -91,6 +91,11 @@ public class CleanupUtil {
     public static void selectNewOwner(Job job) {
         ArrayList<OfflinePlayer> possibles = new ArrayList<>();
         for (UUID name : job.getHelpers()) {
+            // A banned player can still be on the helpers list (job files from older builds, or
+            // addhelper after the ban), and must never inherit the job.
+            if (job.getBannedWorkers().contains(name)) {
+                continue;
+            }
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(name);
             if (p.isOnline()) {
                 possibles.add(p);

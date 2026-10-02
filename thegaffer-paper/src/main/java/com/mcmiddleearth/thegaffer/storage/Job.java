@@ -453,15 +453,35 @@ public class Job implements Listener {
             if (!invitedWorkers.contains(p.getUniqueId())) {
                 return InviteResponse.NOT_INVITED;
             }
-            if (workers.contains(p.getUniqueId())) {
-                workers.remove(p.getUniqueId());
-                workerTeam.removeEntry(p.getName());
-            }
+            dropMembership(p);
             invitedWorkers.remove(p.getUniqueId());
         }
         setDirty(true);
         // JobDatabase.saveJobs();
         return InviteResponse.REMOVE_SUCCESS;
+    }
+
+    /**
+     * Takes every role {@code p} holds in this job. A promoted helper is on the workers AND the
+     * helpers list, and a helper added with addHelper only on the helpers list, so every removal
+     * (ban, kick, leave, uninvite) must clear both, or the player is still in the job.
+     *
+     * @return true if the player held a role
+     */
+    private boolean dropMembership(OfflinePlayer p) {
+        UUID id = p.getUniqueId();
+        boolean wasWorker = workers.remove(id);
+        boolean wasHelper = helpers.remove(id);
+        if (wasWorker) {
+            removeWorkerTeam(p.getName());
+        }
+        if (wasHelper) {
+            removeHelperTeam(p.getName());
+        }
+        if (wasWorker || wasHelper) {
+            setDirty(true);
+        }
+        return wasWorker || wasHelper;
     }
 
     public BanWorkerResponse banWorker(List<OfflinePlayer> ps) {
@@ -471,10 +491,7 @@ public class Job implements Listener {
             if (p.getUniqueId().equals(owner)) {
                 return BanWorkerResponse.CANNOT_BAN_OWNER;
             }
-            if (workers.contains(p.getUniqueId())) {
-                workers.remove(p.getUniqueId());
-                removeWorkerTeam(p.getName());
-            }
+            dropMembership(p);
             if (bannedWorkers.contains(p.getUniqueId())) {
                 return BanWorkerResponse.ALREADY_BANNED;
             }
@@ -503,11 +520,9 @@ public class Job implements Listener {
 
     public KickWorkerResponse kickWorker(List<OfflinePlayer> ps, String reason) {
         for (OfflinePlayer p : ps) {
-            if (!workers.contains(p.getUniqueId())) {
+            if (!dropMembership(p)) {
                 return KickWorkerResponse.NOT_IN_JOB;
             }
-            workers.remove(p.getUniqueId());
-            removeWorkerTeam(p.getName());
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
             // #7: Tell the target immediately if they are online (mirrors removeWorker's AQUA notice to all).
             if (p.isOnline()) {
@@ -525,8 +540,7 @@ public class Job implements Listener {
         if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
             return WorkerResponse.NO_PERMISSIONS;
         }
-        workers.remove(p.getUniqueId());
-        removeWorkerTeam(p.getName());
+        dropMembership(p);
         setDirty(true);
         sendToAll(Component.text(p.getName() + " has left the job.", NamedTextColor.AQUA));
         Util.debug(p.getName() + " was worker removed from " + name + " with reason: Left by themself");
