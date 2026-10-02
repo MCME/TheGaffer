@@ -581,6 +581,7 @@ public class Job implements Listener {
         // job's world, so leaving it behind split the job across two worlds.
         setWorld(loc.getWorld().getName());
         generateBounds();
+        StatsManager.onMove(this);
         setDirty(true);
         // JobDatabase.saveJobs();
     }
@@ -588,6 +589,7 @@ public class Job implements Listener {
     public void updateJobRadius(int newRadius) {
         setJobRadius(newRadius);
         generateBounds();
+        StatsManager.onMove(this);
         setDirty(true);
         //  JobDatabase.saveJobs();
     }
