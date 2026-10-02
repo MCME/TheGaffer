@@ -1,0 +1,12 @@
+# Normalise line endings in the repository to LF, and check them out as LF on every
+# platform. Without this, core.autocrlf on a Windows checkout rewrites text files to
+# CRLF in the working tree, so `mvn package` on Windows and on CI produce jars whose
+# resources differ byte-for-byte from the same commit — config.yml gained 71 bytes
+# that way between two builds of 3.0.0. Harmless to the server, fatal to comparing
+# a local build against a CI one by checksum.
+* text=auto eol=lf
+
+# Binaries git must never touch.
+*.jar  binary
+*.zip  binary
+*.png  binary

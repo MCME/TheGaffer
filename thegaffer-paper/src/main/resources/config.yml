@@ -1,0 +1,71 @@
+# General options
+general:
+    debug: false
+# Worlds configuration
+unprotectedworlds:
+    - plotworld
+# Protection configuration
+#
+# Allow other plugins to let players build in protected worlds.
+#
+# You need to specify plugin and method names.
+#
+# Method signature should look like this:
+#   someMethod(org.bukkit.entity.Player, org.bukkit.Location);
+#
+# Allow method should be declared static and return boolean - true if player
+#   should be allowed to build, false otherwise (if it returns false, TheGaffer
+#   will handle protection).
+#
+# Deny method should be declared static and return boolean - true if player
+#   shouldn't be allowed to build, false otherwise (if it returns false,
+#   TheGaffer will handle protection).
+#
+# externalProtectionHandlers:
+#     Plugin1Name:
+#         allow: allowMethodNameInPlugin1
+#         deny: denyMethodNameInPlugin1
+#     Plugin2Name:
+#         allow: methodNameInPlugin2
+#
+# Should jobs have a description that is shown in the job start messages.
+# Job leaders need to type in the Description during job start conversation
+jobDescription: true
+# Restore a player's flight when the plugin puts them back into Survival after they
+# leave a job area. Only affects players the plugin itself switched.
+enableFlight: true
+#Discord integration
+#name of the job channel where the job start message should appear
+#name of an emoji to decorate the job messages, remove for no emoji
+discord:
+  channel: job-general
+  emoji: ringmcme
+# Discord roles that may be pinged when a job is announced (e.g. a "Jobber" role
+# players opt into for job notifications). ONLY these roles are pinged — @everyone
+# and arbitrary players cannot be. Leave empty or remove to announce with no ping.
+allowRolePing:
+  - Jobber
+glowing:
+  enabled: true
+  workerColor: DARK_PURPLE
+  helperColor: AQUA
+# Show players a client-side world border marking the job's build area while they are
+# in a job. Purely visual (no damage / no blocking). Players can also toggle it per-person
+# with /job border. Set false to disable the feature server-wide.
+showJobBorder: true
+# Statistics configuration
+stats:
+  # Maximum gap (in seconds) between two consecutive block events that still counts as
+  # active build time. Gaps larger than this are treated as idle and not accumulated.
+  activeIdleThresholdSeconds: 60
+
+# Set true when the proxy runs TheGaffer's own proxy plugin (thegaffer-velocity).
+#
+# That plugin posts its own job announcement to the whole network, with a button that
+# transfers the player to the job's server. This server then announces only to its own
+# players, so nobody sees the same job announced twice.
+#
+# Left false, this server relays its announcement network-wide as plain text through
+# MCME-Connect instead (the old behaviour). That text carries no working button, because
+# the relay strips click data — remote players have to type the command or switch server.
+proxyAnnouncesJobs: false
