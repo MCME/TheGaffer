@@ -74,7 +74,7 @@ public class ProtectionUtil {
             if (playerJob == null) {
                 return BuildProtection.NOT_IN_JOB;
             }
-            if (playerJob.getBounds().contains(location.getBlockX(), location.getBlockZ())) {
+            if (playerJob.containsLocation(location)) {
                 return playerJob.isPaused() ? BuildProtection.JOB_PAUSED : BuildProtection.ALLOWED;
             }
             return BuildProtection.OUT_OF_BOUNDS;

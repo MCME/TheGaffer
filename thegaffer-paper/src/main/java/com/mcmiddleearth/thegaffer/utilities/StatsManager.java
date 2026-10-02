@@ -149,16 +149,15 @@ public class StatsManager {
     /**
      * Unified counting path for a successful, in-bounds block action: resolves the player's
      * active job and folds one place ({@code place == true}) or break into its live stats.
-     * No-op if the player isn't working a job, the job has no bounds, or the location is
-     * outside those bounds. <b>Assumes the action is allowed</b> — the caller (the block-event
+     * No-op if the player isn't working a job or the location is outside the job's area (its
+     * world and bounds). <b>Assumes the action is allowed</b> — the caller (the block-event
      * listener, or a cooperating plugin via {@link TheGaffer#recordExternalBuild}) is
      * responsible for filtering blocked events. Main thread.
      */
     public static void recordBuild(Player player, Location location, boolean place) {
         if (player == null || location == null) { return; }
         Job job = JobDatabase.getJobWorking(player);
-        if (job == null || job.getBounds() == null) { return; }
-        if (!job.getBounds().contains(location.getBlockX(), location.getBlockZ())) { return; }
+        if (job == null || !job.containsLocation(location)) { return; }
         if (place) {
             recordPlace(job.getName(), player.getUniqueId());
         } else {

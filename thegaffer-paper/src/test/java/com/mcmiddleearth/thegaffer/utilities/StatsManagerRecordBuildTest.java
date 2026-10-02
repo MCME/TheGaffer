@@ -71,4 +71,15 @@ class StatsManagerRecordBuildTest {
         assertEquals(1, StatsManager.getLive("river").getBuilders().get(p.getUniqueId()).getPlaced());
         assertEquals(1, StatsManager.getLive("river").getBuilders().get(p.getUniqueId()).getBroke());
     }
+
+    @Test void recordBuild_sameXZInAnotherWorld_isNotCounted() {
+        PlayerMock p = server.addPlayer();
+        runningJobAt(0, 0, p);
+        World other = server.addSimpleWorld("other");
+
+        StatsManager.recordBuild(p, new Location(other, 5, 64, 5), true);
+
+        assertNull(StatsManager.getLive("river").getBuilders().get(p.getUniqueId()),
+                "a build in another world at the job's X/Z is outside the job");
+    }
 }

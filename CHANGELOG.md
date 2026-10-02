@@ -106,6 +106,10 @@ handlers, the build-protection hot path, and the protection handler's placement.
   their running jobs when a player joins.
 - **`/job join <name>` ignored other servers.** Typing a job's name sent the command to whichever backend
   you stood on, which answered "no jobs running" whenever the job was elsewhere.
+- **A worker could build in another world at their own job's coordinates.** A job's area is an X/Z
+  rectangle with no world attached, and build protection compared only the coordinates. With jobs running
+  in two worlds, a worker of one could build in the other at the same X/Z. Statistics made the same
+  mistake, so such blocks counted towards the job. Both now check the world as well.
 - `unbanWorker` had an inverted check, so unbanning did the opposite.
 - `clearworkerinvens` was misspelled, so `/job admin` never dispatched it.
 - The job boundary showed only to workers, not owners and helpers, and only rendered within 32 blocks —

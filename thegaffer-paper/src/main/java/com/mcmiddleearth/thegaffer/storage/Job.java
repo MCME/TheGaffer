@@ -157,6 +157,17 @@ public class Job implements Listener {
         return TheGaffer.getServerInstance().getWorld(world);
     }
 
+    /**
+     * Whether {@code location} is inside this job's area: in the job's world and within its X/Z
+     * bounds. The bounds are a bare rectangle with no world, so on their own they would also
+     * match the same coordinates in every other world.
+     */
+    public boolean containsLocation(Location location) {
+        World locationWorld = location.getWorld();
+        return bounds != null && locationWorld != null && locationWorld.getName().equals(world)
+                && bounds.contains(location.getBlockX(), location.getBlockZ());
+    }
+
 
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
