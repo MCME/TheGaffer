@@ -4,11 +4,14 @@ import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
 import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import com.mcmiddleearth.thegaffer.GafferResponses.BanWorkerResponse;
+import com.mcmiddleearth.thegaffer.GafferResponses.HelperResponse;
+import com.mcmiddleearth.thegaffer.TheGaffer;
 import org.bukkit.OfflinePlayer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,13 +27,22 @@ class JobBanTest {
     private ServerMock server;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         server = MockBukkit.mock();
+        // addHelper announces to the helpers, which looks players up via TheGaffer.getServerInstance().
+        setServerInstance(server);
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws Exception {
+        setServerInstance(null);
         MockBukkit.unmock();
+    }
+
+    private static void setServerInstance(Object value) throws Exception {
+        Field f = TheGaffer.class.getDeclaredField("serverInstance");
+        f.setAccessible(true);
+        f.set(null, value);
     }
 
     @Test
@@ -88,5 +100,18 @@ class JobBanTest {
                 "a non-owner should still be bannable");
         assertTrue(job.getBannedWorkers().contains(worker.getUniqueId()),
                 "the banned worker's UUID should be on the banned list");
+    }
+
+    @Test
+    void addHelper_bannedPlayer_isRefused() {
+        Job job = new Job();
+        job.setName("river");
+        job.setOwner(server.addPlayer().getUniqueId());
+        PlayerMock banned = server.addPlayer();
+        banned.setOp(true); // has the staff permission, so only the ban stands in the way
+        job.getBannedWorkers().add(banned.getUniqueId());
+
+        assertEquals(HelperResponse.WORKER_BANNED, job.addHelper(banned));
+        assertFalse(job.isPlayerHelper(banned), "a banned player must not become a helper");
     }
 }

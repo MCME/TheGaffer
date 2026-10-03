@@ -136,6 +136,23 @@ public class StatsManager {
         if (s != null) { s.addParticipant(id); }
     }
 
+    /**
+     * Keeps a running job's record where the job is. begin() stamps the world, centre and radius,
+     * and /job admin setwarp (which can change the world) and setradius move the job afterwards.
+     */
+    public static void onMove(Job job) {
+        JobStats s = live.get(job.getName());
+        if (s != null) { copyLocation(job, s); }
+    }
+
+    /** Copies the job's world, centre and radius into {@code s}, derived as in begin(). */
+    private static void copyLocation(Job job, JobStats s) {
+        s.setWorld(job.getWorld());
+        s.setCenterX((int) job.getWarp().getX());
+        s.setCenterZ((int) job.getWarp().getZ());
+        s.setRadius(job.getJobRadius());
+    }
+
     public static void recordPlace(String jobName, UUID id) {
         JobStats s = live.get(jobName);
         if (s != null) { s.recordPlace(id, 1, System.currentTimeMillis(), TheGaffer.getActiveIdleThresholdSeconds() * 1000L); }
@@ -149,16 +166,15 @@ public class StatsManager {
     /**
      * Unified counting path for a successful, in-bounds block action: resolves the player's
      * active job and folds one place ({@code place == true}) or break into its live stats.
-     * No-op if the player isn't working a job, the job has no bounds, or the location is
-     * outside those bounds. <b>Assumes the action is allowed</b> — the caller (the block-event
+     * No-op if the player isn't working a job or the location is outside the job's area (its
+     * world and bounds). <b>Assumes the action is allowed</b> — the caller (the block-event
      * listener, or a cooperating plugin via {@link TheGaffer#recordExternalBuild}) is
      * responsible for filtering blocked events. Main thread.
      */
     public static void recordBuild(Player player, Location location, boolean place) {
         if (player == null || location == null) { return; }
         Job job = JobDatabase.getJobWorking(player);
-        if (job == null || job.getBounds() == null) { return; }
-        if (!job.getBounds().contains(location.getBlockX(), location.getBlockZ())) { return; }
+        if (job == null || !job.containsLocation(location)) { return; }
         if (place) {
             recordPlace(job.getName(), player.getUniqueId());
         } else {
@@ -366,7 +382,11 @@ public class StatsManager {
      */
     public static void loadActive() {
         for (JobStats s : JobStatsStorage.readAll(activeDir())) {
-            if (JobDatabase.getActiveJobs().containsKey(s.getName())) {
+            Job job = JobDatabase.getActiveJobs().get(s.getName());
+            if (job != null) {
+                // The job file and this snapshot are written separately, so a crash between the
+                // two can leave them disagreeing on where the job is. The job decides.
+                copyLocation(job, s);
                 live.put(s.getName(), s);
             }
         }

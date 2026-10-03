@@ -802,13 +802,8 @@ public class JobCommand implements TabExecutor {
                 }
                 // Execute the transfer
                 java.util.UUID oldOwner = transferJob.getOwner();
-                transferJob.setOwner(targetUuid);
                 // creator field is intentionally unchanged — /job info shows original "Started by"
-                // Add old owner as a helper (if not already)
-                if (!transferJob.getHelpers().contains(oldOwner)) {
-                    transferJob.getHelpers().add(oldOwner);
-                }
-                transferJob.setDirty(true);
+                transferJob.transferOwnership(targetUuid);
                 // Message old owner
                 player.sendMessage(Component.text("You transferred ownership of ", NamedTextColor.GREEN)
                         .append(Component.text(transferJob.getName(), NamedTextColor.AQUA))
