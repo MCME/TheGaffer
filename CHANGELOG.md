@@ -5,7 +5,7 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [3.0.0] — unreleased
+## [3.0.0] — 2026-10-03
 
 The first release since 2023. TheGaffer now runs on Paper 26.2 and Velocity 4, keeps its jobs across
 restarts, counts what gets built, groups jobs into projects, and ships a proxy plugin so a builder can
