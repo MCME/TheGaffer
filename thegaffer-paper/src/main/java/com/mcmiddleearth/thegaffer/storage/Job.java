@@ -157,6 +157,17 @@ public class Job implements Listener {
         return TheGaffer.getServerInstance().getWorld(world);
     }
 
+    /**
+     * Whether {@code location} is inside this job's area: in the job's world and within its X/Z
+     * bounds. The bounds are a bare rectangle with no world, so on their own they would also
+     * match the same coordinates in every other world.
+     */
+    public boolean containsLocation(Location location) {
+        World locationWorld = location.getWorld();
+        return bounds != null && locationWorld != null && locationWorld.getName().equals(world)
+                && bounds.contains(location.getBlockX(), location.getBlockZ());
+    }
+
 
     public Player[] getWorkersAsPlayersArray() {
         ArrayList<Player> players = new ArrayList();
@@ -287,6 +298,9 @@ public class Job implements Listener {
         if (helpers.contains(p.getUniqueId())) {
             return HelperResponse.ALREADY_HELPER;
         }
+        if (bannedWorkers.contains(p.getUniqueId())) {
+            return HelperResponse.WORKER_BANNED;
+        }
         Job current = JobDatabase.getJobWorking(p);
         if (current != null && !current.getName().equals(name)) {
             return HelperResponse.ALREADY_IN_JOB;
@@ -368,6 +382,21 @@ public class Job implements Listener {
         return DemoteResponse.DEMOTE_SUCCESS;
     }
 
+    /**
+     * Hands the job to {@code newOwner}; the old owner stays on as a helper. Used by /job transfer
+     * and by the owner-timeout takeover. The old owner goes straight onto the helpers list:
+     * addHelper's online and permission checks are for staff adding someone, and a timed-out
+     * owner is offline by definition, so going through addHelper would silently drop them.
+     */
+    public void transferOwnership(UUID newOwner) {
+        UUID oldOwner = owner;
+        owner = newOwner;
+        if (!helpers.contains(oldOwner)) {
+            helpers.add(oldOwner);
+        }
+        setDirty(true);
+    }
+
     public WorkerResponse addWorker(OfflinePlayer p) {
         if (workers.contains(p.getUniqueId())) {
             return WorkerResponse.ALREADY_WORKER;
@@ -442,15 +471,35 @@ public class Job implements Listener {
             if (!invitedWorkers.contains(p.getUniqueId())) {
                 return InviteResponse.NOT_INVITED;
             }
-            if (workers.contains(p.getUniqueId())) {
-                workers.remove(p.getUniqueId());
-                workerTeam.removeEntry(p.getName());
-            }
+            dropMembership(p);
             invitedWorkers.remove(p.getUniqueId());
         }
         setDirty(true);
         // JobDatabase.saveJobs();
         return InviteResponse.REMOVE_SUCCESS;
+    }
+
+    /**
+     * Takes every role {@code p} holds in this job. A promoted helper is on the workers AND the
+     * helpers list, and a helper added with addHelper only on the helpers list, so every removal
+     * (ban, kick, leave, uninvite) must clear both, or the player is still in the job.
+     *
+     * @return true if the player held a role
+     */
+    private boolean dropMembership(OfflinePlayer p) {
+        UUID id = p.getUniqueId();
+        boolean wasWorker = workers.remove(id);
+        boolean wasHelper = helpers.remove(id);
+        if (wasWorker) {
+            removeWorkerTeam(p.getName());
+        }
+        if (wasHelper) {
+            removeHelperTeam(p.getName());
+        }
+        if (wasWorker || wasHelper) {
+            setDirty(true);
+        }
+        return wasWorker || wasHelper;
     }
 
     public BanWorkerResponse banWorker(List<OfflinePlayer> ps) {
@@ -460,10 +509,7 @@ public class Job implements Listener {
             if (p.getUniqueId().equals(owner)) {
                 return BanWorkerResponse.CANNOT_BAN_OWNER;
             }
-            if (workers.contains(p.getUniqueId())) {
-                workers.remove(p.getUniqueId());
-                removeWorkerTeam(p.getName());
-            }
+            dropMembership(p);
             if (bannedWorkers.contains(p.getUniqueId())) {
                 return BanWorkerResponse.ALREADY_BANNED;
             }
@@ -492,11 +538,14 @@ public class Job implements Listener {
 
     public KickWorkerResponse kickWorker(List<OfflinePlayer> ps, String reason) {
         for (OfflinePlayer p : ps) {
-            if (!workers.contains(p.getUniqueId())) {
+            // Like ban: the owner can sit on the helpers list (a helper who took the job over),
+            // and dropping that entry would report a kick while they stay the owner.
+            if (p.getUniqueId().equals(owner)) {
+                return KickWorkerResponse.CANNOT_KICK_OWNER;
+            }
+            if (!dropMembership(p)) {
                 return KickWorkerResponse.NOT_IN_JOB;
             }
-            workers.remove(p.getUniqueId());
-            removeWorkerTeam(p.getName());
             Util.debug(p.getName() + " was worker kicked from " + name + " with reason: " + reason);
             // #7: Tell the target immediately if they are online (mirrors removeWorker's AQUA notice to all).
             if (p.isOnline()) {
@@ -514,8 +563,7 @@ public class Job implements Listener {
         if (!p.getPlayer().hasPermission(PermissionsUtil.getJoinPermission())) {
             return WorkerResponse.NO_PERMISSIONS;
         }
-        workers.remove(p.getUniqueId());
-        removeWorkerTeam(p.getName());
+        dropMembership(p);
         setDirty(true);
         sendToAll(Component.text(p.getName() + " has left the job.", NamedTextColor.AQUA));
         Util.debug(p.getName() + " was worker removed from " + name + " with reason: Left by themself");
@@ -529,7 +577,11 @@ public class Job implements Listener {
         getWarp().setYaw(loc.getYaw());
         getWarp().setPitch(loc.getPitch());
         getWarp().setWorld(loc.getWorld().getName());
+        // The job moves with its warp. Protection, the border and the map marker all read the
+        // job's world, so leaving it behind split the job across two worlds.
+        setWorld(loc.getWorld().getName());
         generateBounds();
+        StatsManager.onMove(this);
         setDirty(true);
         // JobDatabase.saveJobs();
     }
@@ -537,6 +589,7 @@ public class Job implements Listener {
     public void updateJobRadius(int newRadius) {
         setJobRadius(newRadius);
         generateBounds();
+        StatsManager.onMove(this);
         setDirty(true);
         //  JobDatabase.saveJobs();
     }
@@ -550,33 +603,37 @@ public class Job implements Listener {
     }
 
     public int sendToHelpers(Component message) {
-        int count = 0;
-        for (UUID hName : helpers) {
-            if (TheGaffer.getServerInstance().getOfflinePlayer(hName).isOnline()) {
-                TheGaffer.getServerInstance().getOfflinePlayer(hName).getPlayer().sendMessage(message);
-                count++;
-            }
-        }
-        if (getOwnerAsOfflinePlayer().isOnline()) {
-            getOwnerAsOfflinePlayer().getPlayer().sendMessage(message);
-            count++;
-        }
-        return count;
+        Set<UUID> recipients = new LinkedHashSet<>(helpers);
+        recipients.add(owner);
+        return sendTo(recipients, message);
     }
 
     public int sendToWorkers(Component message) {
+        return sendTo(workers, message);
+    }
+
+    public int sendToAll(Component message) {
+        Set<UUID> recipients = new LinkedHashSet<>(helpers);
+        recipients.add(owner);
+        recipients.addAll(workers);
+        return sendTo(recipients, message);
+    }
+
+    /**
+     * Sends {@code message} to each online player in {@code recipients}. Callers that combine
+     * lists pass a set: a promoted helper is on the workers and the helpers list, and a helper who
+     * took the job over is also the owner, yet each must get one copy (/jobchat included).
+     */
+    private int sendTo(Collection<UUID> recipients, Component message) {
         int count = 0;
-        for (UUID wName : workers) {
-            if (TheGaffer.getServerInstance().getOfflinePlayer(wName).isOnline()) {
-                TheGaffer.getServerInstance().getOfflinePlayer(wName).getPlayer().sendMessage(message);
+        for (UUID id : recipients) {
+            OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(id);
+            if (p.isOnline()) {
+                p.getPlayer().sendMessage(message);
                 count++;
             }
         }
         return count;
-    }
-
-    public int sendToAll(Component message) {
-        return sendToHelpers(message) + sendToWorkers(message);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

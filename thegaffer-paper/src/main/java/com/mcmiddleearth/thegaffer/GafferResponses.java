@@ -21,6 +21,7 @@ public class GafferResponses {
 
         ALREADY_HELPER("%name% is already a helper on %job%.", false),
         ALREADY_IN_JOB("%name% is already in another job.", false),
+        WORKER_BANNED("%name% is banned from %job% — unban them first.", false),
         NO_PERMISSIONS("%name% does not have the proper permissions.", false),
         NOT_ONLINE("%name% is not online.", false),
         NOT_HELPER("%name% is not a helper on %job%.", false),
@@ -137,6 +138,7 @@ public class GafferResponses {
     public enum KickWorkerResponse implements GafferResponse {
 
         NOT_IN_JOB("%name% is not part of %job%.", false),
+        CANNOT_KICK_OWNER("You can't kick the owner of %job%.", false),
         KICK_SUCCESS("Successfully kicked %name%.", true);
 
         private final String message;

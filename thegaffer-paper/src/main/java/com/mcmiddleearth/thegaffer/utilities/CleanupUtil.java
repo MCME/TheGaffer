@@ -68,6 +68,11 @@ public class CleanupUtil {
                     if (p.isOnline()) {
                         Util.debug("Player: " + p.getName() + " was scheduled for abandonment, but is now online and was removed from abandoners list.");
                         removeList.add(p);
+                    } else if (job.isPlayerHelper(p)) {
+                        // Helpers are not removed for being away: one added with addhelper is
+                        // never tracked, and removeWorker would strip only a promoted helper's
+                        // worker role, leaving a helper who cannot build.
+                        removeList.add(p);
                     } else {
                         Long since = job.getLeft().get(p.getUniqueId());
                         Long For = System.currentTimeMillis() - since;
@@ -91,6 +96,11 @@ public class CleanupUtil {
     public static void selectNewOwner(Job job) {
         ArrayList<OfflinePlayer> possibles = new ArrayList<>();
         for (UUID name : job.getHelpers()) {
+            // A banned player can still be on the helpers list (job files from older builds, or
+            // addhelper after the ban), and must never inherit the job.
+            if (job.getBannedWorkers().contains(name)) {
+                continue;
+            }
             OfflinePlayer p = TheGaffer.getServerInstance().getOfflinePlayer(name);
             if (p.isOnline()) {
                 possibles.add(p);
@@ -102,8 +112,7 @@ public class CleanupUtil {
             // and then shuffled — needlessly indirect; .get(0) after the shuffle is enough.)
             Collections.shuffle(possibles);
             OfflinePlayer choice = possibles.get(0);
-            job.addHelper(TheGaffer.getServerInstance().getOfflinePlayer(job.getOwner()));
-            job.setOwner(choice.getUniqueId());
+            job.transferOwnership(choice.getUniqueId());
             Util.debug("Selecting " + choice.getName() + " as " + job.getName() + "'s new owner.");
         } else {
             // No helper online to promote: instead of archiving the job (the old behaviour),
