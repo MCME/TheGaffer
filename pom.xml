@@ -4,7 +4,7 @@
 
     <groupId>com.mcmiddleearth</groupId>
     <artifactId>thegaffer-parent</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <packaging>pom</packaging>
 
     <name>TheGaffer (parent)</name>
