@@ -10,9 +10,9 @@ TheGaffer is what turns "the map is protected" into "…except right here, right
 
 | | |
 |---|---|
-| **Version** | 3.0.0 |
+| **Version** | 3.0.1 |
 | **Runs on** | Paper **26.2** backends + a **Velocity 4** proxy |
-| **Jars** | `TheGaffer-3.0.0.jar` (every backend) · `thegaffer-velocity-3.0.0.jar` (the proxy) |
+| **Jars** | `TheGaffer-3.0.1.jar` (every backend) · `thegaffer-velocity-3.0.1.jar` (the proxy) |
 | **Optional hooks** | DiscordSRV · MCME-Connect · Dynmap — all absent-safe |
 
 This page has three parts. Jump to the one that is you:
@@ -176,8 +176,8 @@ Three Maven modules, two deployable jars:
 | Module | Artifact | Goes on | Java |
 |---|---|---|---|
 | `thegaffer-core` | `thegaffer-core` | *(shaded into both)* | 17 |
-| `thegaffer-paper` | **`TheGaffer-3.0.0.jar`** | every Paper backend | 17 |
-| `thegaffer-velocity` | **`thegaffer-velocity-3.0.0.jar`** | the Velocity proxy | 21 |
+| `thegaffer-paper` | **`TheGaffer-3.0.1.jar`** | every Paper backend | 17 |
+| `thegaffer-velocity` | **`thegaffer-velocity-3.0.1.jar`** | the Velocity proxy | 21 |
 
 `thegaffer-core` holds only the wire protocol the two sides share — `Channels`, `Subchannel` and the
 message records. **Both jars shade it**, because Paper and Velocity each load exactly one jar and
