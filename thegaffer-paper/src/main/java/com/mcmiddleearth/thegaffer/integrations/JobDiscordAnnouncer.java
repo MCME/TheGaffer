@@ -105,9 +105,38 @@ public final class JobDiscordAnnouncer {
      * Every DiscordSRV and JDA reference in the plugin lives here. Class-loaded only after
      * {@link #available()} has confirmed the plugin is enabled — never before.
      */
-    private static final class Bridge {
+    static final class Bridge {
 
         private Bridge() {}
+
+        /**
+         * The message content that pings the {@code allowRolePing} roles. Each name is looked up
+         * among the guild's roles only, by its exact name, ignoring case. DiscordSRV's
+         * {@code convertMentionsFromNames} also matches member names, by prefix and in no fixed
+         * order, so "@Jobber" became a mention of a member called "J" followed by "obber". A role
+         * that isn't found pings nobody.
+         */
+        static String rolePing(java.util.List<String> roleNames,
+                               github.scarsz.discordsrv.dependencies.jda.api.entities.Guild guild) {
+            StringBuilder ping = new StringBuilder();
+            for (String name : roleNames) {
+                if (name == null || name.isEmpty()) {
+                    continue;
+                }
+                java.util.List<github.scarsz.discordsrv.dependencies.jda.api.entities.Role> roles =
+                        guild.getRolesByName(name, true);
+                if (roles.isEmpty()) {
+                    Logger.getLogger("TheGaffer").warning("Discord role '" + name
+                            + "' from allowRolePing not found — it is not pinged.");
+                    continue;
+                }
+                if (ping.length() > 0) {
+                    ping.append(' ');
+                }
+                ping.append(roles.get(0).getAsMention());
+            }
+            return ping.toString();
+        }
 
         static void jobStart(Job job) {
             // discord.channel is a DiscordSRV game-channel NAME, not a raw snowflake ID, so
@@ -122,15 +151,7 @@ public final class JobDiscordAnnouncer {
                         + "' not found — job-start embed not sent.");
                 return;
             }
-            github.scarsz.discordsrv.dependencies.jda.api.entities.Guild guild = plugin.getMainGuild();
-            String ping = "";
-            for (String role : TheGaffer.getAllowedPingRoles()) {
-                if (role != null && !role.isEmpty()) {
-                    ping = ping + github.scarsz.discordsrv.util.DiscordUtil
-                            .convertMentionsFromNames("@" + role, guild) + " ";
-                }
-            }
-            ping = ping.trim();
+            String ping = rolePing(TheGaffer.getAllowedPingRoles(), plugin.getMainGuild());
             long startMillis = (job.getStartTime() != null && job.getStartTime() > 0)
                     ? job.getStartTime() : System.currentTimeMillis();
             String title = "🛠 New job: " + job.getName();

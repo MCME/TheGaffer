@@ -5,6 +5,18 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [3.0.1] — unreleased
+
+### Fixed
+
+- **The job announcement on Discord pinged a member instead of the role.** Each `allowRolePing` name was
+  turned into a mention by DiscordSRV, which matches member names as well as role names, and by prefix. With
+  a member called "J" on the server, `@Jobber` became a mention of that member followed by "obber", on every
+  job announcement. The name is now looked up among the server's roles only, by its exact name (case doesn't
+  matter). A name that matches no role pings nobody, and the server log says so.
+
+---
+
 ## [3.0.0] — 2026-10-03
 
 The first release since 2023. TheGaffer now runs on Paper 26.2 and Velocity 4, keeps its jobs across
