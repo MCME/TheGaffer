@@ -310,6 +310,21 @@ Jobs are held in memory with a dirty flag, flushed every 60s asynchronously and 
 disable. Identity is by **UUID** throughout; the only name-keyed thing left is the scoreboard glow
 team, because Bukkit's API is name-based there.
 
+### Releasing
+
+1. Set the new version in all four poms **and** in the `@Plugin` annotation of
+   `VelocityGafferPlugin`. The proxy's `velocity-plugin.json` is generated from that annotation at
+   compile time, and `VelocityPluginDescriptorTest` fails the build when the two disagree.
+2. Give the release a section in `CHANGELOG.md` headed `## [X.Y.Z] — YYYY-MM-DD`.
+3. Push a tag `vX.Y.Z` on the release commit on `master`. GitHub Actions checks the tag against the
+   pom version and the changelog, builds and tests, publishes the parent pom, `thegaffer-core`,
+   `TheGaffer` and `thegaffer-velocity` to `repo.mcmiddleearth.com` (group `com.mcmiddleearth`),
+   and creates the GitHub release "TheGaffer X.Y.Z" with both jars, a SHA-256 for each and the
+   changelog section as notes.
+
+Running the workflow by hand (Actions → Build & Test → Run workflow) publishes whatever version the
+chosen branch is at; that is how a `-SNAPSHOT` reaches the snapshots repository.
+
 ### Deploying
 
 Both jars must go out together — they share `thegaffer-core`, and the wire protocol between them is
@@ -320,7 +335,7 @@ alongside it, or the server loads both.
 ### Tests
 
 ```bash
-mvn -B test        # 197 tests
+mvn -B test        # 200 tests
 ```
 
 MockBukkit cannot boot a Paper plugin of this vintage, reach Discord or render a Dialog, and it does

@@ -2,14 +2,27 @@ name: Build & Test
 
 on:
   push:
-    branches: [ master, main, "2026-rework" ]
+    branches: [ master, development ]
+    # Releases are tagged v<version>, like v3.0.1
+    tags: [ 'v*' ]
   pull_request:
+  # Publishing to the Maven repository is a deliberate act, reachable from the Actions tab
+  # ("Run workflow") rather than riding along with every push.
+  workflow_dispatch:
+
+# A tag run creates the GitHub release.
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # JDK 25, not 17: paper-api 26.2 ships Java 25 class files (major 69), and a
       # javac that cannot READ them fails with "cannot access org.bukkit.*" on every
@@ -17,12 +30,118 @@ jobs:
       # -source/-target rather than --release, so a newer javac can read the newer
       # API jar while still emitting for the older target.
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '25'
           cache: maven
+          # Writes a settings.xml <server id="mcme"> whose credentials are read from these
+          # env var names at deploy time; matches <distributionManagement> in pom.xml.
+          server-id: mcme
+          server-username: MCME_MAVEN_NAME
+          server-password: MCME_MAVEN_SECRET
 
-      # Compiles, runs the JUnit/MockBukkit suite, and builds the jar.
+      - name: Reject version ranges in the poms
+        run: |
+          if grep -nE '<version>\s*[\[(]' pom.xml */pom.xml; then
+            echo "::error::a pom declares a version range; pin a concrete version"
+            exit 1
+          fi
+
+      # The parent's version, which the modules inherit.
+      - name: Read the version from the pom
+        id: version
+        run: |
+          version=$(mvn -q -ntp org.apache.maven.plugins:maven-help-plugin:3.5.2:evaluate -Dexpression=project.version -DforceStdout)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "paper=thegaffer-paper/target/TheGaffer-$version.jar" >> "$GITHUB_OUTPUT"
+          echo "proxy=thegaffer-velocity/target/thegaffer-velocity-$version.jar" >> "$GITHUB_OUTPUT"
+
+      # Every check sits ahead of the deploy: the releases repository refuses to redeploy a
+      # version (409), so a check failing after publishing would leave the artifacts on
+      # repo.mcmiddleearth.com with no GitHub release, and a re-run would stop at the deploy.
+      - name: Check that the tag matches the pom version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          if [ "v${{ steps.version.outputs.version }}" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match pom version ${{ steps.version.outputs.version }}"
+            exit 1
+          fi
+
+      - name: Extract release notes from CHANGELOG.md
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          ver="${GITHUB_REF_NAME#v}"
+          awk -v ver="$ver" '/^## \[/{p = ($2 == "[" ver "]")} p' CHANGELOG.md > release-notes.md
+          # Also catches a section still headed "unreleased"
+          if ! head -n 1 release-notes.md | grep -qE '^## \[[^]]+\] (—|-) [0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+            echo "::error::CHANGELOG.md needs a dated section for $ver, headed '## [$ver] — YYYY-MM-DD'"
+            exit 1
+          fi
+
+      # The MCME_MAVEN_* org secrets are shared with selected repositories only. A repository
+      # that wasn't granted them gets empty values rather than an error, and the deploy fails
+      # with a 401.
+      - name: Check the Maven credentials
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+        env:
+          MCME_MAVEN_NAME: ${{ secrets.MCME_MAVEN_NAME }}
+          MCME_MAVEN_SECRET: ${{ secrets.MCME_MAVEN_SECRET }}
+        run: |
+          if [ -z "$MCME_MAVEN_NAME" ] || [ -z "$MCME_MAVEN_SECRET" ]; then
+            echo "::error::MCME_MAVEN_NAME / MCME_MAVEN_SECRET are empty: give this repository access to the org secrets"
+            exit 1
+          fi
+
+      # Compiles, runs the JUnit/MockBukkit suite, and builds both jars.
       - name: Build and test
-        run: mvn -B verify
+        if: github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/v')
+        run: mvn -B -ntp clean verify
+
+      # The same build, which then publishes all four artifacts (the parent pom, thegaffer-core,
+      # TheGaffer and thegaffer-velocity) to repo.mcmiddleearth.com; releases or snapshots is
+      # chosen by the version suffix. One Maven run, so the jars that passed the tests are the
+      # jars that get published and attached to the GitHub release. deployAtEnd holds every
+      # upload until all modules have built: without it the parent pom and thegaffer-core would
+      # be published before TheGaffer's tests ran, and the releases repository cannot take
+      # them back.
+      - name: Build, test and deploy to repo.mcmiddleearth.com
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+        env:
+          MCME_MAVEN_NAME: ${{ secrets.MCME_MAVEN_NAME }}
+          MCME_MAVEN_SECRET: ${{ secrets.MCME_MAVEN_SECRET }}
+        run: mvn -B -ntp clean deploy -DdeployAtEnd=true
+
+      # Runs on every build, so a renamed jar fails a pull request rather than a release.
+      - name: Check that both jars were built
+        run: |
+          for jar in "${{ steps.version.outputs.paper }}" "${{ steps.version.outputs.proxy }}"; do
+            if [ ! -f "$jar" ]; then
+              echo "::error::$jar was not built"
+              exit 1
+            fi
+          done
+
+      - name: Upload jars
+        uses: actions/upload-artifact@v7
+        with:
+          name: TheGaffer-${{ steps.version.outputs.version }}
+          path: |
+            ${{ steps.version.outputs.paper }}
+            ${{ steps.version.outputs.proxy }}
+          if-no-files-found: error
+
+      # Prod fetches both jars with `gh release download` and checks them with `sha256sum -c`.
+      - name: GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          paper="${{ steps.version.outputs.paper }}"
+          proxy="${{ steps.version.outputs.proxy }}"
+          for jar in "$paper" "$proxy"; do
+            (cd "$(dirname "$jar")" && sha256sum "$(basename "$jar")" > "$(basename "$jar").sha256")
+          done
+          gh release create "$GITHUB_REF_NAME" "$paper" "$paper.sha256" "$proxy" "$proxy.sha256" \
+            --title "TheGaffer ${{ steps.version.outputs.version }}" \
+            --notes-file release-notes.md
