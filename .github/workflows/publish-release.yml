@@ -1,0 +1,103 @@
+name: Publish a release
+
+# For a version that was released by hand before build.yml could publish (3.0.1): puts the
+# jars attached to its GitHub release on repo.mcmiddleearth.com, so the Maven copy and the
+# release carry the same sha256. A release cut by build.yml was published by that same run.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, like v3.0.1
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      # The same JDK and Maven server as build.yml
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          server-id: mcme
+          server-username: MCME_MAVEN_NAME
+          server-password: MCME_MAVEN_SECRET
+
+      - name: Check the Maven credentials
+        env:
+          MCME_MAVEN_NAME: ${{ secrets.MCME_MAVEN_NAME }}
+          MCME_MAVEN_SECRET: ${{ secrets.MCME_MAVEN_SECRET }}
+        run: |
+          if [ -z "$MCME_MAVEN_NAME" ] || [ -z "$MCME_MAVEN_SECRET" ]; then
+            echo "::error::MCME_MAVEN_NAME / MCME_MAVEN_SECRET are empty: give this repository access to the org secrets"
+            exit 1
+          fi
+
+      - name: Check that the tag matches the pom version
+        id: version
+        run: |
+          version=$(mvn -q -ntp org.apache.maven.plugins:maven-help-plugin:3.5.2:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::tag $TAG does not match pom version $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # The release carries only the two plugin jars. A build that depends on TheGaffer also
+      # needs the parent pom and thegaffer-core, so those come from building the tag.
+      - name: Build and test the tag
+        run: mvn -B -ntp clean verify
+
+      - name: Download the release jars
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$TAG" --dir release --pattern '*.jar' --pattern '*.jar.sha256'
+          cd release && sha256sum -c ./*.jar.sha256
+
+      # deploy-file, not deploy: deploy would publish the jars just built, whose bytes differ
+      # from the released ones. An artifact whose pom is already in the repository is skipped,
+      # so a re-run after a failed upload carries on where it stopped (releases answers a
+      # redeploy with a 409).
+      - name: Deploy to repo.mcmiddleearth.com
+        env:
+          MCME_MAVEN_NAME: ${{ secrets.MCME_MAVEN_NAME }}
+          MCME_MAVEN_SECRET: ${{ secrets.MCME_MAVEN_SECRET }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          repo=https://repo.mcmiddleearth.com/releases
+          deploy() {  # <artifactId> <file> <pom> [more deploy-file options]
+            if curl -fsI "$repo/com/mcmiddleearth/$1/$VERSION/$1-$VERSION.pom" > /dev/null 2>&1; then
+              echo "$1 $VERSION is already in the repository: skipped"
+              return
+            fi
+            mvn -B -ntp org.apache.maven.plugins:maven-deploy-plugin:3.1.4:deploy-file \
+              -DrepositoryId=mcme -Durl="$repo" -Dfile="$2" -DpomFile="$3" "${@:4}"
+          }
+          deploy thegaffer-parent pom.xml pom.xml -Dpackaging=pom
+          deploy thegaffer-core "thegaffer-core/target/thegaffer-core-$VERSION.jar" thegaffer-core/pom.xml
+          deploy TheGaffer "release/TheGaffer-$VERSION.jar" thegaffer-paper/pom.xml
+          deploy thegaffer-velocity "release/thegaffer-velocity-$VERSION.jar" thegaffer-velocity/pom.xml
+
+      # The point of this workflow: what a build resolves from repo.mcmiddleearth.com is the
+      # released jar, byte for byte.
+      - name: Check the published jars against the release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir published && cd published
+          for artifact in TheGaffer thegaffer-velocity; do
+            curl -fsSO "https://repo.mcmiddleearth.com/releases/com/mcmiddleearth/$artifact/$VERSION/$artifact-$VERSION.jar"
+          done
+          sha256sum -c ../release/*.jar.sha256
