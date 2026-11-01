@@ -49,6 +49,20 @@
         </repository>
     </repositories>
 
+    <!-- Publish to MCME's own Reposilite, as MCME-Connect does: CI deploys on a v* tag or a
+         manual run, release versions to releases and -SNAPSHOT versions to snapshots. The
+         modules inherit this. The <id> must match the server id configured in CI. -->
+    <distributionManagement>
+        <repository>
+            <id>mcme</id>
+            <url>https://repo.mcmiddleearth.com/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>mcme</id>
+            <url>https://repo.mcmiddleearth.com/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <pluginManagement>
             <plugins>
